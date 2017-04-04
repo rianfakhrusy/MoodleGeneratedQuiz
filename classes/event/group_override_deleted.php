@@ -86,7 +86,7 @@ class group_override_deleted extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         return array($this->courseid, 'gnrquiz', 'delete override', 'overrides.php?cmid=' . $this->contextinstanceid,
-            $this->other['quizid'], $this->contextinstanceid);
+            $this->other['gnrquizid'], $this->contextinstanceid);
     }
 
     /**
@@ -98,7 +98,7 @@ class group_override_deleted extends \core\event\base {
     protected function validate_data() {
         parent::validate_data();
 
-        if (!isset($this->other['quizid'])) {
+        if (!isset($this->other['gnrquizid'])) {
             throw new \coding_exception('The \'gnrquizid\' value must be set in other.');
         }
 
@@ -113,7 +113,7 @@ class group_override_deleted extends \core\event\base {
 
     public static function get_other_mapping() {
         $othermapped = array();
-        $othermapped['quizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
+        $othermapped['gnrquizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
         $othermapped['groupid'] = array('db' => 'groups', 'restore' => 'group');
 
         return $othermapped;

@@ -83,7 +83,7 @@ function gnrquiz_report_unindex($datum) {
  */
 function gnrquiz_has_questions($quizid) {
     global $DB;
-    return $DB->record_exists('gnrquiz_slots', array('quizid' => $quizid));
+    return $DB->record_exists('gnrquiz_slots', array('gnrquizid' => $quizid));
 }
 
 /**
@@ -224,7 +224,7 @@ GROUP BY
 ORDER BY
     band";
 
-    $params['quizid'] = $quizid;
+    $params['gnrquizid'] = $quizid;
     $params['bandwidth'] = $bandwidth;
 
     $data = $DB->get_records_sql_menu($sql, $params);
@@ -273,7 +273,7 @@ function gnrquiz_report_feedback_for_grade($grade, $quizid, $context) {
     static $feedbackcache = array();
 
     if (!isset($feedbackcache[$quizid])) {
-        $feedbackcache[$quizid] = $DB->get_records('gnrquiz_feedback', array('quizid' => $quizid));
+        $feedbackcache[$quizid] = $DB->get_records('gnrquiz_feedback', array('gnrquizid' => $quizid));
     }
 
     // With CBM etc, it is possible to get -ve grades, which would then not match

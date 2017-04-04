@@ -101,7 +101,7 @@ class attempt_deleted extends \core\event\base {
             throw new \coding_exception('The \'relateduserid\' must be set.');
         }
 
-        if (!isset($this->other['quizid'])) {
+        if (!isset($this->other['gnrquizid'])) {
             throw new \coding_exception('The \'gnrquizid\' value must be set in other.');
         }
     }
@@ -112,7 +112,7 @@ class attempt_deleted extends \core\event\base {
 
     public static function get_other_mapping() {
         $othermapped = array();
-        $othermapped['quizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
+        $othermapped['gnrquizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
 
         return $othermapped;
     }

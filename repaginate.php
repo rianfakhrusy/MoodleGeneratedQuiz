@@ -25,7 +25,7 @@
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
-$quizid = required_param('quizid', PARAM_INT);
+$quizid = required_param('gnrquizid', PARAM_INT);
 $slotnumber = required_param('slot', PARAM_INT);
 $repagtype = required_param('repag', PARAM_INT);
 

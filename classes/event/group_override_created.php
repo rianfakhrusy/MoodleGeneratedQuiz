@@ -89,7 +89,7 @@ class group_override_created extends \core\event\base {
     protected function validate_data() {
         parent::validate_data();
 
-        if (!isset($this->other['quizid'])) {
+        if (!isset($this->other['gnrquizid'])) {
             throw new \coding_exception('The \'gnrquizid\' value must be set in other.');
         }
 
@@ -104,7 +104,7 @@ class group_override_created extends \core\event\base {
 
     public static function get_other_mapping() {
         $othermapped = array();
-        $othermapped['quizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
+        $othermapped['gnrquizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
         $othermapped['groupid'] = array('db' => 'groups', 'restore' => 'group');
 
         return $othermapped;

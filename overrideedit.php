@@ -160,7 +160,7 @@ if ($mform->is_cancelled()) {
     $params = array(
         'context' => $context,
         'other' => array(
-            'quizid' => $quiz->id
+            'gnrquizid' => $quiz->id
         )
     );
     if (!empty($override->id)) {
@@ -197,7 +197,7 @@ if ($mform->is_cancelled()) {
         $event->trigger();
     }
 
-    gnrquiz_update_open_attempts(array('quizid'=>$quiz->id));
+    gnrquiz_update_open_attempts(array('gnrquizid'=>$quiz->id));
     gnrquiz_update_events($quiz, $fromform);
 
     if (!empty($fromform->submitbutton)) {

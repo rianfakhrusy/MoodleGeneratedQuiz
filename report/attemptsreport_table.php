@@ -422,7 +422,7 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
         $from = "\n{user} u";
         $from .= "\nLEFT JOIN {gnrquiz_attempts} quiza ON
                                     quiza.userid = u.id AND quiza.quiz = :quizid";
-        $params = array('quizid' => $this->quiz->id);
+        $params = array('gnrquizid' => $this->quiz->id);
 
         if ($this->qmsubselect && $this->options->onlygraded) {
             $from .= " AND (quiza.state <> :finishedstate OR $this->qmsubselect)";
@@ -490,7 +490,7 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
         // therefore, it is better to use a very simple join, which may include
         // too many records, than to do a super-accurate join.
         $qubaids = new qubaid_join("{gnrquiz_attempts} {$alias}quiza", "{$alias}quiza.uniqueid",
-                "{$alias}quiza.quiz = :{$alias}quizid", array("{$alias}quizid" => $this->sql->params['quizid']));
+                "{$alias}quiza.quiz = :{$alias}quizid", array("{$alias}quizid" => $this->sql->params['gnrquizid']));
 
         $dm = new question_engine_data_mapper();
         list($inlineview, $viewparams) = $dm->question_attempt_latest_state_view($alias, $qubaids);

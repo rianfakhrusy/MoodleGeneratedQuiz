@@ -359,7 +359,7 @@ function gnrquiz_attempt_save_started($quizobj, $quba, $attempt) {
     // Decide which event we are using.
     if ($attempt->preview) {
         $params['other'] = array(
-            'quizid' => $quizobj->get_quizid()
+            'gnrquizid' => $quizobj->get_quizid()
         );
         $event = \mod_quiz\event\attempt_preview_started::create($params);
     } else {
@@ -428,7 +428,7 @@ function gnrquiz_delete_attempt($attempt, $quiz) {
             'relateduserid' => $attempt->userid,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id
+                'gnrquizid' => $quiz->id
             )
         );
         $event = \mod_quiz\event\attempt_deleted::create($params);
@@ -487,7 +487,7 @@ function gnrquiz_repaginate_questions($quizid, $slotsperpage) {
     global $DB;
     $trans = $DB->start_delegated_transaction();
 
-    $sections = $DB->get_records('gnrquiz_sections', array('quizid' => $quizid), 'firstslot ASC');
+    $sections = $DB->get_records('gnrquiz_sections', array('gnrquizid' => $quizid), 'firstslot ASC');
     $firstslots = array();
     foreach ($sections as $section) {
         if ((int)$section->firstslot === 1) {
@@ -496,7 +496,7 @@ function gnrquiz_repaginate_questions($quizid, $slotsperpage) {
         $firstslots[] = $section->firstslot;
     }
 
-    $slots = $DB->get_records('gnrquiz_slots', array('quizid' => $quizid),
+    $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $quizid),
             'slot');
     $currentpage = 1;
     $slotsonthispage = 0;
@@ -628,7 +628,7 @@ function gnrquiz_update_sumgrades($quiz) {
             SET sumgrades = COALESCE((
                 SELECT SUM(maxmark)
                 FROM {gnrquiz_slots}
-                WHERE quizid = {quiz}.id
+                WHERE gnrquizid = {quiz}.id
             ), 0)
             WHERE id = ?';
     $DB->execute($sql, array($quiz->id));
@@ -658,8 +658,8 @@ function gnrquiz_update_all_attempt_sumgrades($quiz) {
                 sumgrades = (
                     {$dm->sum_usage_marks_subquery('uniqueid')}
                 )
-            WHERE quiz = :quizid AND state = :finishedstate";
-    $DB->execute($sql, array('timenow' => $timenow, 'quizid' => $quiz->id,
+            WHERE gnrquiz = :quizid AND state = :finishedstate";
+    $DB->execute($sql, array('timenow' => $timenow, 'gnrquizid' => $quiz->id,
             'finishedstate' => gnrquiz_attempt::FINISHED));
 }
 
@@ -703,7 +703,7 @@ function gnrquiz_set_grade($newgrade, $quiz) {
         $DB->execute("
                 UPDATE {gnrquiz_grades}
                 SET grade = ? * grade, timemodified = ?
-                WHERE quiz = ?
+                WHERE gnrquiz = ?
         ", array($newgrade/$oldgrade, $timemodified, $quiz->id));
     }
 
@@ -713,7 +713,7 @@ function gnrquiz_set_grade($newgrade, $quiz) {
         $DB->execute("
                 UPDATE {gnrquiz_feedback}
                 SET mingrade = ? * mingrade, maxgrade = ? * maxgrade
-                WHERE quizid = ?
+                WHERE gnrquizid = ?
         ", array($factor, $factor, $quiz->id));
     }
 
@@ -886,7 +886,7 @@ function gnrquiz_update_all_final_grades($quiz) {
     } else {
         $finalgrade = '0';
     }
-    $param['quizid'] = $quiz->id;
+    $param['gnrquizid'] = $quiz->id;
     $param['gnrquizid2'] = $quiz->id;
     $param['gnrquizid3'] = $quiz->id;
     $param['gnrquizid4'] = $quiz->id;
@@ -909,7 +909,7 @@ function gnrquiz_update_all_final_grades($quiz) {
             FROM (
                 SELECT userid
                 FROM {gnrquiz_grades} qg
-                WHERE quiz = :quizid
+                WHERE gnrquiz = :quizid
             UNION
                 SELECT DISTINCT userid
                 FROM {gnrquiz_attempts} quiza2
@@ -1008,11 +1008,11 @@ function gnrquiz_update_open_attempts(array $conditions) {
         $iwheres[] = "iquiza.userid $incond";
     }
 
-    if (isset($conditions['quizid'])) {
-        list ($incond, $inparams) = $DB->get_in_or_equal($conditions['quizid'], SQL_PARAMS_NAMED, 'qid');
+    if (isset($conditions['gnrquizid'])) {
+        list ($incond, $inparams) = $DB->get_in_or_equal($conditions['gnrquizid'], SQL_PARAMS_NAMED, 'qid');
         $params = array_merge($params, $inparams);
         $wheres[] = "quiza.quiz $incond";
-        list ($incond, $inparams) = $DB->get_in_or_equal($conditions['quizid'], SQL_PARAMS_NAMED, 'iqid');
+        list ($incond, $inparams) = $DB->get_in_or_equal($conditions['gnrquizid'], SQL_PARAMS_NAMED, 'iqid');
         $params = array_merge($params, $inparams);
         $iwheres[] = "iquiza.quiz $incond";
     }
@@ -1062,7 +1062,7 @@ function gnrquiz_update_open_attempts(array $conditions) {
         $updatesql = "UPDATE {gnrquiz_attempts} quiza
                          SET timecheckstate = $timecheckstatesql
                         FROM {quiz} quiz, ( $quizausersql ) quizauser
-                       WHERE quiz.id = quiza.quiz
+                       WHERE gnrquiz.id = quiza.quiz
                          AND quizauser.id = quiza.id
                          AND $attemptselect";
     } else if ($dbfamily == 'mssql') {
@@ -1078,7 +1078,7 @@ function gnrquiz_update_open_attempts(array $conditions) {
                          SET timecheckstate = (
                            SELECT $timecheckstatesql
                              FROM {quiz} quiz, ( $quizausersql ) quizauser
-                            WHERE quiz.id = quiza.quiz
+                            WHERE gnrquiz.id = quiza.quiz
                               AND quizauser.id = quiza.id
                          )
                          WHERE $attemptselect";
@@ -1788,7 +1788,7 @@ function gnrquiz_process_group_deleted_in_course($courseid) {
               FROM {gnrquiz_overrides} o
               JOIN {quiz} quiz ON quiz.id = o.quiz
          LEFT JOIN {groups} grp ON grp.id = o.groupid
-             WHERE quiz.course = :courseid
+             WHERE gnrquiz.course = :courseid
                AND o.groupid IS NOT NULL
                AND grp.id IS NULL";
     $params = array('courseid' => $courseid);
@@ -1797,7 +1797,7 @@ function gnrquiz_process_group_deleted_in_course($courseid) {
         return; // Nothing to do.
     }
     $DB->delete_records_list('gnrquiz_overrides', 'id', array_keys($records));
-    gnrquiz_update_open_attempts(array('quizid' => array_unique(array_values($records))));
+    gnrquiz_update_open_attempts(array('gnrquizid' => array_unique(array_values($records))));
 }
 
 /**
@@ -2013,7 +2013,7 @@ function gnrquiz_has_question_use($quiz, $slot) {
  */
 function gnrquiz_add_gnrquiz_question($questionid, $quiz, $page = 0, $maxmark = null) {
     global $DB;
-    $slots = $DB->get_records('gnrquiz_slots', array('quizid' => $quiz->id),
+    $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $quiz->id),
             'slot', 'questionid, slot, page, id');
     if (array_key_exists($questionid, $slots)) {
         return false;
@@ -2060,7 +2060,7 @@ function gnrquiz_add_gnrquiz_question($questionid, $quiz, $page = 0, $maxmark = 
         $DB->execute("
                 UPDATE {gnrquiz_sections}
                    SET firstslot = firstslot + 1
-                 WHERE quizid = ?
+                 WHERE gnrquizid = ?
                    AND firstslot > ?
                 ", array($quiz->id, max($lastslotbefore, 1)));
 

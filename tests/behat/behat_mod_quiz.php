@@ -135,9 +135,9 @@ class behat_mod_quiz extends behat_question_base {
             // Require previous.
             if (array_key_exists('requireprevious', $questiondata)) {
                 if ($questiondata['requireprevious'] === '1') {
-                    $slot = $DB->get_field('gnrquiz_slots', 'MAX(slot)', array('quizid' => $quiz->id));
+                    $slot = $DB->get_field('gnrquiz_slots', 'MAX(slot)', array('gnrquizid' => $quiz->id));
                     $DB->set_field('gnrquiz_slots', 'requireprevious', 1,
-                            array('quizid' => $quiz->id, 'slot' => $slot));
+                            array('gnrquizid' => $quiz->id, 'slot' => $slot));
                 } else if ($questiondata['requireprevious'] !== '' && $questiondata['requireprevious'] !== '0') {
                     throw new ExpectationException('Require previous for question "' .
                             $questiondata['question'] . '" should be 0, 1 or blank.',
@@ -188,7 +188,7 @@ class behat_mod_quiz extends behat_question_base {
             }
 
             if ($rownumber == 0) {
-                $section = $DB->get_record('gnrquiz_sections', array('quizid' => $quiz->id), '*', MUST_EXIST);
+                $section = $DB->get_record('gnrquiz_sections', array('gnrquizid' => $quiz->id), '*', MUST_EXIST);
             } else {
                 $section = new stdClass();
                 $section->quizid = $quiz->id;
@@ -225,7 +225,7 @@ class behat_mod_quiz extends behat_question_base {
             }
         }
 
-        if ($section->firstslot > $DB->count_records('gnrquiz_slots', array('quizid' => $quiz->id))) {
+        if ($section->firstslot > $DB->count_records('gnrquiz_slots', array('gnrquizid' => $quiz->id))) {
             throw new ExpectationException('The section firstslot must be less than the total number of slots in the quiz.',
                     $this->getSession());
         }

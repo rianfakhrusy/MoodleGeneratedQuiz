@@ -519,7 +519,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
 
         $output = $PAGE->get_renderer('mod_quiz');
         $imageurl = new moodle_url('/mod/gnrquiz/report/statistics/statistics_graph.php',
-                                    compact('quizid', 'currentgroup', 'whichattempts'));
+                                    compact('gnrquizid', 'currentgroup', 'whichattempts'));
         $graphname = get_string('statisticsreportgraph', 'gnrquiz_statistics');
         echo $output->graph($imageurl, $graphname);
     }

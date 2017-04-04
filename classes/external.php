@@ -302,7 +302,7 @@ class mod_gnrquiz_external extends external_api {
     public static function view_gnrquiz_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
             )
         );
     }
@@ -318,10 +318,10 @@ class mod_gnrquiz_external extends external_api {
     public static function view_quiz($quizid) {
         global $DB;
 
-        $params = self::validate_parameters(self::view_gnrquiz_parameters(), array('quizid' => $quizid));
+        $params = self::validate_parameters(self::view_gnrquiz_parameters(), array('gnrquizid' => $quizid));
         $warnings = array();
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         // Trigger course_module_viewed event and completion.
         gnrquiz_view($quiz, $course, $cm, $context);
@@ -356,7 +356,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_user_attempts_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
                 'userid' => new external_value(PARAM_INT, 'user id, empty for current user', VALUE_DEFAULT, 0),
                 'status' => new external_value(PARAM_ALPHA, 'gnrquiz status: all, finished or unfinished', VALUE_DEFAULT, 'finished'),
                 'includepreviews' => new external_value(PARAM_BOOL, 'whether to include previews or not', VALUE_DEFAULT, false),
@@ -382,14 +382,14 @@ class mod_gnrquiz_external extends external_api {
         $warnings = array();
 
         $params = array(
-            'quizid' => $quizid,
+            'gnrquizid' => $quizid,
             'userid' => $userid,
             'status' => $status,
             'includepreviews' => $includepreviews,
         );
         $params = self::validate_parameters(self::get_user_attempts_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         if (!in_array($params['status'], array('all', 'finished', 'unfinished'))) {
             throw new invalid_parameter_exception('Invalid status value');
@@ -474,7 +474,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_user_best_grade_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
                 'userid' => new external_value(PARAM_INT, 'user id', VALUE_DEFAULT, 0),
             )
         );
@@ -494,12 +494,12 @@ class mod_gnrquiz_external extends external_api {
         $warnings = array();
 
         $params = array(
-            'quizid' => $quizid,
+            'gnrquizid' => $quizid,
             'userid' => $userid,
         );
         $params = self::validate_parameters(self::get_user_best_grade_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         // Default value for userid.
         if (empty($params['userid'])) {
@@ -552,7 +552,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_combined_review_options_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
                 'userid' => new external_value(PARAM_INT, 'user id (empty for current user)', VALUE_DEFAULT, 0),
 
             )
@@ -573,12 +573,12 @@ class mod_gnrquiz_external extends external_api {
         $warnings = array();
 
         $params = array(
-            'quizid' => $quizid,
+            'gnrquizid' => $quizid,
             'userid' => $userid,
         );
         $params = self::validate_parameters(self::get_combined_review_options_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         // Default value for userid.
         if (empty($params['userid'])) {
@@ -653,7 +653,7 @@ class mod_gnrquiz_external extends external_api {
     public static function start_attempt_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
                 'preflightdata' => new external_multiple_structure(
                     new external_single_structure(
                         array(
@@ -685,14 +685,14 @@ class mod_gnrquiz_external extends external_api {
         $attempt = array();
 
         $params = array(
-            'quizid' => $quizid,
+            'gnrquizid' => $quizid,
             'preflightdata' => $preflightdata,
             'forcenew' => $forcenew,
         );
         $params = self::validate_parameters(self::start_attempt_parameters(), $params);
         $forcenew = $params['forcenew'];
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         $quizobj = quiz::create($cm->instance, $USER->id);
 
@@ -1580,7 +1580,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_gnrquiz_feedback_for_grade_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
                 'grade' => new external_value(PARAM_FLOAT, 'the grade to check'),
             )
         );
@@ -1599,13 +1599,13 @@ class mod_gnrquiz_external extends external_api {
         global $DB;
 
         $params = array(
-            'quizid' => $quizid,
+            'gnrquizid' => $quizid,
             'grade' => $grade,
         );
         $params = self::validate_parameters(self::get_gnrquiz_feedback_for_grade_parameters(), $params);
         $warnings = array();
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         $result = array();
         $result['feedbacktext'] = '';
@@ -1648,7 +1648,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_gnrquiz_access_information_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id')
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id')
             )
         );
     }
@@ -1667,11 +1667,11 @@ class mod_gnrquiz_external extends external_api {
         $warnings = array();
 
         $params = array(
-            'quizid' => $quizid
+            'gnrquizid' => $quizid
         );
         $params = self::validate_parameters(self::get_gnrquiz_access_information_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         $result = array();
         // Capabilities first.
@@ -1730,7 +1730,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_attempt_access_information_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id'),
                 'attemptid' => new external_value(PARAM_INT, 'attempt id, 0 for the user last attempt if exists', VALUE_DEFAULT, 0),
             )
         );
@@ -1751,12 +1751,12 @@ class mod_gnrquiz_external extends external_api {
         $warnings = array();
 
         $params = array(
-            'quizid' => $quizid,
+            'gnrquizid' => $quizid,
             'attemptid' => $attemptid,
         );
         $params = self::validate_parameters(self::get_attempt_access_information_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         $attempttocheck = 0;
         if (!empty($params['attemptid'])) {
@@ -1837,7 +1837,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_gnrquiz_required_qtypes_parameters() {
         return new external_function_parameters (
             array(
-                'quizid' => new external_value(PARAM_INT, 'gnrquiz instance id')
+                'gnrquizid' => new external_value(PARAM_INT, 'gnrquiz instance id')
             )
         );
     }
@@ -1857,11 +1857,11 @@ class mod_gnrquiz_external extends external_api {
         $warnings = array();
 
         $params = array(
-            'quizid' => $quizid
+            'gnrquizid' => $quizid
         );
         $params = self::validate_parameters(self::get_gnrquiz_required_qtypes_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['quizid']);
+        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
 
         $quizobj = quiz::create($cm->instance, $USER->id);
         $quizobj->preload_questions();

@@ -753,7 +753,7 @@ class edit_renderer extends \plugin_renderer_base {
      */
     public function page_split_join_button($structure, $slot) {
         $insertpagebreak = !$structure->is_last_slot_on_page($slot);
-        $url = new \moodle_url('repaginate.php', array('quizid' => $structure->get_quizid(),
+        $url = new \moodle_url('repaginate.php', array('gnrquizid' => $structure->get_quizid(),
                 'slot' => $slot, 'repag' => $insertpagebreak ? 2 : 1, 'sesskey' => sesskey()));
 
         if ($insertpagebreak) {
@@ -1001,7 +1001,7 @@ class edit_renderer extends \plugin_renderer_base {
                 'M.mod_quiz.init_resource_toolbox',
                 array(array(
                         'courseid' => $structure->get_courseid(),
-                        'quizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_quizid(),
                         'ajaxurl' => $config->resourceurl,
                         'config' => $config,
                 ))
@@ -1013,7 +1013,7 @@ class edit_renderer extends \plugin_renderer_base {
                 'M.mod_quiz.init_section_toolbox',
                 array(array(
                         'courseid' => $structure,
-                        'quizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_quizid(),
                         'ajaxurl' => $config->sectionurl,
                         'config' => $config,
                 ))
@@ -1022,7 +1022,7 @@ class edit_renderer extends \plugin_renderer_base {
         $this->page->requires->yui_module('moodle-mod_quiz-dragdrop', 'M.mod_quiz.init_section_dragdrop',
                 array(array(
                         'courseid' => $structure,
-                        'quizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_quizid(),
                         'ajaxurl' => $config->sectionurl,
                         'config' => $config,
                 )), null, true);
@@ -1030,7 +1030,7 @@ class edit_renderer extends \plugin_renderer_base {
         $this->page->requires->yui_module('moodle-mod_quiz-dragdrop', 'M.mod_quiz.init_resource_dragdrop',
                 array(array(
                         'courseid' => $structure,
-                        'quizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_quizid(),
                         'ajaxurl' => $config->resourceurl,
                         'config' => $config,
                 )), null, true);

@@ -99,17 +99,17 @@ function xmldb_gnrquiz_upgrade($oldversion) {
 
         // Adding fields to table gnrquiz_sections.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('quizid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('gnrquizid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('firstslot', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('heading', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
         $table->add_field('shufflequestions', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0');
 
         // Adding keys to table gnrquiz_sections.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('quizid', XMLDB_KEY_FOREIGN, array('quizid'), 'gnrquiz', array('id'));
+        $table->add_key('gnrquizid', XMLDB_KEY_FOREIGN, array('gnrquizid'), 'gnrquiz', array('id'));
 
         // Adding indexes to table gnrquiz_sections.
-        $table->add_index('gnrquizid-firstslot', XMLDB_INDEX_UNIQUE, array('quizid', 'firstslot'));
+        $table->add_index('gnrquizid-firstslot', XMLDB_INDEX_UNIQUE, array('gnrquizid', 'firstslot'));
 
         // Conditionally launch create table for gnrquiz_sections.
         if (!$dbman->table_exists($table)) {
@@ -179,7 +179,7 @@ function xmldb_gnrquiz_upgrade($oldversion) {
             $done = 0;
             foreach ($problemquizzes as $problemquiz) {
                 $DB->set_field('gnrquiz_sections', 'firstslot', 1,
-                        array('quizid' => $problemquiz->quizid,
+                        array('gnrquizid' => $problemquiz->quizid,
                         'firstslot' => $problemquiz->firstsectionfirstslot));
                 $done += 1;
                 $pbar->update($done, $total, "Fixing quiz layouts - {$done}/{$total}.");

@@ -74,7 +74,7 @@ $params = array(
     'courseid' => $course->id,
     'context' => $contexts->lowest(),
     'other' => array(
-        'quizid' => $quiz->id
+        'gnrquizid' => $quiz->id
     )
 );
 $event = \mod_quiz\event\edit_page_viewed::create($params);
@@ -196,7 +196,7 @@ $quizeditconfig->dialoglisteners = array();
 $numberoflisteners = $DB->get_field_sql("
     SELECT COALESCE(MAX(page), 1)
       FROM {gnrquiz_slots}
-     WHERE quizid = ?", array($quiz->id));
+     WHERE gnrquizid = ?", array($quiz->id));
 
 for ($pageiter = 1; $pageiter <= $numberoflisteners; $pageiter++) {
     $quizeditconfig->dialoglisteners[] = 'addrandomdialoglaunch_' . $pageiter;

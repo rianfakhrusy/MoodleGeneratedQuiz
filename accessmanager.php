@@ -185,7 +185,7 @@ class gnrquiz_access_manager {
     protected static function get_load_sql($quizid, $rules, $basefields) {
         $allfields = $basefields;
         $alljoins = '{quiz} quiz';
-        $allparams = array('quizid' => $quizid);
+        $allparams = array('gnrquizid' => $quizid);
 
         foreach ($rules as $rule) {
             list($fields, $joins, $params) = $rule::get_settings_sql($quizid);
@@ -207,7 +207,7 @@ class gnrquiz_access_manager {
             return array('', array());
         }
 
-        return array("SELECT $allfields FROM $alljoins WHERE quiz.id = :quizid", $allparams);
+        return array("SELECT $allfields FROM $alljoins WHERE gnrquiz.id = :quizid", $allparams);
     }
 
     /**

@@ -112,7 +112,7 @@ Y.extend(TOOLBOX, Y.Base, {
 
         data.sesskey = M.cfg.sesskey;
         data.courseid = this.get('courseid');
-        data.quizid = this.get('quizid');
+        data.quizid = this.get('gnrquizid');
 
         var uri = M.cfg.wwwroot + this.get('ajaxurl');
 

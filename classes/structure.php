@@ -611,7 +611,7 @@ class structure {
         }
 
         // Get quiz sections in ascending order of the firstslot.
-        $this->sections = $DB->get_records('gnrquiz_sections', array('quizid' => $quiz->id), 'firstslot ASC');
+        $this->sections = $DB->get_records('gnrquiz_sections', array('gnrquizid' => $quiz->id), 'firstslot ASC');
         $this->populate_slots_with_sections();
         $this->populate_question_numbers();
     }
@@ -791,7 +791,7 @@ class structure {
         // Slot has moved record new order.
         if ($slotreorder) {
             update_field_with_unique_index('gnrquiz_slots', 'slot', $slotreorder,
-                    array('quizid' => $this->get_quizid()));
+                    array('gnrquizid' => $this->get_quizid()));
         }
 
         // Page has changed. Record it.
@@ -804,7 +804,7 @@ class structure {
         $DB->execute("
                 UPDATE {gnrquiz_sections}
                    SET firstslot = firstslot + ?
-                 WHERE quizid = ?
+                 WHERE gnrquizid = ?
                    AND firstslot > ?
                    AND firstslot < ?
                 ", array($headingmovedirection, $this->get_quizid(),
@@ -814,9 +814,9 @@ class structure {
         $emptypages = $DB->get_fieldset_sql("
                 SELECT DISTINCT page - 1
                   FROM {gnrquiz_slots} slot
-                 WHERE quizid = ?
+                 WHERE gnrquizid = ?
                    AND page > 1
-                   AND NOT EXISTS (SELECT 1 FROM {gnrquiz_slots} WHERE quizid = ? AND page = slot.page - 1)
+                   AND NOT EXISTS (SELECT 1 FROM {gnrquiz_slots} WHERE gnrquizid = ? AND page = slot.page - 1)
               ORDER BY page - 1 DESC
                 ", array($this->get_quizid(), $this->get_quizid()));
 
@@ -824,7 +824,7 @@ class structure {
             $DB->execute("
                     UPDATE {gnrquiz_slots}
                        SET page = page - 1
-                     WHERE quizid = ?
+                     WHERE gnrquizid = ?
                        AND page > ?
                     ", array($this->get_quizid(), $page));
         }
@@ -841,7 +841,7 @@ class structure {
         global $DB;
         // Get slots ordered by page then slot.
         if (!count($slots)) {
-            $slots = $DB->get_records('gnrquiz_slots', array('quizid' => $this->get_quizid()), 'slot, page');
+            $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_quizid()), 'slot, page');
         }
 
         // Loop slots. Start Page number at 1 and increment as required.
@@ -895,17 +895,17 @@ class structure {
             throw new \coding_exception('You cannot remove the last slot in a section.');
         }
 
-        $slot = $DB->get_record('gnrquiz_slots', array('quizid' => $this->get_quizid(), 'slot' => $slotnumber));
+        $slot = $DB->get_record('gnrquiz_slots', array('gnrquizid' => $this->get_quizid(), 'slot' => $slotnumber));
         if (!$slot) {
             return;
         }
-        $maxslot = $DB->get_field_sql('SELECT MAX(slot) FROM {gnrquiz_slots} WHERE quizid = ?', array($this->get_quizid()));
+        $maxslot = $DB->get_field_sql('SELECT MAX(slot) FROM {gnrquiz_slots} WHERE gnrquizid = ?', array($this->get_quizid()));
 
         $trans = $DB->start_delegated_transaction();
         $DB->delete_records('gnrquiz_slots', array('id' => $slot->id));
         for ($i = $slot->slot + 1; $i <= $maxslot; $i++) {
             $DB->set_field('gnrquiz_slots', 'slot', $i - 1,
-                    array('quizid' => $this->get_quizid(), 'slot' => $i));
+                    array('gnrquizid' => $this->get_quizid(), 'slot' => $i));
         }
 
         $qtype = $DB->get_field('question', 'qtype', array('id' => $slot->questionid));
@@ -917,7 +917,7 @@ class structure {
         $DB->execute("
                 UPDATE {gnrquiz_sections}
                    SET firstslot = firstslot - 1
-                 WHERE quizid = ?
+                 WHERE gnrquizid = ?
                    AND firstslot > ?
                 ", array($this->get_quizid(), $slotnumber));
         unset($this->questions[$slot->questionid]);
@@ -981,7 +981,7 @@ class structure {
 
         $this->check_can_be_edited();
 
-        $quizslots = $DB->get_records('gnrquiz_slots', array('quizid' => $this->get_quizid()), 'slot');
+        $quizslots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_quizid()), 'slot');
         $repaginate = new \mod_quiz\repaginate($this->get_quizid(), $quizslots);
         $repaginate->repaginate_slots($quizslots[$slotid]->slot, $type);
         $slots = $this->refresh_page_numbers_and_update_db();
@@ -999,7 +999,7 @@ class structure {
         $section = new \stdClass();
         $section->heading = $heading;
         $section->quizid = $this->get_quizid();
-        $slotsonpage = $DB->get_records('gnrquiz_slots', array('quizid' => $this->get_quizid(), 'page' => $pagenumber), 'slot DESC');
+        $slotsonpage = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_quizid(), 'page' => $pagenumber), 'slot DESC');
         $section->firstslot = end($slotsonpage)->slot;
         $section->shufflequestions = 0;
         return $DB->insert_record('gnrquiz_sections', $section);

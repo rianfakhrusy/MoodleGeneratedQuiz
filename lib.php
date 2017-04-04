@@ -1462,11 +1462,11 @@ function gnrquiz_reset_userdata($data) {
     if ($data->timeshift) {
         $DB->execute("UPDATE {gnrquiz_overrides}
                          SET timeopen = timeopen + ?
-                       WHERE quiz IN (SELECT id FROM {quiz} WHERE course = ?)
+                       WHERE gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?)
                          AND timeopen <> 0", array($data->timeshift, $data->courseid));
         $DB->execute("UPDATE {gnrquiz_overrides}
                          SET timeclose = timeclose + ?
-                       WHERE quiz IN (SELECT id FROM {quiz} WHERE course = ?)
+                       WHERE gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?)
                          AND timeclose <> 0", array($data->timeshift, $data->courseid));
 
         shift_course_mod_dates('gnrquiz', array('timeopen', 'timeclose'),
@@ -1600,7 +1600,7 @@ function gnrquiz_num_attempt_summary($quiz, $cm, $returnzero = false, $currentgr
                 $a->group = $DB->count_records_sql('SELECT COUNT(DISTINCT qa.id) FROM ' .
                         '{gnrquiz_attempts} qa JOIN ' .
                         '{groups_members} gm ON qa.userid = gm.userid ' .
-                        'WHERE quiz = ? AND preview = 0 AND groupid = ?',
+                        'WHERE gnrquiz = ? AND preview = 0 AND groupid = ?',
                         array($quiz->id, $currentgroup));
                 return get_string('attemptsnumthisgroup', 'gnrquiz', $a);
             } else if ($groups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid)) {
@@ -1608,7 +1608,7 @@ function gnrquiz_num_attempt_summary($quiz, $cm, $returnzero = false, $currentgr
                 $a->group = $DB->count_records_sql('SELECT COUNT(DISTINCT qa.id) FROM ' .
                         '{gnrquiz_attempts} qa JOIN ' .
                         '{groups_members} gm ON qa.userid = gm.userid ' .
-                        'WHERE quiz = ? AND preview = 0 AND ' .
+                        'WHERE gnrquiz = ? AND preview = 0 AND ' .
                         "groupid $usql", array_merge(array($quiz->id), $params));
                 return get_string('attemptsnumyourgroups', 'gnrquiz', $a);
             }

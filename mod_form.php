@@ -364,7 +364,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
 
         if (!empty($this->_instance)) {
             $this->_feedbacks = $DB->get_records('gnrquiz_feedback',
-                    array('quizid' => $this->_instance), 'mingrade DESC');
+                    array('gnrquizid' => $this->_instance), 'mingrade DESC');
             $numfeedbacks = count($this->_feedbacks);
         } else {
             $this->_feedbacks = array();
@@ -660,7 +660,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
             $this->maxattemptsanyoverride = $DB->get_field_sql("
                     SELECT MAX(CASE WHEN attempts = 0 THEN 1000 ELSE attempts END)
                       FROM {gnrquiz_overrides}
-                     WHERE quiz = ?",
+                     WHERE gnrquiz = ?",
                     array($this->_instance));
             if ($this->maxattemptsanyoverride < 1) {
                 // This happens when no override alters the number of attempts.

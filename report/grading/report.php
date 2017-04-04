@@ -196,7 +196,7 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
                 SELECT $fields
                 FROM {gnrquiz_attempts} quiza
                 JOIN {user} u ON u.id = quiza.userid
-                WHERE quiza.uniqueid $asql AND quiza.state = ? AND quiza.quiz = ?",
+                WHERE gnrquiza.uniqueid $asql AND quiza.state = ? AND quiza.quiz = ?",
                 $params);
 
         $attempts = array();
@@ -498,7 +498,7 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
                 'courseid' => $attemptobj->get_courseid(),
                 'context' => context_module::instance($attemptobj->get_cmid()),
                 'other' => array(
-                    'quizid' => $attemptobj->get_quizid(),
+                    'gnrquizid' => $attemptobj->get_quizid(),
                     'attemptid' => $attemptobj->get_attemptid(),
                     'slot' => $assumedslotforevents
                 )

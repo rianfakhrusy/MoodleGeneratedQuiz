@@ -102,7 +102,7 @@ echo $OUTPUT->footer();
 $params = array(
     'context' => $context,
     'other' => array(
-        'quizid' => $quiz->id,
+        'gnrquizid' => $quiz->id,
         'reportname' => $mode
     )
 );

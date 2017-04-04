@@ -116,7 +116,7 @@ class mod_gnrquiz_overdue_attempt_updater {
            JOIN {quiz} quiz ON quiz.id = quiza.quiz
            JOIN ( $quizausersql ) quizauser ON quizauser.id = quiza.id
 
-          WHERE quiza.state IN ('inprogress', 'overdue')
+          WHERE gnrquiza.state IN ('inprogress', 'overdue')
             AND quiza.timecheckstate <= :processto
        ORDER BY quiz.course, quiza.quiz",
 

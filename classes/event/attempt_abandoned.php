@@ -134,7 +134,7 @@ class attempt_abandoned extends \core\event\base {
     public static function get_other_mapping() {
         $othermapped = array();
         $othermapped['submitterid'] = array('db' => 'user', 'restore' => 'user');
-        $othermapped['quizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
+        $othermapped['gnrquizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
 
         return $othermapped;
     }

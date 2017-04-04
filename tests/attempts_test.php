@@ -352,7 +352,7 @@ class mod_gnrquiz_attempt_overdue_testcase extends advanced_testcase {
         $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
 
         // update timecheckstate
-        gnrquiz_update_open_attempts(array('quizid'=>$quiz->id));
+        gnrquiz_update_open_attempts(array('gnrquizid'=>$quiz->id));
         $this->assertEquals(1300, $DB->get_field('gnrquiz_attempts', 'timecheckstate', array('id'=>$attemptid)));
 
         // remove from group
@@ -370,7 +370,7 @@ class mod_gnrquiz_attempt_overdue_testcase extends advanced_testcase {
 
         // add a group2 override
         $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>1400, 'timelimit'=>null));
-        gnrquiz_update_open_attempts(array('quizid'=>$quiz->id));
+        gnrquiz_update_open_attempts(array('gnrquizid'=>$quiz->id));
         $this->assertEquals(1400, $DB->get_field('gnrquiz_attempts', 'timecheckstate', array('id'=>$attemptid)));
 
         // delete user1 from all groups

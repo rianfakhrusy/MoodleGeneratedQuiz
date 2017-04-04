@@ -41,7 +41,7 @@ function gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $whichattempts
     $fromqa = '{gnrquiz_attempts} quiza ';
 
     $whereqa = 'gnrquiza.quiz = :quizid AND quiza.preview = 0 AND quiza.state = :quizstatefinished';
-    $qaparams = array('quizid' => (int)$quizid, 'gnrquizstatefinished' => gnrquiz_attempt::FINISHED);
+    $qaparams = array('gnrquizid' => (int)$quizid, 'gnrquizstatefinished' => gnrquiz_attempt::FINISHED);
 
     if ($groupstudents) {
         ksort($groupstudents);

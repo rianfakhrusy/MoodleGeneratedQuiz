@@ -88,7 +88,7 @@ class question_manually_graded extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         return array($this->courseid, 'gnrquiz', 'manualgrade', 'comment.php?attempt=' . $this->other['attemptid'] .
-            '&slot=' . $this->other['slot'], $this->other['quizid'], $this->contextinstanceid);
+            '&slot=' . $this->other['slot'], $this->other['gnrquizid'], $this->contextinstanceid);
     }
 
     /**
@@ -100,7 +100,7 @@ class question_manually_graded extends \core\event\base {
     protected function validate_data() {
         parent::validate_data();
 
-        if (!isset($this->other['quizid'])) {
+        if (!isset($this->other['gnrquizid'])) {
             throw new \coding_exception('The \'gnrquizid\' value must be set in other.');
         }
 
@@ -119,7 +119,7 @@ class question_manually_graded extends \core\event\base {
 
     public static function get_other_mapping() {
         $othermapped = array();
-        $othermapped['quizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
+        $othermapped['gnrquizid'] = array('db' => 'gnrquiz', 'restore' => 'gnrquiz');
         $othermapped['attemptid'] = array('db' => 'gnrquiz_attempts', 'restore' => 'gnrquiz_attempt');
 
         return $othermapped;

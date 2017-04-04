@@ -30,7 +30,7 @@ require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
 // Initialise ALL the incoming parameters here, up front.
-$quizid     = required_param('quizid', PARAM_INT);
+$quizid     = required_param('gnrquizid', PARAM_INT);
 $class      = required_param('class', PARAM_ALPHA);
 $field      = optional_param('field', '', PARAM_ALPHA);
 $instanceid = optional_param('instanceId', 0, PARAM_INT);
@@ -48,7 +48,7 @@ $newheading = optional_param('newheading', '', PARAM_TEXT);
 $shuffle    = optional_param('newshuffle', 0, PARAM_INT);
 $page       = optional_param('page', '', PARAM_INT);
 $PAGE->set_url('/mod/gnrquiz/edit-rest.php',
-        array('quizid' => $quizid, 'class' => $class));
+        array('gnrquizid' => $quizid, 'class' => $class));
 
 require_sesskey();
 $quiz = $DB->get_record('gnrquiz', array('id' => $quizid), '*', MUST_EXIST);
@@ -166,7 +166,7 @@ switch($requestmethod) {
 
             case 'resource':
                 require_capability('mod/gnrquiz:manage', $modcontext);
-                if (!$slot = $DB->get_record('gnrquiz_slots', array('quizid' => $quiz->id, 'id' => $id))) {
+                if (!$slot = $DB->get_record('gnrquiz_slots', array('gnrquizid' => $quiz->id, 'id' => $id))) {
                     throw new moodle_exception('AJAX commands.php: Bad slot ID '.$id);
                 }
                 $structure->remove_slot($slot->slot);

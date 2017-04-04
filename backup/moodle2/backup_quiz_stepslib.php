@@ -116,13 +116,13 @@ class backup_gnrquiz_activity_structure_step extends backup_questions_activity_s
         $quiz->set_source_table('gnrquiz', array('id' => backup::VAR_ACTIVITYID));
 
         $qinstance->set_source_table('gnrquiz_slots',
-                array('quizid' => backup::VAR_PARENTID));
+                array('gnrquizid' => backup::VAR_PARENTID));
 
         $section->set_source_table('gnrquiz_sections',
-                array('quizid' => backup::VAR_PARENTID));
+                array('gnrquizid' => backup::VAR_PARENTID));
 
         $feedback->set_source_table('gnrquiz_feedback',
-                array('quizid' => backup::VAR_PARENTID));
+                array('gnrquizid' => backup::VAR_PARENTID));
 
         // Quiz overrides to backup are different depending of user info.
         $overrideparams = array('gnrquiz' => backup::VAR_PARENTID);
@@ -138,7 +138,7 @@ class backup_gnrquiz_activity_structure_step extends backup_questions_activity_s
             $attempt->set_source_sql('
                     SELECT *
                     FROM {gnrquiz_attempts}
-                    WHERE quiz = :quiz AND preview = 0',
+                    WHERE gnrquiz = :quiz AND preview = 0',
                     array('gnrquiz' => backup::VAR_PARENTID));
         }
 

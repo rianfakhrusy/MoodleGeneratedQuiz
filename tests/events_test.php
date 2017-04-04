@@ -248,7 +248,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'courseid' => $course->id,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id
+                'gnrquizid' => $quiz->id
             )
         );
         $event = \mod_quiz\event\edit_page_viewed::create($params);
@@ -319,7 +319,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
         $params = array(
             'context' => $context = context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id,
+                'gnrquizid' => $quiz->id,
                 'reportname' => 'overview'
             )
         );
@@ -359,7 +359,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'courseid' => $course->id,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id
+                'gnrquizid' => $quiz->id
             )
         );
         $event = \mod_quiz\event\attempt_reviewed::create($params);
@@ -397,7 +397,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'courseid' => $course->id,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id
+                'gnrquizid' => $quiz->id
             )
         );
         $event = \mod_quiz\event\attempt_summary_viewed::create($params);
@@ -434,7 +434,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'relateduserid' => 2,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id
+                'gnrquizid' => $quiz->id
             )
         );
         $event = \mod_quiz\event\user_override_created::create($params);
@@ -468,7 +468,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'objectid' => 1,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id,
+                'gnrquizid' => $quiz->id,
                 'groupid' => 2
             )
         );
@@ -504,7 +504,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'relateduserid' => 2,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id
+                'gnrquizid' => $quiz->id
             )
         );
         $event = \mod_quiz\event\user_override_updated::create($params);
@@ -540,7 +540,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'objectid' => 1,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id,
+                'gnrquizid' => $quiz->id,
                 'groupid' => 2
             )
         );
@@ -643,7 +643,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'courseid' => $course->id,
             'context' => context_module::instance($quiz->cmid),
             'other' => array(
-                'quizid' => $quiz->id
+                'gnrquizid' => $quiz->id
             )
         );
         $event = \mod_quiz\event\attempt_viewed::create($params);
@@ -701,7 +701,7 @@ class mod_gnrquiz_events_testcase extends advanced_testcase {
             'courseid' => $quizobj->get_courseid(),
             'context' => context_module::instance($quizobj->get_cmid()),
             'other' => array(
-                'quizid' => $quizobj->get_quizid(),
+                'gnrquizid' => $quizobj->get_quizid(),
                 'attemptid' => 2,
                 'slot' => 3
             )

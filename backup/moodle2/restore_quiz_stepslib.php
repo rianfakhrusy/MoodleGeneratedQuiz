@@ -429,7 +429,7 @@ class restore_gnrquiz_activity_structure_step extends restore_questions_activity
 
         if (!$this->sectioncreated) {
             $DB->insert_record('gnrquiz_sections', array(
-                    'quizid' => $this->get_new_parentid('gnrquiz'),
+                    'gnrquizid' => $this->get_new_parentid('gnrquiz'),
                     'firstslot' => 1, 'heading' => '',
                     'shufflequestions' => $this->legacyshufflequestionsoption));
         }

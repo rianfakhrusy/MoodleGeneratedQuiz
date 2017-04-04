@@ -90,7 +90,7 @@ if ($groupmode) {
                 JOIN {groups} g ON o.groupid = g.id
                 WHERE o.quiz = :quizid
                 ORDER BY g.name';
-    $params = array('quizid' => $quiz->id);
+    $params = array('gnrquizid' => $quiz->id);
 } else {
     $colname = get_string('user');
     list($sort, $params) = users_order_by_sql('u');
@@ -99,7 +99,7 @@ if ($groupmode) {
             JOIN {user} u ON o.userid = u.id
             WHERE o.quiz = :quizid
             ORDER BY ' . $sort;
-    $params['quizid'] = $quiz->id;
+    $params['gnrquizid'] = $quiz->id;
 }
 
 $overrides = $DB->get_records_sql($sql, $params);

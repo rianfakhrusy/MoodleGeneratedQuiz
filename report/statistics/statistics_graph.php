@@ -35,7 +35,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/reportlib.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/report/statistics/statisticslib.php');
 
 // Get the parameters.
-$quizid = required_param('quizid', PARAM_INT);
+$quizid = required_param('gnrquizid', PARAM_INT);
 $currentgroup = required_param('currentgroup', PARAM_INT);
 $whichattempts = required_param('whichattempts', PARAM_INT);
 
