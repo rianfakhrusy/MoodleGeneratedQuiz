@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_safebrowser plugin.
+ * Unit tests for the gnrquizaccess_safebrowser plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage safebrowser
  * @category   phpunit
  * @copyright  2008 The Open University
@@ -32,20 +32,20 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/safebrowser/rule.php');
 
 
 /**
- * Unit tests for the quizaccess_safebrowser plugin.
+ * Unit tests for the gnrquizaccess_safebrowser plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_safebrowser_testcase extends basic_testcase {
+class gnrquizaccess_safebrowser_testcase extends basic_testcase {
     // Nothing very testable in this class, just test that it obeys the general access rule contact.
     public function test_safebrowser_access_rule() {
-        $quiz = new stdClass();
-        $quiz->browsersecurity = 'safebrowser';
+        $gnrquiz = new stdClass();
+        $gnrquiz->browsersecurity = 'safebrowser';
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
-        $rule = new quizaccess_safebrowser($quizobj, 0);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
+        $rule = new gnrquizaccess_safebrowser($gnrquizobj, 0);
         $attempt = new stdClass();
 
         // This next test assumes the unit tests are not being run using Safe Exam Browser!

@@ -1,6 +1,6 @@
-@mod @mod_quiz
-Feature: Edit quiz page - drag-and-drop
-  In order to change the layout of a quiz I built
+@mod @mod_gnrquiz
+Feature: Edit gnrquiz page - drag-and-drop
+  In order to change the layout of a gnrquiz I built
   As a teacher
   I need to be able to drag and drop questions to reorder them.
 
@@ -24,8 +24,8 @@ Feature: Edit quiz page - drag-and-drop
       | Test questions   | truefalse | Question C | This is question 03 |
     And the following "activities" exist:
       | activity   | name   | course | idnumber |
-      | quiz       | Quiz 1 | C1     | quiz1    |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | C1     | gnrquiz1    |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question   | page |
       | Question A | 1    |
       | Question B | 1    |
@@ -33,42 +33,42 @@ Feature: Edit quiz page - drag-and-drop
     And I log in as "teacher1"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
+    And I follow "Edit gnrquiz"
 
   @javascript
   Scenario: Re-order questions by clicking on the move icon.
-    Then I should see "Question A" on quiz page "1"
-    And I should see "Question B" on quiz page "1"
-    And I should see "Question C" on quiz page "2"
+    Then I should see "Question A" on gnrquiz page "1"
+    And I should see "Question B" on gnrquiz page "1"
+    And I should see "Question C" on gnrquiz page "2"
 
-    When I move "Question A" to "After Question 2" in the quiz by clicking the move icon
-    Then I should see "Question B" on quiz page "1"
-    And I should see "Question A" on quiz page "1"
-    And I should see "Question B" before "Question A" on the edit quiz page
-    And I should see "Question C" on quiz page "2"
+    When I move "Question A" to "After Question 2" in the gnrquiz by clicking the move icon
+    Then I should see "Question B" on gnrquiz page "1"
+    And I should see "Question A" on gnrquiz page "1"
+    And I should see "Question B" before "Question A" on the edit gnrquiz page
+    And I should see "Question C" on gnrquiz page "2"
 
-    When I move "Question A" to "After Page 2" in the quiz by clicking the move icon
-    Then I should see "Question B" on quiz page "1"
-    And I should see "Question A" on quiz page "2"
-    And I should see "Question C" on quiz page "2"
-    And I should see "Question A" before "Question C" on the edit quiz page
+    When I move "Question A" to "After Page 2" in the gnrquiz by clicking the move icon
+    Then I should see "Question B" on gnrquiz page "1"
+    And I should see "Question A" on gnrquiz page "2"
+    And I should see "Question C" on gnrquiz page "2"
+    And I should see "Question A" before "Question C" on the edit gnrquiz page
 
-    When I move "Question B" to "After Question 2" in the quiz by clicking the move icon
-    Then I should see "Question A" on quiz page "1"
-    And I should see "Question B" on quiz page "1"
-    And I should see "Question C" on quiz page "1"
-    And I should see "Question A" before "Question B" on the edit quiz page
-    And I should see "Question B" before "Question C" on the edit quiz page
+    When I move "Question B" to "After Question 2" in the gnrquiz by clicking the move icon
+    Then I should see "Question A" on gnrquiz page "1"
+    And I should see "Question B" on gnrquiz page "1"
+    And I should see "Question C" on gnrquiz page "1"
+    And I should see "Question A" before "Question B" on the edit gnrquiz page
+    And I should see "Question B" before "Question C" on the edit gnrquiz page
 
-    When I move "Question B" to "After Page 1" in the quiz by clicking the move icon
-    Then I should see "Question B" on quiz page "1"
-    And I should see "Question A" on quiz page "1"
-    And I should see "Question C" on quiz page "1"
-    And I should see "Question B" before "Question A" on the edit quiz page
-    And I should see "Question A" before "Question C" on the edit quiz page
+    When I move "Question B" to "After Page 1" in the gnrquiz by clicking the move icon
+    Then I should see "Question B" on gnrquiz page "1"
+    And I should see "Question A" on gnrquiz page "1"
+    And I should see "Question C" on gnrquiz page "1"
+    And I should see "Question B" before "Question A" on the edit gnrquiz page
+    And I should see "Question A" before "Question C" on the edit gnrquiz page
 
     When I click on the "Add" page break icon after question "Question A"
-    When I open the "Page 2" add to quiz menu
+    When I open the "Page 2" add to gnrquiz menu
     And I follow "a new question" in the open menu
     And I set the field "qtype_qtype_description" to "1"
     And I press "submitbutton"
@@ -77,27 +77,27 @@ Feature: Edit quiz page - drag-and-drop
       | Question name | Question D  |
       | Question text | Useful info |
     And I press "id_submitbutton"
-    Then I should see "Question B" on quiz page "1"
-    And I should see "Question A" on quiz page "1"
-    And I should see "Question C" on quiz page "2"
-    And I should see "Question D" on quiz page "2"
-    And I should see "Question B" before "Question A" on the edit quiz page
-    And I should see "Question C" before "Question D" on the edit quiz page
+    Then I should see "Question B" on gnrquiz page "1"
+    And I should see "Question A" on gnrquiz page "1"
+    And I should see "Question C" on gnrquiz page "2"
+    And I should see "Question D" on gnrquiz page "2"
+    And I should see "Question B" before "Question A" on the edit gnrquiz page
+    And I should see "Question C" before "Question D" on the edit gnrquiz page
 
-    And "Question B" should have number "1" on the edit quiz page
-    And "Question A" should have number "2" on the edit quiz page
-    And "Question C" should have number "3" on the edit quiz page
-    And "Question D" should have number "i" on the edit quiz page
+    And "Question B" should have number "1" on the edit gnrquiz page
+    And "Question A" should have number "2" on the edit gnrquiz page
+    And "Question C" should have number "3" on the edit gnrquiz page
+    And "Question D" should have number "i" on the edit gnrquiz page
 
-    When I move "Question D" to "After Question 2" in the quiz by clicking the move icon
-    Then I should see "Question B" on quiz page "1"
-    And I should see "Question D" on quiz page "1"
-    And I should see "Question A" on quiz page "1"
-    And I should see "Question C" on quiz page "2"
-    And I should see "Question B" before "Question A" on the edit quiz page
-    And I should see "Question A" before "Question D" on the edit quiz page
+    When I move "Question D" to "After Question 2" in the gnrquiz by clicking the move icon
+    Then I should see "Question B" on gnrquiz page "1"
+    And I should see "Question D" on gnrquiz page "1"
+    And I should see "Question A" on gnrquiz page "1"
+    And I should see "Question C" on gnrquiz page "2"
+    And I should see "Question B" before "Question A" on the edit gnrquiz page
+    And I should see "Question A" before "Question D" on the edit gnrquiz page
 
-    And "Question B" should have number "1" on the edit quiz page
-    And "Question D" should have number "i" on the edit quiz page
-    And "Question A" should have number "2" on the edit quiz page
-    And "Question C" should have number "3" on the edit quiz page
+    And "Question B" should have number "1" on the edit gnrquiz page
+    And "Question D" should have number "i" on the edit gnrquiz page
+    And "Question A" should have number "2" on the edit gnrquiz page
+    And "Question C" should have number "3" on the edit gnrquiz page

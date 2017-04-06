@@ -1,19 +1,19 @@
 /**
  * A collection of utility classes for use with slots.
  *
- * @module moodle-mod_quiz-util
- * @submodule moodle-mod_quiz-util-slot
+ * @module moodle-mod_gnrquiz-util
+ * @submodule moodle-mod_gnrquiz-util-slot
  */
 
-Y.namespace('Moodle.mod_quiz.util.slot');
+Y.namespace('Moodle.mod_gnrquiz.util.slot');
 
 /**
  * A collection of utility classes for use with slots.
  *
- * @class Moodle.mod_quiz.util.slot
+ * @class Moodle.mod_gnrquiz.util.slot
  * @static
  */
-Y.Moodle.mod_quiz.util.slot = {
+Y.Moodle.mod_gnrquiz.util.slot = {
     CSS: {
         SLOT : 'slot',
         QUESTIONTYPEDESCRIPTION : 'qtype_description',
@@ -188,9 +188,9 @@ Y.Moodle.mod_quiz.util.slot = {
         // Loop through slots incrementing the number each time.
         slots.each(function(slot) {
 
-            if (!Y.Moodle.mod_quiz.util.page.getPageFromSlot(slot)) {
+            if (!Y.Moodle.mod_gnrquiz.util.page.getPageFromSlot(slot)) {
                 // Move the next page to the front.
-                var nextpage = slot.next(Y.Moodle.mod_quiz.util.page.SELECTORS.PAGE);
+                var nextpage = slot.next(Y.Moodle.mod_gnrquiz.util.page.SELECTORS.PAGE);
                 slot.swap(nextpage);
             }
 
@@ -216,7 +216,7 @@ Y.Moodle.mod_quiz.util.slot = {
      * @return void
      */
     updateOneSlotSections: function() {
-        Y.all('.mod-quiz-edit-content ul.slots li.section').each(function(section) {
+        Y.all('.mod-gnrquiz-edit-content ul.slots li.section').each(function(section) {
             if (section.all(this.SELECTORS.SLOT).size() > 1) {
                 section.removeClass('only-has-one-slot');
             } else {
@@ -233,14 +233,14 @@ Y.Moodle.mod_quiz.util.slot = {
      * @return void
      */
     remove: function(slot) {
-        var page = Y.Moodle.mod_quiz.util.page.getPageFromSlot(slot);
+        var page = Y.Moodle.mod_gnrquiz.util.page.getPageFromSlot(slot);
         slot.remove();
         // Is the page empty.
-        if (!Y.Moodle.mod_quiz.util.page.isEmpty(page)) {
+        if (!Y.Moodle.mod_gnrquiz.util.page.isEmpty(page)) {
             return;
         }
         // If so remove it. Including add menu and page break.
-        Y.Moodle.mod_quiz.util.page.remove(page);
+        Y.Moodle.mod_gnrquiz.util.page.remove(page);
     },
 
     /**
@@ -274,7 +274,7 @@ Y.Moodle.mod_quiz.util.slot = {
      * @return pagebreak PageBreak node
      */
     addPageBreak: function(slot) {
-        var nodetext = M.mod_quiz.resource_toolbox.get('config').addpageiconhtml;
+        var nodetext = M.mod_gnrquiz.resource_toolbox.get('config').addpageiconhtml;
         nodetext = nodetext.replace('%%SLOT%%', this.getNumber(slot));
         var pagebreak = Y.Node.create(nodetext);
         slot.one('div').insert(pagebreak, 'after');
@@ -331,7 +331,7 @@ Y.Moodle.mod_quiz.util.slot = {
 
             // Get the correct title.
             var action = '', iconname = '';
-            if (Y.Moodle.mod_quiz.util.page.isPage(nextitem)) {
+            if (Y.Moodle.mod_gnrquiz.util.page.isPage(nextitem)) {
                 action = 'removepagebreak';
                 iconname = 'e/remove_page_break';
             } else {

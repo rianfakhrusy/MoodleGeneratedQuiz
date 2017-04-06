@@ -1,4 +1,4 @@
-@mod @mod_quiz
+@mod @mod_gnrquiz
 Feature: Teachers can override the grade for any question
   As a teacher
   In order to correct errors
@@ -24,14 +24,14 @@ Feature: Teachers can override the grade for any question
       | Test questions   | essay       | TF1   | First question  | 20          |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | grade |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | 20    |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | 20    |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
     And I log in as "student1"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I follow "Finish attempt ..."
     And I press "Submit all and finish"
     And I click on "Submit all and finish" "button" in the "Confirmation" "dialogue"

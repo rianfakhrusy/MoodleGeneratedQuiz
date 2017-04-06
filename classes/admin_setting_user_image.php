@@ -17,7 +17,7 @@
 /**
  * Admin settings class for the choices for how to display the user's image
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2008 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

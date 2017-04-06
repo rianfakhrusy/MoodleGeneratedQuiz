@@ -17,7 +17,7 @@
 /**
  * Unit tests for (some of) mod/gnrquiz/locallib.php.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   test
  * @copyright  2008 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -39,19 +39,19 @@ require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 class mod_gnrquiz_locallib_testcase extends advanced_testcase {
 
     public function test_gnrquiz_rescale_grade() {
-        $quiz = new stdClass();
-        $quiz->decimalpoints = 2;
-        $quiz->questiondecimalpoints = 3;
-        $quiz->grade = 10;
-        $quiz->sumgrades = 10;
-        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $quiz, false), 0.12345678);
-        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $quiz, true), format_float(0.12, 2));
-        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $quiz, 'question'),
+        $gnrquiz = new stdClass();
+        $gnrquiz->decimalpoints = 2;
+        $gnrquiz->questiondecimalpoints = 3;
+        $gnrquiz->grade = 10;
+        $gnrquiz->sumgrades = 10;
+        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $gnrquiz, false), 0.12345678);
+        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $gnrquiz, true), format_float(0.12, 2));
+        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $gnrquiz, 'question'),
             format_float(0.123, 3));
-        $quiz->sumgrades = 5;
-        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $quiz, false), 0.24691356);
-        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $quiz, true), format_float(0.25, 2));
-        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $quiz, 'question'),
+        $gnrquiz->sumgrades = 5;
+        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $gnrquiz, false), 0.24691356);
+        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $gnrquiz, true), format_float(0.25, 2));
+        $this->assertEquals(gnrquiz_rescale_grade(0.12345678, $gnrquiz, 'question'),
             format_float(0.247, 3));
     }
 
@@ -76,7 +76,7 @@ class mod_gnrquiz_locallib_testcase extends advanced_testcase {
      *
      * @param unknown $attemptstate as in the gnrquiz_attempts.state DB column.
      * @param unknown $relativetimefinish time relative to now when the attempt finished, or null for 0.
-     * @param unknown $relativetimeclose time relative to now when the quiz closes, or null for 0.
+     * @param unknown $relativetimeclose time relative to now when the gnrquiz closes, or null for 0.
      * @param unknown $expectedstate expected result. One of the mod_gnrquiz_display_options constants/
      */
     public function test_gnrquiz_attempt_state($attemptstate,
@@ -90,14 +90,14 @@ class mod_gnrquiz_locallib_testcase extends advanced_testcase {
             $attempt->timefinish = time() + $relativetimefinish;
         }
 
-        $quiz = new stdClass();
+        $gnrquiz = new stdClass();
         if ($relativetimeclose === null) {
-            $quiz->timeclose = 0;
+            $gnrquiz->timeclose = 0;
         } else {
-            $quiz->timeclose = time() + $relativetimeclose;
+            $gnrquiz->timeclose = time() + $relativetimeclose;
         }
 
-        $this->assertEquals($expectedstate, gnrquiz_attempt_state($quiz, $attempt));
+        $this->assertEquals($expectedstate, gnrquiz_attempt_state($gnrquiz, $attempt));
     }
 
     public function test_gnrquiz_question_tostring() {
@@ -125,15 +125,15 @@ class mod_gnrquiz_locallib_testcase extends advanced_testcase {
         $this->setAdminUser();
         // Setup test data.
         $course = $this->getDataGenerator()->create_course(array('enablecompletion' => 1));
-        $quiz = $this->getDataGenerator()->create_module('gnrquiz', array('course' => $course->id),
+        $gnrquiz = $this->getDataGenerator()->create_module('gnrquiz', array('course' => $course->id),
                                                             array('completion' => 2, 'completionview' => 1));
-        $context = context_module::instance($quiz->cmid);
-        $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id);
+        $context = context_module::instance($gnrquiz->cmid);
+        $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id);
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
 
-        gnrquiz_view($quiz, $course, $cm, $context);
+        gnrquiz_view($gnrquiz, $course, $cm, $context);
 
         $events = $sink->get_events();
         // 2 additional events thanks to completion.
@@ -141,7 +141,7 @@ class mod_gnrquiz_locallib_testcase extends advanced_testcase {
         $event = array_shift($events);
 
         // Checking that the event contains the expected values.
-        $this->assertInstanceOf('\mod_quiz\event\course_module_viewed', $event);
+        $this->assertInstanceOf('\mod_gnrquiz\event\course_module_viewed', $event);
         $this->assertEquals($context, $event->get_context());
         $moodleurl = new \moodle_url('/mod/gnrquiz/view.php', array('id' => $cm->id));
         $this->assertEquals($moodleurl, $event->get_url());

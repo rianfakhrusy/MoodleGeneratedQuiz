@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Post-install script for the quiz statistics report.
+ * Post-install script for the gnrquiz statistics report.
  *
  * @package   gnrquiz_statistics
  * @copyright 2008 Jamie Pratt

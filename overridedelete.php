@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page handles deleting quiz overrides
+ * This page handles deleting gnrquiz overrides
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2010 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,10 +34,10 @@ $confirm = optional_param('confirm', false, PARAM_BOOL);
 if (! $override = $DB->get_record('gnrquiz_overrides', array('id' => $overrideid))) {
     print_error('invalidoverrideid', 'gnrquiz');
 }
-if (! $quiz = $DB->get_record('gnrquiz', array('id' => $override->quiz))) {
+if (! $gnrquiz = $DB->get_record('gnrquiz', array('id' => $override->gnrquiz))) {
     print_error('invalidcoursemodule');
 }
-if (! $cm = get_coursemodule_from_instance("quiz", $quiz->id, $quiz->course)) {
+if (! $cm = get_coursemodule_from_instance("gnrquiz", $gnrquiz->id, $gnrquiz->course)) {
     print_error('invalidcoursemodule');
 }
 $course = $DB->get_record('course', array('id'=>$cm->course), '*', MUST_EXIST);
@@ -62,8 +62,8 @@ if ($confirm) {
     require_sesskey();
 
     // Set the course module id before calling gnrquiz_delete_override().
-    $quiz->cmid = $cm->id;
-    gnrquiz_delete_override($quiz, $override->id);
+    $gnrquiz->cmid = $cm->id;
+    gnrquiz_delete_override($gnrquiz, $override->id);
 
     redirect($cancelurl);
 }
@@ -79,16 +79,16 @@ $PAGE->set_title($title);
 $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($quiz->name, true, array('context' => $context)));
+echo $OUTPUT->heading(format_string($gnrquiz->name, true, array('context' => $context)));
 
 if ($override->groupid) {
     $group = $DB->get_record('groups', array('id' => $override->groupid), 'id, name');
-    $confirmstr = get_string("overridedeletegroupsure", "quiz", $group->name);
+    $confirmstr = get_string("overridedeletegroupsure", "gnrquiz", $group->name);
 } else {
     $namefields = get_all_user_name_fields(true);
     $user = $DB->get_record('user', array('id' => $override->userid),
             'id, ' . $namefields);
-    $confirmstr = get_string("overridedeleteusersure", "quiz", fullname($user));
+    $confirmstr = get_string("overridedeleteusersure", "gnrquiz", fullname($user));
 }
 
 echo $OUTPUT->confirm($confirmstr, $confirmurl, $cancelurl);

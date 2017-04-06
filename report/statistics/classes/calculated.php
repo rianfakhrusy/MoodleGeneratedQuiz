@@ -21,7 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * The statistics calculator returns an instance of this class which contains the calculated statistics.
  *
- * These quiz statistics calculations are described here :
+ * These gnrquiz statistics calculations are described here :
  *
  * http://docs.moodle.org/dev/Quiz_statistics_calculations#Test_statistics
  *
@@ -34,8 +34,8 @@ class calculated {
 
     /**
      * @param  string $whichattempts which attempts to use, represented internally as one of the constants as used in
-     *                                   $quiz->grademethod ie.
-     *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+     *                                   $gnrquiz->grademethod ie.
+     *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
      *                                   we calculate stats based on which attempts would affect the grade for each student,
      *                                   the default null value is used when constructing an instance whose values will be
      *                                   populated from a db record.
@@ -121,10 +121,10 @@ class calculated {
     /**
      * @param $course
      * @param $cm
-     * @param $quiz
+     * @param $gnrquiz
      * @return array to display in table or spreadsheet.
      */
-    public function get_formatted_gnrquiz_info_data($course, $cm, $quiz) {
+    public function get_formatted_gnrquiz_info_data($course, $cm, $gnrquiz) {
 
         // You can edit this array to control which statistics are displayed.
         $todisplay = array('firstattemptscount' => 'number',
@@ -141,22 +141,22 @@ class calculated {
                            'errorratio' => 'number_format_percent',
                            'standarderror' => 'summarks_as_percentage');
 
-        // General information about the quiz.
-        $quizinfo = array();
-        $quizinfo[get_string('gnrquizname', 'gnrquiz_statistics')] = format_string($quiz->name);
-        $quizinfo[get_string('coursename', 'gnrquiz_statistics')] = format_string($course->fullname);
+        // General information about the gnrquiz.
+        $gnrquizinfo = array();
+        $gnrquizinfo[get_string('gnrquizname', 'gnrquiz_statistics')] = format_string($gnrquiz->name);
+        $gnrquizinfo[get_string('coursename', 'gnrquiz_statistics')] = format_string($course->fullname);
         if ($cm->idnumber) {
-            $quizinfo[get_string('idnumbermod')] = $cm->idnumber;
+            $gnrquizinfo[get_string('idnumbermod')] = $cm->idnumber;
         }
-        if ($quiz->timeopen) {
-            $quizinfo[get_string('gnrquizopen', 'gnrquiz')] = userdate($quiz->timeopen);
+        if ($gnrquiz->timeopen) {
+            $gnrquizinfo[get_string('gnrquizopen', 'gnrquiz')] = userdate($gnrquiz->timeopen);
         }
-        if ($quiz->timeclose) {
-            $quizinfo[get_string('gnrquizclose', 'gnrquiz')] = userdate($quiz->timeclose);
+        if ($gnrquiz->timeclose) {
+            $gnrquizinfo[get_string('gnrquizclose', 'gnrquiz')] = userdate($gnrquiz->timeclose);
         }
-        if ($quiz->timeopen && $quiz->timeclose) {
-            $quizinfo[get_string('duration', 'gnrquiz_statistics')] =
-                format_time($quiz->timeclose - $quiz->timeopen);
+        if ($gnrquiz->timeopen && $gnrquiz->timeclose) {
+            $gnrquizinfo[get_string('duration', 'gnrquiz_statistics')] =
+                format_time($gnrquiz->timeclose - $gnrquiz->timeopen);
         }
 
         // The statistics.
@@ -168,15 +168,15 @@ class calculated {
 
             switch ($format) {
                 case 'summarks_as_percentage':
-                    $formattedvalue = gnrquiz_report_scale_summarks_as_percentage($value, $quiz);
+                    $formattedvalue = gnrquiz_report_scale_summarks_as_percentage($value, $gnrquiz);
                     break;
                 case 'number_format_percent':
-                    $formattedvalue = gnrquiz_format_grade($quiz, $value) . '%';
+                    $formattedvalue = gnrquiz_format_grade($gnrquiz, $value) . '%';
                     break;
                 case 'number_format':
                     // 2 extra decimal places, since not a percentage,
                     // and we want the same number of sig figs.
-                    $formattedvalue = format_float($value, $quiz->decimalpoints + 2);
+                    $formattedvalue = format_float($value, $gnrquiz->decimalpoints + 2);
                     break;
                 case 'number':
                     $formattedvalue = $value + 0;
@@ -185,11 +185,11 @@ class calculated {
                     $formattedvalue = $value;
             }
 
-            $quizinfo[get_string($property, 'gnrquiz_statistics',
+            $gnrquizinfo[get_string($property, 'gnrquiz_statistics',
                                  calculator::using_attempts_lang_string($this->whichattempts))] = $formattedvalue;
         }
 
-        return $quizinfo;
+        return $gnrquizinfo;
     }
 
     /**

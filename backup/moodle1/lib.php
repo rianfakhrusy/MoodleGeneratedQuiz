@@ -18,7 +18,7 @@
  * Provides support for the conversion of moodle1 backup to the moodle2 format
  * Based off of a template @ http://docs.moodle.org/dev/Backup_1.9_conversion_for_developers
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2011 Aparup Banerjee <aparup@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -43,7 +43,7 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
      * For each path returned, the corresponding conversion method must be
      * defined.
      *
-     * Note that the path /MOODLE_BACKUP/COURSE/MODULES/MOD/QUIZ does not
+     * Note that the path /MOODLE_BACKUP/COURSE/MODULES/MOD/GNRQUIZ does not
      * actually exist in the file. The last element with the module name was
      * appended by the moodle1_converter class.
      *
@@ -52,7 +52,7 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
     public function get_paths() {
         return array(
             new convert_path(
-                'gnrquiz', '/MOODLE_BACKUP/COURSE/MODULES/MOD/QUIZ',
+                'gnrquiz', '/MOODLE_BACKUP/COURSE/MODULES/MOD/GNRQUIZ',
                 array(
                     'newfields' => array(
                         'showuserpicture'       => 0,
@@ -63,9 +63,9 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
                 )
             ),
             new convert_path('gnrquiz_question_instances',
-                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/QUIZ/QUESTION_INSTANCES'),
+                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/GNRQUIZ/QUESTION_INSTANCES'),
             new convert_path('gnrquiz_question_instance',
-                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/QUIZ/QUESTION_INSTANCES/QUESTION_INSTANCE',
+                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/GNRQUIZ/QUESTION_INSTANCES/QUESTION_INSTANCE',
                 array(
                     'renamefields' => array(
                         'question' => 'questionid',
@@ -74,9 +74,9 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
                 )
             ),
             new convert_path('gnrquiz_feedbacks',
-                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/QUIZ/FEEDBACKS'),
+                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/GNRQUIZ/FEEDBACKS'),
             new convert_path('gnrquiz_feedback',
-                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/QUIZ/FEEDBACKS/FEEDBACK',
+                    '/MOODLE_BACKUP/COURSE/MODULES/MOD/GNRQUIZ/FEEDBACKS/FEEDBACK',
                 array(
                     'newfields' => array(
                         'feedbacktextformat' => FORMAT_HTML,
@@ -87,10 +87,10 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
     }
 
     /**
-     * This is executed every time we have one /MOODLE_BACKUP/COURSE/MODULES/MOD/QUIZ
+     * This is executed every time we have one /MOODLE_BACKUP/COURSE/MODULES/MOD/GNRQUIZ
      * data available
      */
-    public function process_quiz($data) {
+    public function process_gnrquiz($data) {
         global $CFG;
 
         // Replay the upgrade step 2008081501.
@@ -116,7 +116,7 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
         $contextid      = $this->converter->get_contextid(CONTEXT_MODULE, $this->moduleid);
 
         // Get a fresh new file manager for this instance.
-        $this->fileman = $this->converter->get_file_manager($contextid, 'mod_quiz');
+        $this->fileman = $this->converter->get_file_manager($contextid, 'mod_gnrquiz');
 
         // Convert course files embedded into the intro.
         $this->fileman->filearea = 'intro';
@@ -124,7 +124,7 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
         $data['intro'] = moodle1_converter::migrate_referenced_files(
                 $data['intro'], $this->fileman);
 
-        // Start writing quiz.xml.
+        // Start writing gnrquiz.xml.
         $this->open_xml_writer("activities/gnrquiz_{$this->moduleid}/gnrquiz.xml");
         $this->xmlwriter->begin_tag('activity', array('id' => $instanceid,
                 'moduleid' => $this->moduleid, 'modulename' => 'gnrquiz',
@@ -180,7 +180,7 @@ class moodle1_mod_gnrquiz_handler extends moodle1_mod_handler {
         // Append empty <overrides> subpath element.
         $this->write_xml('overrides', array());
 
-        // Finish writing quiz.xml.
+        // Finish writing gnrquiz.xml.
         $this->xmlwriter->end_tag('gnrquiz');
         $this->xmlwriter->end_tag('activity');
         $this->close_xml_writer();

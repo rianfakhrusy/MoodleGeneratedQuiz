@@ -17,7 +17,7 @@
 /**
  * Quiz attempt overdue handling tests
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   phpunit
  * @copyright  2012 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,9 +29,9 @@ global $CFG;
 require_once($CFG->dirroot.'/group/lib.php');
 
 /**
- * Unit tests for quiz attempt overdue handling
+ * Unit tests for gnrquiz attempt overdue handling
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   phpunit
  * @copyright  2012 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -65,204 +65,204 @@ class mod_gnrquiz_attempt_overdue_testcase extends advanced_testcase {
         $uniqueid = 0;
         $usertimes = array();
 
-        $gnrquiz_generator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        $gnrquiz_generator = $this->getDataGenerator()->get_plugin_generator('mod_gnrquiz');
 
-        // Basic quiz settings
+        // Basic gnrquiz settings
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>600, 'message'=>'Test1A');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>1800));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>1800));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>1800, 'message'=>'Test1B');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>0, 'message'=>'Test1C');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>600, 'message'=>'Test1D');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>0));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>0));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>0, 'message'=>'Test1E');
 
         // Group overrides
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>null));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>null));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>0, 'message'=>'Test2A');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1100, 'timelimit'=>null));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1100, 'timelimit'=>null));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1100, 'timelimit'=>0, 'message'=>'Test2B');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>700));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>700));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>700, 'message'=>'Test2C');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>500));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>500));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>500, 'message'=>'Test2D');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>0));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>0));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>0, '', 'message'=>'Test2E');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>500, '', 'message'=>'Test2F');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>500, '', 'message'=>'Test2G');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group3->id, 'timeclose'=>1300, 'timelimit'=>500)); // user not in group
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group3->id, 'timeclose'=>1300, 'timelimit'=>500)); // user not in group
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>600, '', 'message'=>'Test2H');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>600, '', 'message'=>'Test2I');
 
         // Multiple group overrides
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>501));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>1301, 'timelimit'=>500));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>501));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>1301, 'timelimit'=>500));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>501, '', 'message'=>'Test3A');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>501, '', 'message'=>'Test3B');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1301, 'timelimit'=>500));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>1300, 'timelimit'=>501));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1301, 'timelimit'=>500));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>1300, 'timelimit'=>501));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>501, '', 'message'=>'Test3C');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>501, '', 'message'=>'Test3D');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1301, 'timelimit'=>500));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>1300, 'timelimit'=>501));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group3->id, 'timeclose'=>1500, 'timelimit'=>1000)); // user not in group
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1301, 'timelimit'=>500));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>1300, 'timelimit'=>501));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group3->id, 'timeclose'=>1500, 'timelimit'=>1000)); // user not in group
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>501, '', 'message'=>'Test3E');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>501, '', 'message'=>'Test3F');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>null, 'timelimit'=>501));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>null, 'timelimit'=>501));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>501, '', 'message'=>'Test3G');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>501, '', 'message'=>'Test3H');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>1301, 'timelimit'=>null));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>1301, 'timelimit'=>null));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>500, '', 'message'=>'Test3I');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>500, '', 'message'=>'Test3J');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>1301, 'timelimit'=>0));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>1301, 'timelimit'=>0));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>0, '', 'message'=>'Test3K');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1301, 'timelimit'=>0, '', 'message'=>'Test3L');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>0, 'timelimit'=>501));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>500));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>0, 'timelimit'=>501));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>501, '', 'message'=>'Test3M');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>501, '', 'message'=>'Test3N');
 
         // User overrides
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>601));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>601));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>601, '', 'message'=>'Test4A');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>601, '', 'message'=>'Test4B');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'timeclose'=>0, 'timelimit'=>601));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'timeclose'=>0, 'timelimit'=>601));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>601, '', 'message'=>'Test4C');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>601, '', 'message'=>'Test4D');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>0));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>0));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>0, '', 'message'=>'Test4E');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>0, '', 'message'=>'Test4F');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'timeclose'=>null, 'timelimit'=>601));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'timeclose'=>null, 'timelimit'=>601));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>601, '', 'message'=>'Test4G');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>601, '', 'message'=>'Test4H');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>700));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'timeclose'=>null, 'timelimit'=>601));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>null, 'timelimit'=>700));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'timeclose'=>null, 'timelimit'=>601));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>601, '', 'message'=>'Test4I');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>601, '', 'message'=>'Test4J');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>null));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>null));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>700, '', 'message'=>'Test4K');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>700, '', 'message'=>'Test4L');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>null));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>null));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>null));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'timeclose'=>1201, 'timelimit'=>null));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>600, '', 'message'=>'Test4M');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1201, 'timelimit'=>600, '', 'message'=>'Test4N');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'userid'=>0, 'timeclose'=>1201, 'timelimit'=>601)); // not user
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>700));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'userid'=>0, 'timeclose'=>1201, 'timelimit'=>601)); // not user
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>700, '', 'message'=>'Test4O');
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>1000, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++, 'attempt'=>1));
         $usertimes[$attemptid] = array('timeclose'=>1300, 'timelimit'=>700, '', 'message'=>'Test4P');
 
         // Attempt state overdue
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600, 'overduehandling'=>'graceperiod', 'graceperiod'=>250));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'overdue', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>600, 'overduehandling'=>'graceperiod', 'graceperiod'=>250));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'overdue', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>1200, 'timelimit'=>600, '', 'message'=>'Test5A');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600, 'overduehandling'=>'graceperiod', 'graceperiod'=>250));
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'overdue', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>0, 'timelimit'=>600, 'overduehandling'=>'graceperiod', 'graceperiod'=>250));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'overdue', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
         $usertimes[$attemptid] = array('timeclose'=>0, 'timelimit'=>600, '', 'message'=>'Test5B');
 
         //
@@ -275,7 +275,7 @@ class mod_gnrquiz_attempt_overdue_testcase extends advanced_testcase {
             $this->assertTrue(false !== $attempt, $times['message']);
 
             if ($attempt->state == 'overdue') {
-                $graceperiod = $DB->get_field('gnrquiz', 'graceperiod', array('id'=>$attempt->quiz));
+                $graceperiod = $DB->get_field('gnrquiz', 'graceperiod', array('id'=>$attempt->gnrquiz));
             } else {
                 $graceperiod = 0;
             }
@@ -341,18 +341,18 @@ class mod_gnrquiz_attempt_overdue_testcase extends advanced_testcase {
 
         $uniqueid = 0;
 
-        $gnrquiz_generator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        $gnrquiz_generator = $this->getDataGenerator()->get_plugin_generator('mod_gnrquiz');
 
-        $quiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
+        $gnrquiz = $gnrquiz_generator->create_instance(array('course'=>$course->id, 'timeclose'=>1200, 'timelimit'=>0));
 
         // add a group1 override
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>null));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group1->id, 'timeclose'=>1300, 'timelimit'=>null));
 
         // add an attempt
-        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$quiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
+        $attemptid = $DB->insert_record('gnrquiz_attempts', array('gnrquiz'=>$gnrquiz->id, 'userid'=>$user1->id, 'state'=>'inprogress', 'timestart'=>100, 'timecheckstate'=>0, 'layout'=>'', 'uniqueid'=>$uniqueid++));
 
         // update timecheckstate
-        gnrquiz_update_open_attempts(array('gnrquizid'=>$quiz->id));
+        gnrquiz_update_open_attempts(array('gnrquizid'=>$gnrquiz->id));
         $this->assertEquals(1300, $DB->get_field('gnrquiz_attempts', 'timecheckstate', array('id'=>$attemptid)));
 
         // remove from group
@@ -366,11 +366,11 @@ class mod_gnrquiz_attempt_overdue_testcase extends advanced_testcase {
         // delete group
         groups_delete_group($group1);
         $this->assertEquals(1200, $DB->get_field('gnrquiz_attempts', 'timecheckstate', array('id'=>$attemptid)));
-        $this->assertEquals(0, $DB->count_records('gnrquiz_overrides', array('gnrquiz'=>$quiz->id)));
+        $this->assertEquals(0, $DB->count_records('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id)));
 
         // add a group2 override
-        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$quiz->id, 'groupid'=>$group2->id, 'timeclose'=>1400, 'timelimit'=>null));
-        gnrquiz_update_open_attempts(array('gnrquizid'=>$quiz->id));
+        $DB->insert_record('gnrquiz_overrides', array('gnrquiz'=>$gnrquiz->id, 'groupid'=>$group2->id, 'timeclose'=>1400, 'timelimit'=>null));
+        gnrquiz_update_open_attempts(array('gnrquizid'=>$gnrquiz->id));
         $this->assertEquals(1400, $DB->get_field('gnrquiz_attempts', 'timecheckstate', array('id'=>$attemptid)));
 
         // delete user1 from all groups

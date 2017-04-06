@@ -1,7 +1,7 @@
 {
-    "name": "moodle-mod_quiz-toolboxes",
+    "name": "moodle-mod_gnrquiz-toolboxes",
     "builds": {
-        "moodle-mod_quiz-toolboxes": {
+        "moodle-mod_gnrquiz-toolboxes": {
             "jsfiles": [
                 "toolbox.js",
                 "resource.js",

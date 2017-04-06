@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This script controls the display of the quiz reports.
+ * This script controls the display of the gnrquiz reports.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -39,18 +39,18 @@ if ($id) {
     if (!$course = $DB->get_record('course', array('id' => $cm->course))) {
         print_error('coursemisconf');
     }
-    if (!$quiz = $DB->get_record('gnrquiz', array('id' => $cm->instance))) {
+    if (!$gnrquiz = $DB->get_record('gnrquiz', array('id' => $cm->instance))) {
         print_error('invalidcoursemodule');
     }
 
 } else {
-    if (!$quiz = $DB->get_record('gnrquiz', array('id' => $q))) {
-        print_error('invalidquizid', 'gnrquiz');
+    if (!$gnrquiz = $DB->get_record('gnrquiz', array('id' => $q))) {
+        print_error('invalidgnrquizid', 'gnrquiz');
     }
-    if (!$course = $DB->get_record('course', array('id' => $quiz->course))) {
+    if (!$course = $DB->get_record('course', array('id' => $gnrquiz->course))) {
         print_error('invalidcourseid');
     }
-    if (!$cm = get_coursemodule_from_instance("quiz", $quiz->id, $course->id)) {
+    if (!$cm = get_coursemodule_from_instance("gnrquiz", $gnrquiz->id, $course->id)) {
         print_error('invalidcoursemodule');
     }
 }
@@ -82,7 +82,7 @@ if (!is_readable("report/$mode/report.php")) {
     print_error('reportnotfound', 'gnrquiz', '', $mode);
 }
 
-// Open the selected quiz report and display it.
+// Open the selected gnrquiz report and display it.
 $file = $CFG->dirroot . '/mod/gnrquiz/report/' . $mode . '/report.php';
 if (is_readable($file)) {
     include_once($file);
@@ -93,7 +93,7 @@ if (!class_exists($reportclassname)) {
 }
 
 $report = new $reportclassname();
-$report->display($quiz, $cm, $course);
+$report->display($gnrquiz, $cm, $course);
 
 // Print footer.
 echo $OUTPUT->footer();
@@ -102,11 +102,11 @@ echo $OUTPUT->footer();
 $params = array(
     'context' => $context,
     'other' => array(
-        'gnrquizid' => $quiz->id,
+        'gnrquizid' => $gnrquiz->id,
         'reportname' => $mode
     )
 );
-$event = \mod_quiz\event\report_viewed::create($params);
+$event = \mod_gnrquiz\event\report_viewed::create($params);
 $event->add_record_snapshot('course', $course);
-$event->add_record_snapshot('gnrquiz', $quiz);
+$event->add_record_snapshot('gnrquiz', $gnrquiz);
 $event->trigger();

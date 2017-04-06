@@ -2,7 +2,7 @@
 /**
  * Drag and Drop for Quiz sections and slots.
  *
- * @module moodle-mod-quiz-dragdrop
+ * @module moodle-mod-gnrquiz-dragdrop
  */
 
 var CSS = {
@@ -10,7 +10,7 @@ var CSS = {
     ACTIVITY: 'activity',
     ACTIVITYINSTANCE: 'activityinstance',
     CONTENT: 'content',
-    COURSECONTENT: 'mod-quiz-edit-content',
+    COURSECONTENT: 'mod-gnrquiz-edit-content',
     EDITINGMOVE: 'editing_move',
     ICONCLASS: 'iconsmall',
     JUMPMENU: 'jumpmenu',

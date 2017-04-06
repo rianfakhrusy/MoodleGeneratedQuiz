@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page deals with processing responses during an attempt at a quiz.
+ * This page deals with processing responses during an attempt at a gnrquiz.
  *
  * People will normally arrive here from a form submission on attempt.php or
  * summary.php, and once the responses are processed, they will be redirected to
@@ -23,7 +23,7 @@
  *
  * This code used to be near the top of attempt.php, if you are looking for CVS history.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -70,7 +70,7 @@ require_sesskey();
 
 // Check that this attempt belongs to this user.
 if ($attemptobj->get_userid() != $USER->id) {
-    throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'notyourattempt');
+    throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'notyourattempt');
 }
 
 // Check capabilities.
@@ -80,7 +80,7 @@ if (!$attemptobj->is_preview_user()) {
 
 // If the attempt is already closed, send them to the review page.
 if ($attemptobj->is_finished()) {
-    throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(),
+    throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(),
             'attemptalreadyclosed', null, $attemptobj->review_url());
 }
 

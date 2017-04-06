@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page handles editing and creation of quiz overrides
+ * This page handles editing and creation of gnrquiz overrides
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2010 Matt Petro
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,14 +40,14 @@ if ($overrideid) {
     if (! $override = $DB->get_record('gnrquiz_overrides', array('id' => $overrideid))) {
         print_error('invalidoverrideid', 'gnrquiz');
     }
-    if (! $quiz = $DB->get_record('gnrquiz', array('id' => $override->quiz))) {
+    if (! $gnrquiz = $DB->get_record('gnrquiz', array('id' => $override->gnrquiz))) {
         print_error('invalidcoursemodule');
     }
-    list($course, $cm) = get_course_and_cm_from_instance($quiz, 'gnrquiz');
+    list($course, $cm) = get_course_and_cm_from_instance($gnrquiz, 'gnrquiz');
 
 } else if ($cmid) {
     list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'gnrquiz');
-    $quiz = $DB->get_record('gnrquiz', array('id' => $cm->instance), '*', MUST_EXIST);
+    $gnrquiz = $DB->get_record('gnrquiz', array('id' => $cm->instance), '*', MUST_EXIST);
 
 } else {
     print_error('invalidcoursemodule');
@@ -81,11 +81,11 @@ if ($overrideid) {
     $data = new stdClass();
 }
 
-// Merge quiz defaults with data.
+// Merge gnrquiz defaults with data.
 $keys = array('timeopen', 'timeclose', 'timelimit', 'attempts', 'password');
 foreach ($keys as $key) {
     if (!isset($data->{$key}) || $reset) {
-        $data->{$key} = $quiz->{$key};
+        $data->{$key} = $gnrquiz->{$key};
     }
 }
 
@@ -106,7 +106,7 @@ if (!$groupmode) {
 }
 
 // Setup the form.
-$mform = new gnrquiz_override_form($url, $cm, $quiz, $context, $groupmode, $override);
+$mform = new gnrquiz_override_form($url, $cm, $gnrquiz, $context, $groupmode, $override);
 $mform->set_data($data);
 
 if ($mform->is_cancelled()) {
@@ -118,11 +118,11 @@ if ($mform->is_cancelled()) {
 
 } else if ($fromform = $mform->get_data()) {
     // Process the data.
-    $fromform->quiz = $quiz->id;
+    $fromform->gnrquiz = $gnrquiz->id;
 
     // Replace unchanged values with null.
     foreach ($keys as $key) {
-        if ($fromform->{$key} == $quiz->{$key}) {
+        if ($fromform->{$key} == $gnrquiz->{$key}) {
             $fromform->{$key} = null;
         }
     }
@@ -139,7 +139,7 @@ if ($mform->is_cancelled()) {
 
     if ($userorgroupchanged) {
         $conditions = array(
-                'gnrquiz' => $quiz->id,
+                'gnrquiz' => $gnrquiz->id,
                 'userid' => empty($fromform->userid)? null : $fromform->userid,
                 'groupid' => empty($fromform->groupid)? null : $fromform->groupid);
         if ($oldoverride = $DB->get_record('gnrquiz_overrides', $conditions)) {
@@ -151,8 +151,8 @@ if ($mform->is_cancelled()) {
                 }
             }
             // Set the course module id before calling gnrquiz_delete_override().
-            $quiz->cmid = $cm->id;
-            gnrquiz_delete_override($quiz, $oldoverride->id);
+            $gnrquiz->cmid = $cm->id;
+            gnrquiz_delete_override($gnrquiz, $oldoverride->id);
         }
     }
 
@@ -160,7 +160,7 @@ if ($mform->is_cancelled()) {
     $params = array(
         'context' => $context,
         'other' => array(
-            'gnrquizid' => $quiz->id
+            'gnrquizid' => $gnrquiz->id
         )
     );
     if (!empty($override->id)) {
@@ -171,10 +171,10 @@ if ($mform->is_cancelled()) {
         $params['objectid'] = $override->id;
         if (!$groupmode) {
             $params['relateduserid'] = $fromform->userid;
-            $event = \mod_quiz\event\user_override_updated::create($params);
+            $event = \mod_gnrquiz\event\user_override_updated::create($params);
         } else {
             $params['other']['groupid'] = $fromform->groupid;
-            $event = \mod_quiz\event\group_override_updated::create($params);
+            $event = \mod_gnrquiz\event\group_override_updated::create($params);
         }
 
         // Trigger the override updated event.
@@ -187,18 +187,18 @@ if ($mform->is_cancelled()) {
         $params['objectid'] = $fromform->id;
         if (!$groupmode) {
             $params['relateduserid'] = $fromform->userid;
-            $event = \mod_quiz\event\user_override_created::create($params);
+            $event = \mod_gnrquiz\event\user_override_created::create($params);
         } else {
             $params['other']['groupid'] = $fromform->groupid;
-            $event = \mod_quiz\event\group_override_created::create($params);
+            $event = \mod_gnrquiz\event\group_override_created::create($params);
         }
 
         // Trigger the override created event.
         $event->trigger();
     }
 
-    gnrquiz_update_open_attempts(array('gnrquizid'=>$quiz->id));
-    gnrquiz_update_events($quiz, $fromform);
+    gnrquiz_update_open_attempts(array('gnrquizid'=>$gnrquiz->id));
+    gnrquiz_update_events($gnrquiz, $fromform);
 
     if (!empty($fromform->submitbutton)) {
         redirect($overridelisturl);
@@ -219,7 +219,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_title($pagetitle);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($quiz->name, true, array('context' => $context)));
+echo $OUTPUT->heading(format_string($gnrquiz->name, true, array('context' => $context)));
 
 $mform->display();
 

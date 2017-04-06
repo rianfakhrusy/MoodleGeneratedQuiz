@@ -1,7 +1,7 @@
 {
-    "name": "moodle-mod_quiz-questionchooser",
+    "name": "moodle-mod_gnrquiz-questionchooser",
     "builds": {
-        "moodle-mod_quiz-questionchooser": {
+        "moodle-mod_gnrquiz-questionchooser": {
             "jsfiles": [
                 "questionchooser.js"
             ]

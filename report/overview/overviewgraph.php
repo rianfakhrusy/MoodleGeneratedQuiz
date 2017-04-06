@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file renders the quiz overview graph.
+ * This file renders the gnrquiz overview graph.
  *
  * @package   gnrquiz_overview
  * @copyright 2008 Jamie Pratt
@@ -28,12 +28,12 @@ require_once($CFG->libdir . '/graphlib.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/report/reportlib.php');
 
-$quizid = required_param('id', PARAM_INT);
+$gnrquizid = required_param('id', PARAM_INT);
 $groupid = optional_param('groupid', 0, PARAM_INT);
 
-$quiz = $DB->get_record('gnrquiz', array('id' => $quizid));
-$course = $DB->get_record('course', array('id' => $quiz->course));
-$cm = get_coursemodule_from_instance('gnrquiz', $quizid);
+$gnrquiz = $DB->get_record('gnrquiz', array('id' => $gnrquizid));
+$course = $DB->get_record('course', array('id' => $gnrquiz->course));
+$cm = get_coursemodule_from_instance('gnrquiz', $gnrquizid);
 
 require_login($course, false, $cm);
 $modcontext = context_module::instance($cm->id);
@@ -74,8 +74,8 @@ $line->parameter['bar_size'] = 1;
 // Don't forget to increase spacing so that graph doesn't become one big block of colour.
 $line->parameter['bar_spacing'] = 10;
 
-// Pick a sensible number of bands depending on quiz maximum grade.
-$bands = $quiz->grade;
+// Pick a sensible number of bands depending on gnrquiz maximum grade.
+$bands = $gnrquiz->grade;
 while ($bands > 20 || $bands <= 10) {
     if ($bands > 50) {
         $bands /= 5;
@@ -92,11 +92,11 @@ while ($bands > 20 || $bands <= 10) {
 // See MDL-34589. Using doubles as array keys causes problems in PHP 5.4,
 // hence the explicit cast to int.
 $bands = (int) ceil($bands);
-$bandwidth = $quiz->grade / $bands;
+$bandwidth = $gnrquiz->grade / $bands;
 $bandlabels = array();
 for ($i = 1; $i <= $bands; $i++) {
-    $bandlabels[] = gnrquiz_format_grade($quiz, ($i - 1) * $bandwidth) . ' - ' .
-            gnrquiz_format_grade($quiz, $i * $bandwidth);
+    $bandlabels[] = gnrquiz_format_grade($gnrquiz, ($i - 1) * $bandwidth) . ' - ' .
+            gnrquiz_format_grade($gnrquiz, $i * $bandwidth);
 }
 $line->x_data = $bandlabels;
 
@@ -106,7 +106,7 @@ $line->y_format['allusers'] = array(
     'shadow_offset' => 1,
     'legend' => get_string('allparticipants')
 );
-$line->y_data['allusers'] = gnrquiz_report_grade_bands($bandwidth, $bands, $quizid, $groupusers);
+$line->y_data['allusers'] = gnrquiz_report_grade_bands($bandwidth, $bands, $gnrquizid, $groupusers);
 
 $line->y_order = array('allusers');
 

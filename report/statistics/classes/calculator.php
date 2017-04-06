@@ -18,9 +18,9 @@ namespace gnrquiz_statistics;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class to calculate and also manage caching of quiz statistics.
+ * Class to calculate and also manage caching of gnrquiz statistics.
  *
- * These quiz statistics calculations are described here :
+ * These gnrquiz statistics calculations are described here :
  *
  * http://docs.moodle.org/dev/Quiz_statistics_calculations#Test_statistics
  *
@@ -44,47 +44,47 @@ class calculator {
     }
 
     /**
-     * Compute the quiz statistics.
+     * Compute the gnrquiz statistics.
      *
-     * @param int   $quizid            the quiz id.
+     * @param int   $gnrquizid            the gnrquiz id.
      * @param int $whichattempts which attempts to use, represented internally as one of the constants as used in
-     *                                   $quiz->grademethod ie.
-     *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+     *                                   $gnrquiz->grademethod ie.
+     *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
      *                                   we calculate stats based on which attempts would affect the grade for each student.
      * @param array $groupstudents     students in this group.
      * @param int   $p                 number of positions (slots).
      * @param float $sumofmarkvariance sum of mark variance, calculated as part of question statistics
-     * @return calculated $quizstats The statistics for overall attempt scores.
+     * @return calculated $gnrquizstats The statistics for overall attempt scores.
      */
-    public function calculate($quizid, $whichattempts, $groupstudents, $p, $sumofmarkvariance) {
+    public function calculate($gnrquizid, $whichattempts, $groupstudents, $p, $sumofmarkvariance) {
 
         $this->progress->start_progress('', 3);
 
-        $quizstats = new calculated($whichattempts);
+        $gnrquizstats = new calculated($whichattempts);
 
-        $countsandaverages = $this->attempt_counts_and_averages($quizid, $groupstudents);
+        $countsandaverages = $this->attempt_counts_and_averages($gnrquizid, $groupstudents);
         $this->progress->progress(1);
 
         foreach ($countsandaverages as $propertyname => $value) {
-            $quizstats->{$propertyname} = $value;
+            $gnrquizstats->{$propertyname} = $value;
         }
 
-        $s = $quizstats->s();
+        $s = $gnrquizstats->s();
         if ($s != 0) {
 
             // Recalculate sql again this time possibly including test for first attempt.
             list($fromqa, $whereqa, $qaparams) =
-                gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $whichattempts);
+                gnrquiz_statistics_attempts_sql($gnrquizid, $groupstudents, $whichattempts);
 
-            $quizstats->median = $this->median($s, $fromqa, $whereqa, $qaparams);
+            $gnrquizstats->median = $this->median($s, $fromqa, $whereqa, $qaparams);
             $this->progress->progress(2);
 
             if ($s > 1) {
 
-                $powers = $this->sum_of_powers_of_difference_to_mean($quizstats->avg(), $fromqa, $whereqa, $qaparams);
+                $powers = $this->sum_of_powers_of_difference_to_mean($gnrquizstats->avg(), $fromqa, $whereqa, $qaparams);
                 $this->progress->progress(3);
 
-                $quizstats->standarddeviation = sqrt($powers->power2 / ($s - 1));
+                $gnrquizstats->standarddeviation = sqrt($powers->power2 / ($s - 1));
 
                 // Skewness.
                 if ($s > 2) {
@@ -96,29 +96,29 @@ class calculator {
                     $k2 = $s * $m2 / ($s - 1);
                     $k3 = $s * $s * $m3 / (($s - 1) * ($s - 2));
                     if ($k2 != 0) {
-                        $quizstats->skewness = $k3 / (pow($k2, 3 / 2));
+                        $gnrquizstats->skewness = $k3 / (pow($k2, 3 / 2));
 
                         // Kurtosis.
                         if ($s > 3) {
                             $k4 = $s * $s * ((($s + 1) * $m4) - (3 * ($s - 1) * $m2 * $m2)) / (($s - 1) * ($s - 2) * ($s - 3));
-                            $quizstats->kurtosis = $k4 / ($k2 * $k2);
+                            $gnrquizstats->kurtosis = $k4 / ($k2 * $k2);
                         }
 
                         if ($p > 1) {
-                            $quizstats->cic = (100 * $p / ($p - 1)) * (1 - ($sumofmarkvariance / $k2));
-                            $quizstats->errorratio = 100 * sqrt(1 - ($quizstats->cic / 100));
-                            $quizstats->standarderror = $quizstats->errorratio *
-                                $quizstats->standarddeviation / 100;
+                            $gnrquizstats->cic = (100 * $p / ($p - 1)) * (1 - ($sumofmarkvariance / $k2));
+                            $gnrquizstats->errorratio = 100 * sqrt(1 - ($gnrquizstats->cic / 100));
+                            $gnrquizstats->standarderror = $gnrquizstats->errorratio *
+                                $gnrquizstats->standarddeviation / 100;
                         }
                     }
 
                 }
             }
 
-            $quizstats->cache(gnrquiz_statistics_qubaids_condition($quizid, $groupstudents, $whichattempts));
+            $gnrquizstats->cache(gnrquiz_statistics_qubaids_condition($gnrquizid, $groupstudents, $whichattempts));
         }
         $this->progress->end_progress();
-        return $quizstats;
+        return $gnrquizstats;
     }
 
     /** @var integer Time after which statistics are automatically recomputed. */
@@ -156,14 +156,14 @@ class calculator {
     }
 
     /**
-     * Given a particular quiz grading method return a lang string describing which attempts contribute to grade.
+     * Given a particular gnrquiz grading method return a lang string describing which attempts contribute to grade.
      *
      * Note internally we use the grading method constants to represent which attempts we are calculating statistics for, each
      * grading method corresponds to different attempts for each user.
      *
      * @param  int $whichattempts which attempts to use, represented internally as one of the constants as used in
-     *                                   $quiz->grademethod ie.
-     *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+     *                                   $gnrquiz->grademethod ie.
+     *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
      *                                   we calculate stats based on which attempts would affect the grade for each student.
      * @return string the appropriate lang string to describe this option.
      */
@@ -172,27 +172,27 @@ class calculator {
     }
 
     /**
-     * Given a particular quiz grading method return a string id for use as a field name prefix in mdl_gnrquiz_statistics or to
+     * Given a particular gnrquiz grading method return a string id for use as a field name prefix in mdl_gnrquiz_statistics or to
      * fetch the appropriate language string describing which attempts contribute to grade.
      *
      * Note internally we use the grading method constants to represent which attempts we are calculating statistics for, each
      * grading method corresponds to different attempts for each user.
      *
      * @param  int $whichattempts which attempts to use, represented internally as one of the constants as used in
-     *                                   $quiz->grademethod ie.
-     *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+     *                                   $gnrquiz->grademethod ie.
+     *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
      *                                   we calculate stats based on which attempts would affect the grade for each student.
      * @return string the string id for this option.
      */
     public static function using_attempts_string_id($whichattempts) {
         switch ($whichattempts) {
-            case QUIZ_ATTEMPTFIRST :
+            case GNRQUIZ_ATTEMPTFIRST :
                 return 'firstattempts';
-            case QUIZ_GRADEHIGHEST :
+            case GNRQUIZ_GRADEHIGHEST :
                 return 'highestattempts';
-            case QUIZ_ATTEMPTLAST :
+            case GNRQUIZ_ATTEMPTLAST :
                 return 'lastattempts';
-            case QUIZ_GRADEAVERAGE :
+            case GNRQUIZ_GRADEAVERAGE :
                 return 'allattempts';
         }
     }
@@ -202,17 +202,17 @@ class calculator {
      *
      * See : http://docs.moodle.org/dev/Quiz_item_analysis_calculations_in_practise
      *                                      #Calculating_MEAN_of_grades_for_all_attempts_by_students
-     * @param int $quizid
+     * @param int $gnrquizid
      * @param array $groupstudents
      * @return \stdClass with properties with count and avg with prefixes firstattempts, highestattempts, etc.
      */
-    protected function attempt_counts_and_averages($quizid, $groupstudents) {
+    protected function attempt_counts_and_averages($gnrquizid, $groupstudents) {
         global $DB;
 
         $attempttotals = new \stdClass();
         foreach (array_keys(gnrquiz_get_grading_options()) as $which) {
 
-            list($fromqa, $whereqa, $qaparams) = gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $which);
+            list($fromqa, $whereqa, $qaparams) = gnrquiz_statistics_attempts_sql($gnrquizid, $groupstudents, $which);
 
             $fromdb = $DB->get_record_sql("SELECT COUNT(*) AS rcount, AVG(sumgrades) AS average FROM $fromqa WHERE $whereqa",
                                             $qaparams);
@@ -271,9 +271,9 @@ class calculator {
         global $DB;
 
         $sql = "SELECT
-                    SUM(POWER((quiza.sumgrades - $mean), 2)) AS power2,
-                    SUM(POWER((quiza.sumgrades - $mean), 3)) AS power3,
-                    SUM(POWER((quiza.sumgrades - $mean), 4)) AS power4
+                    SUM(POWER((gnrquiza.sumgrades - $mean), 2)) AS power2,
+                    SUM(POWER((gnrquiza.sumgrades - $mean), 3)) AS power3,
+                    SUM(POWER((gnrquiza.sumgrades - $mean), 4)) AS power4
                     FROM $fromqa
                     WHERE $whereqa";
         $params = array('mean1' => $mean, 'mean2' => $mean, 'mean3' => $mean) + $qaparams;

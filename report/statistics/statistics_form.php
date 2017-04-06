@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
 /**
- * This is the settings form for the quiz statistics report.
+ * This is the settings form for the gnrquiz statistics report.
  *
  * @package   gnrquiz_statistics
  * @copyright 2014 Open University

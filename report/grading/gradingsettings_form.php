@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the setting form for the quiz grading report.
+ * This file defines the setting form for the gnrquiz grading report.
  *
  * @package   gnrquiz_grading
  * @copyright 2010 Tim Hunt

@@ -19,7 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Quiz module test data generator class
  *
- * @package mod_quiz
+ * @package mod_gnrquiz
  * @copyright 2012 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,13 +31,13 @@ class mod_gnrquiz_generator extends testing_module_generator {
         require_once($CFG->dirroot.'/mod/gnrquiz/locallib.php');
         $record = (object)(array)$record;
 
-        $defaultquizsettings = array(
+        $defaultgnrquizsettings = array(
             'timeopen'               => 0,
             'timeclose'              => 0,
             'preferredbehaviour'     => 'deferredfeedback',
             'attempts'               => 0,
             'attemptonlast'          => 0,
-            'grademethod'            => QUIZ_GRADEHIGHEST,
+            'grademethod'            => GNRQUIZ_GRADEHIGHEST,
             'decimalpoints'          => 2,
             'questiondecimalpoints'  => -1,
             'attemptduring'          => 1,
@@ -84,10 +84,10 @@ class mod_gnrquiz_generator extends testing_module_generator {
             'delay2'                 => 0,
             'showuserpicture'        => 0,
             'showblocks'             => 0,
-            'navmethod'              => QUIZ_NAVMETHOD_FREE,
+            'navmethod'              => GNRQUIZ_NAVMETHOD_FREE,
         );
 
-        foreach ($defaultquizsettings as $name => $value) {
+        foreach ($defaultgnrquizsettings as $name => $value) {
             if (!isset($record->{$name})) {
                 $record->{$name} = $value;
             }

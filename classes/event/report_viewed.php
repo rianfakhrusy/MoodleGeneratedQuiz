@@ -15,28 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_quiz report viewed event.
+ * The mod_gnrquiz report viewed event.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\event;
+namespace mod_gnrquiz\event;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_quiz report viewed event class.
+ * The mod_gnrquiz report viewed event class.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int quizid: the id of the quiz.
+ *      - int gnrquizid: the id of the gnrquiz.
  *      - string reportname: the name of the report.
  * }
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @since      Moodle 2.7
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -59,7 +59,7 @@ class report_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventreportviewed', 'mod_quiz');
+        return get_string('eventreportviewed', 'mod_gnrquiz');
     }
 
     /**
@@ -68,7 +68,7 @@ class report_viewed extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' viewed the report '" . s($this->other['reportname']) . "' for the quiz with " .
+        return "The user with id '$this->userid' viewed the report '" . s($this->other['reportname']) . "' for the gnrquiz with " .
             "course module id '$this->contextinstanceid'.";
     }
 

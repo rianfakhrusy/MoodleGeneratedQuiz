@@ -17,9 +17,9 @@
 /**
  * Quiz attempt walk through using data from csv file.
  *
- * The quiz stats below and the question stats found in qstats00.csv were calculated independently in a spreadsheet which is
+ * The gnrquiz stats below and the question stats found in qstats00.csv were calculated independently in a spreadsheet which is
  * available in open document or excel format here :
- * https://github.com/jamiepratt/moodle-quiz-tools/tree/master/statsspreadsheet
+ * https://github.com/jamiepratt/moodle-gnrquiz-tools/tree/master/statsspreadsheet
  *
  * Similarly the question variant's stats in qstats00.csv are calculated in stats_for_variant_1.xls and stats_for_variant_8.xls
  * The calculations in the spreadsheets are the same as for the other question stats but applied just to the attempts where the
@@ -64,24 +64,24 @@ class gnrquiz_report_statistics_from_steps_testcase extends mod_gnrquiz_attempt_
     protected $files = array('questions', 'steps', 'results', 'qstats', 'responsecounts');
 
     /**
-     * Create a quiz add questions to it, walk through quiz attempts and then check results.
+     * Create a gnrquiz add questions to it, walk through gnrquiz attempts and then check results.
      *
      * @param PHPUnit_Extensions_Database_DataSet_ITable[] of data read from csv file "questionsXX.csv",
      *                                                                                  "stepsXX.csv" and "resultsXX.csv".
      * @dataProvider get_data_for_walkthrough
      */
-    public function test_walkthrough_from_csv($quizsettings, $csvdata) {
+    public function test_walkthrough_from_csv($gnrquizsettings, $csvdata) {
 
-        $this->create_gnrquiz_simulate_attempts_and_check_results($quizsettings, $csvdata);
+        $this->create_gnrquiz_simulate_attempts_and_check_results($gnrquizsettings, $csvdata);
 
-        $whichattempts = QUIZ_GRADEAVERAGE; // All attempts.
+        $whichattempts = GNRQUIZ_GRADEAVERAGE; // All attempts.
         $whichtries = question_attempt::ALL_TRIES;
         $groupstudents = array();
-        list($questions, $quizstats, $questionstats, $qubaids) =
+        list($questions, $gnrquizstats, $questionstats, $qubaids) =
                     $this->check_stats_calculations_and_response_analysis($csvdata, $whichattempts, $whichtries, $groupstudents);
-        if ($quizsettings['testnumber'] === '00') {
+        if ($gnrquizsettings['testnumber'] === '00') {
             $this->check_variants_count_for_gnrquiz_00($questions, $questionstats, $whichtries, $qubaids);
-            $this->check_gnrquiz_stats_for_gnrquiz_00($quizstats);
+            $this->check_gnrquiz_stats_for_gnrquiz_00($gnrquizstats);
         }
     }
 
@@ -332,10 +332,10 @@ class gnrquiz_report_statistics_from_steps_testcase extends mod_gnrquiz_attempt_
     }
 
     /**
-     * @param $quizstats
+     * @param $gnrquizstats
      */
-    protected function check_gnrquiz_stats_for_gnrquiz_00($quizstats) {
-        $quizstatsexpected = array(
+    protected function check_gnrquiz_stats_for_gnrquiz_00($gnrquizstats) {
+        $gnrquizstatsexpected = array(
             'median'             => 4.5,
             'firstattemptsavg'   => 4.617333332,
             'allattemptsavg'     => 4.617333332,
@@ -349,8 +349,8 @@ class gnrquiz_report_statistics_from_steps_testcase extends mod_gnrquiz_attempt_
             'standarderror'      => 1.1106813066
         );
 
-        foreach ($quizstatsexpected as $statname => $statvalue) {
-            $this->assertEquals($statvalue, $quizstats->$statname, $quizstats->$statname, abs($statvalue) * 1.5e-5);
+        foreach ($gnrquizstatsexpected as $statname => $statvalue) {
+            $this->assertEquals($statvalue, $gnrquizstats->$statname, $gnrquizstats->$statname, abs($statvalue) * 1.5e-5);
         }
     }
 
@@ -361,25 +361,25 @@ class gnrquiz_report_statistics_from_steps_testcase extends mod_gnrquiz_attempt_
      * @param string $whichattempts
      * @param string $whichtries
      * @param int[] $groupstudents
-     * @return array with contents 0 => $questions, 1 => $quizstats, 2=> $questionstats, 3=> $qubaids Might be needed for further
+     * @return array with contents 0 => $questions, 1 => $gnrquizstats, 2=> $questionstats, 3=> $qubaids Might be needed for further
      *               testing.
      */
     protected function check_stats_calculations_and_response_analysis($csvdata, $whichattempts, $whichtries, $groupstudents) {
         $this->report = new gnrquiz_statistics_report();
-        $questions = $this->report->load_and_initialise_questions_for_calculations($this->quiz);
-        list($quizstats, $questionstats) = $this->report->get_all_stats_and_analysis($this->quiz,
+        $questions = $this->report->load_and_initialise_questions_for_calculations($this->gnrquiz);
+        list($gnrquizstats, $questionstats) = $this->report->get_all_stats_and_analysis($this->gnrquiz,
                                                                                      $whichattempts,
                                                                                      $whichtries,
                                                                                      $groupstudents,
                                                                                      $questions);
 
-        $qubaids = gnrquiz_statistics_qubaids_condition($this->quiz->id, $groupstudents, $whichattempts);
+        $qubaids = gnrquiz_statistics_qubaids_condition($this->gnrquiz->id, $groupstudents, $whichattempts);
 
-        // We will create some quiz and question stat calculator instances and some response analyser instances, just in order
+        // We will create some gnrquiz and question stat calculator instances and some response analyser instances, just in order
         // to check the last analysed time then returned.
-        $quizcalc = new \gnrquiz_statistics\calculator();
+        $gnrquizcalc = new \gnrquiz_statistics\calculator();
         // Should not be a delay of more than one second between the calculation of stats above and here.
-        $this->assertTimeCurrent($quizcalc->get_last_calculated_time($qubaids));
+        $this->assertTimeCurrent($gnrquizcalc->get_last_calculated_time($qubaids));
 
         $qcalc = new \core_question\statistics\questions\calculator($questions);
         $this->assertTimeCurrent($qcalc->get_last_calculated_time($qubaids));
@@ -389,9 +389,9 @@ class gnrquiz_report_statistics_from_steps_testcase extends mod_gnrquiz_attempt_
         }
         if (isset($csvdata['qstats'])) {
             $this->check_question_stats($csvdata['qstats'], $questionstats);
-            return array($questions, $quizstats, $questionstats, $qubaids);
+            return array($questions, $gnrquizstats, $questionstats, $qubaids);
         }
-        return array($questions, $quizstats, $questionstats, $qubaids);
+        return array($questions, $gnrquizstats, $questionstats, $qubaids);
     }
 
 }

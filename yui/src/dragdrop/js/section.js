@@ -1,7 +1,7 @@
 /**
  * Section drag and drop.
  *
- * @class M.mod_quiz.dragdrop.section
+ * @class M.mod_gnrquiz.dragdrop.section
  * @constructor
  * @extends M.core.dragdrop
  */
@@ -41,7 +41,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                 moveOnEnd: false
             });
             del.dd.plug(Y.Plugin.DDConstrained, {
-                // Keep it inside the .mod-quiz-edit-content
+                // Keep it inside the .mod-gnrquiz-edit-content
                 constrain: '#' + CSS.PAGECONTENT,
                 stickY: true
             });
@@ -133,11 +133,11 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
 
         if (dragnodeid === dropnodeindex) {
             Y.log("Skipping move - same location moving " + dragnodeid + " to " + dropnodeindex,
-                  'debug', 'moodle-mod_quiz-dragdrop');
+                  'debug', 'moodle-mod_gnrquiz-dragdrop');
             return;
         }
 
-        Y.log("Moving from position " + dragnodeid + " to position " + dropnodeindex, 'debug', 'moodle-mod_quiz-dragdrop');
+        Y.log("Moving from position " + dragnodeid + " to position " + dropnodeindex, 'debug', 'moodle-mod_gnrquiz-dragdrop');
 
         if (loopstart > loopend) {
             // If we're going up, we need to swap the loop order
@@ -168,7 +168,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
         // Prepare request parameters
         params.sesskey = M.cfg.sesskey;
         params.courseid = this.get('courseid');
-        params.quizid = this.get('gnrquizid');
+        params.gnrquizid = this.get('gnrquizid');
         params['class'] = 'section';
         params.field = 'move';
         params.id = dragnodeid;
@@ -191,7 +191,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                         if (responsetext.error) {
                             new M.core.ajaxException(responsetext);
                         }
-                        M.mod_quiz.edit.process_sections(Y, sectionlist, responsetext, loopstart, loopend);
+                        M.mod_gnrquiz.edit.process_sections(Y, sectionlist, responsetext, loopstart, loopend);
                     } catch (e) {}
 
                     // Update all of the section IDs - first unset them, then set them
@@ -208,14 +208,14 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
                                         Y.Moodle.core_course.util.section.getId(sectionlist.item(index))) {
                                 Y.log("Swapping " + Y.Moodle.core_course.util.section.getId(sectionlist.item(index - 1)) +
                                         " with " + Y.Moodle.core_course.util.section.getId(sectionlist.item(index)),
-                                        "debug", "moodle-mod_quiz-dragdrop");
+                                        "debug", "moodle-mod_gnrquiz-dragdrop");
                                 // Swap section id.
                                 var sectionid = sectionlist.item(index - 1).get('id');
                                 sectionlist.item(index - 1).set('id', sectionlist.item(index).get('id'));
                                 sectionlist.item(index).set('id', sectionid);
 
                                 // See what format needs to swap.
-                                M.mod_quiz.edit.swap_sections(Y, index - 1, index);
+                                M.mod_gnrquiz.edit.swap_sections(Y, index - 1, index);
 
                                 // Update flag.
                                 swapped = true;
@@ -239,12 +239,12 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
     }
 
 }, {
-    NAME: 'mod_quiz-dragdrop-section',
+    NAME: 'mod_gnrquiz-dragdrop-section',
     ATTRS: {
         courseid: {
             value: null
         },
-        quizid: {
+        gnrquizid: {
             value: null
         },
         ajaxurl: {
@@ -256,7 +256,7 @@ Y.extend(DRAGSECTION, M.core.dragdrop, {
     }
 });
 
-M.mod_quiz = M.mod_quiz || {};
-M.mod_quiz.init_section_dragdrop = function(params) {
+M.mod_gnrquiz = M.mod_gnrquiz || {};
+M.mod_gnrquiz.init_section_dragdrop = function(params) {
     new DRAGSECTION(params);
 };

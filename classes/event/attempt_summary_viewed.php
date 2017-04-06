@@ -15,27 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_quiz attempt summary viewed event.
+ * The mod_gnrquiz attempt summary viewed event.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\event;
+namespace mod_gnrquiz\event;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_quiz attempt summary viewed event class.
+ * The mod_gnrquiz attempt summary viewed event class.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int quizid: the id of the quiz.
+ *      - int gnrquizid: the id of the gnrquiz.
  * }
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @since      Moodle 2.7
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -59,7 +59,7 @@ class attempt_summary_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventattemptsummaryviewed', 'mod_quiz');
+        return get_string('eventattemptsummaryviewed', 'mod_gnrquiz');
     }
 
     /**
@@ -69,7 +69,7 @@ class attempt_summary_viewed extends \core\event\base {
      */
     public function get_description() {
         return "The user with id '$this->userid' has viewed the summary for the attempt with id '$this->objectid' belonging " .
-            "to the user with id '$this->relateduserid' for the quiz with course module id '$this->contextinstanceid'.";
+            "to the user with id '$this->relateduserid' for the gnrquiz with course module id '$this->contextinstanceid'.";
     }
 
     /**

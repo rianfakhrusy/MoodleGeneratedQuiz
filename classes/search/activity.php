@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Search area for mod_quiz activities.
+ * Search area for mod_gnrquiz activities.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2015 David Monllao {@link http://www.davidmonllao.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\search;
+namespace mod_gnrquiz\search;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Search area for mod_quiz activities.
+ * Search area for mod_gnrquiz activities.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2015 David Monllao {@link http://www.davidmonllao.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

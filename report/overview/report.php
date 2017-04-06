@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz overview report class.
+ * This file defines the gnrquiz overview report class.
  *
  * @package   gnrquiz_overview
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
@@ -39,12 +39,12 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/overview/overview_table.php');
  */
 class gnrquiz_overview_report extends gnrquiz_attempts_report {
 
-    public function display($quiz, $cm, $course) {
+    public function display($gnrquiz, $cm, $course) {
         global $CFG, $DB, $OUTPUT, $PAGE;
 
         list($currentgroup, $students, $groupstudents, $allowed) =
-                $this->init('overview', 'gnrquiz_overview_settings_form', $quiz, $cm, $course);
-        $options = new gnrquiz_overview_options('overview', $quiz, $cm, $course);
+                $this->init('overview', 'gnrquiz_overview_settings_form', $gnrquiz, $cm, $course);
+        $options = new gnrquiz_overview_options('overview', $gnrquiz, $cm, $course);
 
         if ($fromform = $this->form->get_data()) {
             $options->process_settings_from_form($fromform);
@@ -57,34 +57,34 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
 
         if ($options->attempts == self::ALL_WITH) {
             // This option is only available to users who can access all groups in
-            // groups mode, so setting allowed to empty (which means all quiz attempts
+            // groups mode, so setting allowed to empty (which means all gnrquiz attempts
             // are accessible, is not a security porblem.
             $allowed = array();
         }
 
         // Load the required questions.
-        $questions = gnrquiz_report_get_significant_questions($quiz);
+        $questions = gnrquiz_report_get_significant_questions($gnrquiz);
 
         // Prepare for downloading, if applicable.
         $courseshortname = format_string($course->shortname, true,
                 array('context' => context_course::instance($course->id)));
-        $table = new gnrquiz_overview_table($quiz, $this->context, $this->qmsubselect,
+        $table = new gnrquiz_overview_table($gnrquiz, $this->context, $this->qmsubselect,
                 $options, $groupstudents, $students, $questions, $options->get_url());
         $filename = gnrquiz_report_download_filename(get_string('overviewfilename', 'gnrquiz_overview'),
-                $courseshortname, $quiz->name);
+                $courseshortname, $gnrquiz->name);
         $table->is_downloading($options->download, $filename,
-                $courseshortname . ' ' . format_string($quiz->name, true));
+                $courseshortname . ' ' . format_string($gnrquiz->name, true));
         if ($table->is_downloading()) {
             raise_memory_limit(MEMORY_EXTRA);
         }
 
         $this->course = $course; // Hack to make this available in process_actions.
-        $this->process_actions($quiz, $cm, $currentgroup, $groupstudents, $allowed, $options->get_url());
+        $this->process_actions($gnrquiz, $cm, $currentgroup, $groupstudents, $allowed, $options->get_url());
 
         // Start output.
         if (!$table->is_downloading()) {
             // Only print headers if not asked to download data.
-            $this->print_header_and_tabs($cm, $course, $quiz, $this->mode);
+            $this->print_header_and_tabs($cm, $course, $gnrquiz, $this->mode);
         }
 
         if ($groupmode = groups_get_activity_groupmode($cm)) {
@@ -97,15 +97,15 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
         // Print information on the number of existing attempts.
         if (!$table->is_downloading()) {
             // Do not print notices when downloading.
-            if ($strattemptnum = gnrquiz_num_attempt_summary($quiz, $cm, true, $currentgroup)) {
-                echo '<div class="quizattemptcounts">' . $strattemptnum . '</div>';
+            if ($strattemptnum = gnrquiz_num_attempt_summary($gnrquiz, $cm, true, $currentgroup)) {
+                echo '<div class="gnrquizattemptcounts">' . $strattemptnum . '</div>';
             }
         }
 
-        $hasquestions = gnrquiz_has_questions($quiz->id);
+        $hasquestions = gnrquiz_has_questions($gnrquiz->id);
         if (!$table->is_downloading()) {
             if (!$hasquestions) {
-                echo gnrquiz_no_questions_message($quiz, $cm, $this->context);
+                echo gnrquiz_no_questions_message($gnrquiz, $cm, $this->context);
             } else if (!$students) {
                 echo $OUTPUT->notification(get_string('nostudentsyet'));
             } else if ($currentgroup && !$groupstudents) {
@@ -119,7 +119,7 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
         $hasstudents = $students && (!$currentgroup || $groupstudents);
         if ($hasquestions && ($hasstudents || $options->attempts == self::ALL_WITH)) {
             // Construct the SQL.
-            $fields = $DB->sql_concat('u.id', "'#'", 'COALESCE(quiza.attempt, 0)') .
+            $fields = $DB->sql_concat('u.id', "'#'", 'COALESCE(gnrquiza.attempt, 0)') .
                     ' AS uniqueid, ';
 
             list($fields, $from, $where, $params) = $table->base_sql($allowed);
@@ -130,13 +130,13 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
             $fields .= ", COALESCE((
                                 SELECT MAX(qqr.regraded)
                                   FROM {gnrquiz_overview_regrades} qqr
-                                 WHERE qqr.questionusageid = quiza.uniqueid
+                                 WHERE qqr.questionusageid = gnrquiza.uniqueid
                           ), -1) AS regraded";
             if ($options->onlyregraded) {
                 $where .= " AND COALESCE((
                                     SELECT MAX(qqr.regraded)
                                       FROM {gnrquiz_overview_regrades} qqr
-                                     WHERE qqr.questionusageid = quiza.uniqueid
+                                     WHERE qqr.questionusageid = gnrquiza.uniqueid
                                 ), -1) <> -1";
             }
             $table->set_sql($fields, $from, $where, $params);
@@ -145,7 +145,7 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
                 // Output the regrade buttons.
                 if (has_capability('mod/gnrquiz:regrade', $this->context)) {
                     $regradesneeded = $this->count_question_attempts_needing_regrade(
-                            $quiz, $groupstudents);
+                            $gnrquiz, $groupstudents);
                     if ($currentgroup) {
                         $a= new stdClass();
                         $a->groupname = groups_get_group_name($currentgroup);
@@ -183,8 +183,8 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
                 }
                 // Print information on the grading method.
                 if ($strattempthighlight = gnrquiz_report_highlighting_grading_method(
-                        $quiz, $this->qmsubselect, $options->onlygraded)) {
-                    echo '<div class="quizattemptcounts">' . $strattempthighlight . '</div>';
+                        $gnrquiz, $this->qmsubselect, $options->onlygraded)) {
+                    echo '<div class="gnrquizattemptcounts">' . $strattempthighlight . '</div>';
                 }
             }
 
@@ -201,7 +201,7 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
             $this->add_state_column($columns, $headers);
             $this->add_time_columns($columns, $headers);
 
-            $this->add_grade_columns($quiz, $options->usercanseegrades, $columns, $headers, false);
+            $this->add_grade_columns($gnrquiz, $options->usercanseegrades, $columns, $headers, false);
 
             if (!$table->is_downloading() && has_capability('mod/gnrquiz:regrade', $this->context) &&
                     $this->has_regraded_questions($from, $where, $params)) {
@@ -219,7 +219,7 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
                     } else {
                         $header .= ' ';
                     }
-                    $header .= '/' . gnrquiz_rescale_grade($question->maxmark, $quiz, 'question');
+                    $header .= '/' . gnrquiz_rescale_grade($question->maxmark, $gnrquiz, 'question');
                     $headers[] = $header;
                 }
             }
@@ -231,23 +231,23 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
         }
 
         if (!$table->is_downloading() && $options->usercanseegrades) {
-            $output = $PAGE->get_renderer('mod_quiz');
+            $output = $PAGE->get_renderer('mod_gnrquiz');
             if ($currentgroup && $groupstudents) {
                 list($usql, $params) = $DB->get_in_or_equal($groupstudents);
-                $params[] = $quiz->id;
-                if ($DB->record_exists_select('gnrquiz_grades', "userid $usql AND quiz = ?",
+                $params[] = $gnrquiz->id;
+                if ($DB->record_exists_select('gnrquiz_grades', "userid $usql AND gnrquiz = ?",
                         $params)) {
                     $imageurl = new moodle_url('/mod/gnrquiz/report/overview/overviewgraph.php',
-                            array('id' => $quiz->id, 'groupid' => $currentgroup));
+                            array('id' => $gnrquiz->id, 'groupid' => $currentgroup));
                     $graphname = get_string('overviewreportgraphgroup', 'gnrquiz_overview',
                             groups_get_group_name($currentgroup));
                     echo $output->graph($imageurl, $graphname);
                 }
             }
 
-            if ($DB->record_exists('gnrquiz_grades', array('gnrquiz'=> $quiz->id))) {
+            if ($DB->record_exists('gnrquiz_grades', array('gnrquiz'=> $gnrquiz->id))) {
                 $imageurl = new moodle_url('/mod/gnrquiz/report/overview/overviewgraph.php',
-                        array('id' => $quiz->id));
+                        array('id' => $gnrquiz->id));
                 $graphname = get_string('overviewreportgraph', 'gnrquiz_overview');
                 echo $output->graph($imageurl, $graphname);
             }
@@ -255,45 +255,45 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
         return true;
     }
 
-    protected function process_actions($quiz, $cm, $currentgroup, $groupstudents, $allowed, $redirecturl) {
-        parent::process_actions($quiz, $cm, $currentgroup, $groupstudents, $allowed, $redirecturl);
+    protected function process_actions($gnrquiz, $cm, $currentgroup, $groupstudents, $allowed, $redirecturl) {
+        parent::process_actions($gnrquiz, $cm, $currentgroup, $groupstudents, $allowed, $redirecturl);
 
         if (empty($currentgroup) || $groupstudents) {
             if (optional_param('regrade', 0, PARAM_BOOL) && confirm_sesskey()) {
                 if ($attemptids = optional_param_array('attemptid', array(), PARAM_INT)) {
-                    $this->start_regrade($quiz, $cm);
-                    $this->regrade_attempts($quiz, false, $groupstudents, $attemptids);
+                    $this->start_regrade($gnrquiz, $cm);
+                    $this->regrade_attempts($gnrquiz, false, $groupstudents, $attemptids);
                     $this->finish_regrade($redirecturl);
                 }
             }
         }
 
         if (optional_param('regradeall', 0, PARAM_BOOL) && confirm_sesskey()) {
-            $this->start_regrade($quiz, $cm);
-            $this->regrade_attempts($quiz, false, $groupstudents);
+            $this->start_regrade($gnrquiz, $cm);
+            $this->regrade_attempts($gnrquiz, false, $groupstudents);
             $this->finish_regrade($redirecturl);
 
         } else if (optional_param('regradealldry', 0, PARAM_BOOL) && confirm_sesskey()) {
-            $this->start_regrade($quiz, $cm);
-            $this->regrade_attempts($quiz, true, $groupstudents);
+            $this->start_regrade($gnrquiz, $cm);
+            $this->regrade_attempts($gnrquiz, true, $groupstudents);
             $this->finish_regrade($redirecturl);
 
         } else if (optional_param('regradealldrydo', 0, PARAM_BOOL) && confirm_sesskey()) {
-            $this->start_regrade($quiz, $cm);
-            $this->regrade_attempts_needing_it($quiz, $groupstudents);
+            $this->start_regrade($gnrquiz, $cm);
+            $this->regrade_attempts_needing_it($gnrquiz, $groupstudents);
             $this->finish_regrade($redirecturl);
         }
     }
 
     /**
      * Check necessary capabilities, and start the display of the regrade progress page.
-     * @param object $quiz the quiz settings.
-     * @param object $cm the cm object for the quiz.
+     * @param object $gnrquiz the gnrquiz settings.
+     * @param object $cm the cm object for the gnrquiz.
      */
-    protected function start_regrade($quiz, $cm) {
+    protected function start_regrade($gnrquiz, $cm) {
         global $OUTPUT, $PAGE;
         require_capability('mod/gnrquiz:regrade', $this->context);
-        $this->print_header_and_tabs($cm, $this->course, $quiz, $this->mode);
+        $this->print_header_and_tabs($cm, $this->course, $gnrquiz, $this->mode);
     }
 
     /**
@@ -318,21 +318,21 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
     }
 
     /**
-     * Regrade a particular quiz attempt. Either for real ($dryrun = false), or
+     * Regrade a particular gnrquiz attempt. Either for real ($dryrun = false), or
      * as a pretend regrade to see which fractions would change. The outcome is
      * stored in the gnrquiz_overview_regrades table.
      *
      * Note, $attempt is not upgraded in the database. The caller needs to do that.
      * However, $attempt->sumgrades is updated, if this is not a dry run.
      *
-     * @param object $attempt the quiz attempt to regrade.
+     * @param object $attempt the gnrquiz attempt to regrade.
      * @param bool $dryrun if true, do a pretend regrade, otherwise do it for real.
      * @param array $slots if null, regrade all questions, otherwise, just regrade
      *      the quetsions with those slots.
      */
     protected function regrade_attempt($attempt, $dryrun = false, $slots = null) {
         global $DB;
-        // Need more time for a quiz with many questions.
+        // Need more time for a gnrquiz with many questions.
         core_php_time_limit::raise(300);
 
         $transaction = $DB->start_delegated_transaction();
@@ -374,22 +374,22 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
     }
 
     /**
-     * Regrade attempts for this quiz, exactly which attempts are regraded is
+     * Regrade attempts for this gnrquiz, exactly which attempts are regraded is
      * controlled by the parameters.
-     * @param object $quiz the quiz settings.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param bool $dryrun if true, do a pretend regrade, otherwise do it for real.
      * @param array $groupstudents blank for all attempts, otherwise regrade attempts
      * for these users.
      * @param array $attemptids blank for all attempts, otherwise only regrade
      * attempts whose id is in this list.
      */
-    protected function regrade_attempts($quiz, $dryrun = false,
+    protected function regrade_attempts($gnrquiz, $dryrun = false,
             $groupstudents = array(), $attemptids = array()) {
         global $DB;
         $this->unlock_session();
 
-        $where = "quiz = ? AND preview = 0";
-        $params = array($quiz->id);
+        $where = "gnrquiz = ? AND preview = 0";
+        $params = array($gnrquiz->id);
 
         if ($groupstudents) {
             list($usql, $uparams) = $DB->get_in_or_equal($groupstudents);
@@ -408,7 +408,7 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
             return;
         }
 
-        $this->clear_regrade_table($quiz, $groupstudents);
+        $this->clear_regrade_table($gnrquiz, $groupstudents);
 
         $progressbar = new progress_bar('gnrquiz_overview_regrade', 500, true);
         $a = array(
@@ -423,35 +423,35 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
         }
 
         if (!$dryrun) {
-            $this->update_overall_grades($quiz);
+            $this->update_overall_grades($gnrquiz);
         }
     }
 
     /**
      * Regrade those questions in those attempts that are marked as needing regrading
      * in the gnrquiz_overview_regrades table.
-     * @param object $quiz the quiz settings.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param array $groupstudents blank for all attempts, otherwise regrade attempts
      * for these users.
      */
-    protected function regrade_attempts_needing_it($quiz, $groupstudents) {
+    protected function regrade_attempts_needing_it($gnrquiz, $groupstudents) {
         global $DB;
         $this->unlock_session();
 
-        $where = "quiza.quiz = ? AND quiza.preview = 0 AND qqr.regraded = 0";
-        $params = array($quiz->id);
+        $where = "gnrquiza.gnrquiz = ? AND gnrquiza.preview = 0 AND qqr.regraded = 0";
+        $params = array($gnrquiz->id);
 
         // Fetch all attempts that need regrading.
         if ($groupstudents) {
             list($usql, $uparams) = $DB->get_in_or_equal($groupstudents);
-            $where .= " AND quiza.userid $usql";
+            $where .= " AND gnrquiza.userid $usql";
             $params = array_merge($params, $uparams);
         }
 
         $toregrade = $DB->get_recordset_sql("
-                SELECT quiza.uniqueid, qqr.slot
-                FROM {gnrquiz_attempts} quiza
-                JOIN {gnrquiz_overview_regrades} qqr ON qqr.questionusageid = quiza.uniqueid
+                SELECT gnrquiza.uniqueid, qqr.slot
+                FROM {gnrquiz_attempts} gnrquiza
+                JOIN {gnrquiz_overview_regrades} qqr ON qqr.questionusageid = gnrquiza.uniqueid
                 WHERE $where", $params);
 
         $attemptquestions = array();
@@ -467,7 +467,7 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
         $attempts = $DB->get_records_list('gnrquiz_attempts', 'uniqueid',
                 array_keys($attemptquestions));
 
-        $this->clear_regrade_table($quiz, $groupstudents);
+        $this->clear_regrade_table($gnrquiz, $groupstudents);
 
         $progressbar = new progress_bar('gnrquiz_overview_regrade', 500, true);
         $a = array(
@@ -481,33 +481,33 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
                     get_string('regradingattemptxofy', 'gnrquiz_overview', $a));
         }
 
-        $this->update_overall_grades($quiz);
+        $this->update_overall_grades($gnrquiz);
     }
 
     /**
      * Count the number of attempts in need of a regrade.
-     * @param object $quiz the quiz settings.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param array $groupstudents user ids. If this is given, only data relating
      * to these users is cleared.
      */
-    protected function count_question_attempts_needing_regrade($quiz, $groupstudents) {
+    protected function count_question_attempts_needing_regrade($gnrquiz, $groupstudents) {
         global $DB;
 
         $usertest = '';
         $params = array();
         if ($groupstudents) {
             list($usql, $params) = $DB->get_in_or_equal($groupstudents);
-            $usertest = "quiza.userid $usql AND ";
+            $usertest = "gnrquiza.userid $usql AND ";
         }
 
-        $params[] = $quiz->id;
-        $sql = "SELECT COUNT(DISTINCT quiza.id)
-                FROM {gnrquiz_attempts} quiza
-                JOIN {gnrquiz_overview_regrades} qqr ON quiza.uniqueid = qqr.questionusageid
+        $params[] = $gnrquiz->id;
+        $sql = "SELECT COUNT(DISTINCT gnrquiza.id)
+                FROM {gnrquiz_attempts} gnrquiza
+                JOIN {gnrquiz_overview_regrades} qqr ON gnrquiza.uniqueid = qqr.questionusageid
                 WHERE
                     $usertest
-                    quiza.quiz = ? AND
-                    quiza.preview = 0 AND
+                    gnrquiza.gnrquiz = ? AND
+                    gnrquiza.preview = 0 AND
                     qqr.regraded = 0";
         return $DB->count_records_sql($sql, $params);
     }
@@ -524,17 +524,17 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
         return $DB->record_exists_sql("
                 SELECT 1
                   FROM {$from}
-                  JOIN {gnrquiz_overview_regrades} qor ON qor.questionusageid = quiza.uniqueid
+                  JOIN {gnrquiz_overview_regrades} qor ON qor.questionusageid = gnrquiza.uniqueid
                  WHERE {$where}", $params);
     }
 
     /**
      * Remove all information about pending/complete regrades from the database.
-     * @param object $quiz the quiz settings.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param array $groupstudents user ids. If this is given, only data relating
      * to these users is cleared.
      */
-    protected function clear_regrade_table($quiz, $groupstudents) {
+    protected function clear_regrade_table($gnrquiz, $groupstudents) {
         global $DB;
 
         // Fetch all attempts that need regrading.
@@ -545,25 +545,25 @@ class gnrquiz_overview_report extends gnrquiz_attempts_report {
             $where = "userid $usql AND ";
         }
 
-        $params[] = $quiz->id;
+        $params[] = $gnrquiz->id;
         $DB->delete_records_select('gnrquiz_overview_regrades',
                 "questionusageid IN (
                     SELECT uniqueid
                     FROM {gnrquiz_attempts}
-                    WHERE $where quiz = ?
+                    WHERE $where gnrquiz = ?
                 )", $params);
     }
 
     /**
      * Update the final grades for all attempts. This method is used following
      * a regrade.
-     * @param object $quiz the quiz settings.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param array $userids only update scores for these userids.
      * @param array $attemptids attemptids only update scores for these attempt ids.
      */
-    protected function update_overall_grades($quiz) {
-        gnrquiz_update_all_attempt_sumgrades($quiz);
-        gnrquiz_update_all_final_grades($quiz);
-        gnrquiz_update_grades($quiz);
+    protected function update_overall_grades($gnrquiz) {
+        gnrquiz_update_all_attempt_sumgrades($gnrquiz);
+        gnrquiz_update_all_final_grades($gnrquiz);
+        gnrquiz_update_grades($gnrquiz);
     }
 }

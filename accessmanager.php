@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Classes to enforce the various access rules that can apply to a quiz.
+ * Classes to enforce the various access rules that can apply to a gnrquiz.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,47 +28,47 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * This class keeps track of the various access rules that apply to a particular
- * quiz, with convinient methods for seeing whether access is allowed.
+ * gnrquiz, with convinient methods for seeing whether access is allowed.
  *
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since     Moodle 2.2
  */
 class gnrquiz_access_manager {
-    /** @var quiz the quiz settings object. */
-    protected $quizobj;
+    /** @var gnrquiz the gnrquiz settings object. */
+    protected $gnrquizobj;
     /** @var int the time to be considered as 'now'. */
     protected $timenow;
     /** @var array of gnrquiz_access_rule_base. */
     protected $rules = array();
 
     /**
-     * Create an instance for a particular quiz.
-     * @param object $quizobj An instance of the class quiz from attemptlib.php.
-     *      The quiz we will be controlling access to.
+     * Create an instance for a particular gnrquiz.
+     * @param object $gnrquizobj An instance of the class gnrquiz from attemptlib.php.
+     *      The gnrquiz we will be controlling access to.
      * @param int $timenow The time to use as 'now'.
      * @param bool $canignoretimelimits Whether this user is exempt from time
      *      limits (has_capability('mod/gnrquiz:ignoretimelimits', ...)).
      */
-    public function __construct($quizobj, $timenow, $canignoretimelimits) {
-        $this->quizobj = $quizobj;
+    public function __construct($gnrquizobj, $timenow, $canignoretimelimits) {
+        $this->gnrquizobj = $gnrquizobj;
         $this->timenow = $timenow;
-        $this->rules = $this->make_rules($quizobj, $timenow, $canignoretimelimits);
+        $this->rules = $this->make_rules($gnrquizobj, $timenow, $canignoretimelimits);
     }
 
     /**
-     * Make all the rules relevant to a particular quiz.
-     * @param quiz $quizobj information about the quiz in question.
+     * Make all the rules relevant to a particular gnrquiz.
+     * @param gnrquiz $gnrquizobj information about the gnrquiz in question.
      * @param int $timenow the time that should be considered as 'now'.
      * @param bool $canignoretimelimits whether the current user is exempt from
      *      time limits by the mod/gnrquiz:ignoretimelimits capability.
      * @return array of {@link gnrquiz_access_rule_base}s.
      */
-    protected function make_rules($quizobj, $timenow, $canignoretimelimits) {
+    protected function make_rules($gnrquizobj, $timenow, $canignoretimelimits) {
 
         $rules = array();
         foreach (self::get_rule_classes() as $ruleclass) {
-            $rule = $ruleclass::make($quizobj, $timenow, $canignoretimelimits);
+            $rule = $ruleclass::make($gnrquizobj, $timenow, $canignoretimelimits);
             if ($rule) {
                 $rules[$ruleclass] = $rule;
             }
@@ -97,16 +97,16 @@ class gnrquiz_access_manager {
      * Add any form fields that the access rules require to the settings form.
      *
      * Note that the standard plugins do not use this mechanism, becuase all their
-     * settings are stored in the quiz table.
+     * settings are stored in the gnrquiz table.
      *
-     * @param mod_gnrquiz_mod_form $quizform the quiz settings form that is being built.
+     * @param mod_gnrquiz_mod_form $gnrquizform the gnrquiz settings form that is being built.
      * @param MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     public static function add_settings_form_fields(
-            mod_gnrquiz_mod_form $quizform, MoodleQuickForm $mform) {
+            mod_gnrquiz_mod_form $gnrquizform, MoodleQuickForm $mform) {
 
         foreach (self::get_rule_classes() as $rule) {
-            $rule::add_settings_form_fields($quizform, $mform);
+            $rule::add_settings_form_fields($gnrquizform, $mform);
         }
     }
 
@@ -128,67 +128,67 @@ class gnrquiz_access_manager {
      * @param array $errors the errors found so far.
      * @param array $data the submitted form data.
      * @param array $files information about any uploaded files.
-     * @param mod_gnrquiz_mod_form $quizform the quiz form object.
+     * @param mod_gnrquiz_mod_form $gnrquizform the gnrquiz form object.
      * @return array $errors the updated $errors array.
      */
     public static function validate_settings_form_fields(array $errors,
-            array $data, $files, mod_gnrquiz_mod_form $quizform) {
+            array $data, $files, mod_gnrquiz_mod_form $gnrquizform) {
 
         foreach (self::get_rule_classes() as $rule) {
-            $errors = $rule::validate_settings_form_fields($errors, $data, $files, $quizform);
+            $errors = $rule::validate_settings_form_fields($errors, $data, $files, $gnrquizform);
         }
 
         return $errors;
     }
 
     /**
-     * Save any submitted settings when the quiz settings form is submitted.
+     * Save any submitted settings when the gnrquiz settings form is submitted.
      *
      * Note that the standard plugins do not use this mechanism because their
-     * settings are stored in the quiz table.
+     * settings are stored in the gnrquiz table.
      *
-     * @param object $quiz the data from the quiz form, including $quiz->id
-     *      which is the id of the quiz being saved.
+     * @param object $gnrquiz the data from the gnrquiz form, including $gnrquiz->id
+     *      which is the id of the gnrquiz being saved.
      */
-    public static function save_settings($quiz) {
+    public static function save_settings($gnrquiz) {
 
         foreach (self::get_rule_classes() as $rule) {
-            $rule::save_settings($quiz);
+            $rule::save_settings($gnrquiz);
         }
     }
 
     /**
-     * Delete any rule-specific settings when the quiz is deleted.
+     * Delete any rule-specific settings when the gnrquiz is deleted.
      *
      * Note that the standard plugins do not use this mechanism because their
-     * settings are stored in the quiz table.
+     * settings are stored in the gnrquiz table.
      *
-     * @param object $quiz the data from the database, including $quiz->id
-     *      which is the id of the quiz being deleted.
+     * @param object $gnrquiz the data from the database, including $gnrquiz->id
+     *      which is the id of the gnrquiz being deleted.
      * @since Moodle 2.7.1, 2.6.4, 2.5.7
      */
-    public static function delete_settings($quiz) {
+    public static function delete_settings($gnrquiz) {
 
         foreach (self::get_rule_classes() as $rule) {
-            $rule::delete_settings($quiz);
+            $rule::delete_settings($gnrquiz);
         }
     }
 
     /**
      * Build the SQL for loading all the access settings in one go.
-     * @param int $quizid the quiz id.
+     * @param int $gnrquizid the gnrquiz id.
      * @param string $basefields initial part of the select list.
      * @return array with two elements, the sql and the placeholder values.
      *      If $basefields is '' then you must allow for the possibility that
      *      there is no data to load, in which case this method returns $sql = ''.
      */
-    protected static function get_load_sql($quizid, $rules, $basefields) {
+    protected static function get_load_sql($gnrquizid, $rules, $basefields) {
         $allfields = $basefields;
-        $alljoins = '{quiz} quiz';
-        $allparams = array('gnrquizid' => $quizid);
+        $alljoins = '{gnrquiz} gnrquiz';
+        $allparams = array('gnrquizid' => $gnrquizid);
 
         foreach ($rules as $rule) {
-            list($fields, $joins, $params) = $rule::get_settings_sql($quizid);
+            list($fields, $joins, $params) = $rule::get_settings_sql($gnrquizid);
             if ($fields) {
                 if ($allfields) {
                     $allfields .= ', ';
@@ -207,7 +207,7 @@ class gnrquiz_access_manager {
             return array('', array());
         }
 
-        return array("SELECT $allfields FROM $alljoins WHERE gnrquiz.id = :quizid", $allparams);
+        return array("SELECT $allfields FROM $alljoins WHERE gnrquiz.id = :gnrquizid", $allparams);
     }
 
     /**
@@ -215,17 +215,17 @@ class gnrquiz_access_manager {
      * a single DB query.
      *
      * Note that the standard plugins do not use this mechanism, becuase all their
-     * settings are stored in the quiz table.
+     * settings are stored in the gnrquiz table.
      *
-     * @param int $quizid the quiz id.
+     * @param int $gnrquizid the gnrquiz id.
      * @return array setting value name => value. The value names should all
      *      start with the name of the corresponding plugin to avoid collisions.
      */
-    public static function load_settings($quizid) {
+    public static function load_settings($gnrquizid) {
         global $DB;
 
         $rules = self::get_rule_classes();
-        list($sql, $params) = self::get_load_sql($quizid, $rules, '');
+        list($sql, $params) = self::get_load_sql($gnrquizid, $rules, '');
 
         if ($sql) {
             $data = (array) $DB->get_record_sql($sql, $params);
@@ -234,36 +234,36 @@ class gnrquiz_access_manager {
         }
 
         foreach ($rules as $rule) {
-            $data += $rule::get_extra_settings($quizid);
+            $data += $rule::get_extra_settings($gnrquizid);
         }
 
         return $data;
     }
 
     /**
-     * Load the quiz settings and any settings required by the access rules.
+     * Load the gnrquiz settings and any settings required by the access rules.
      * We try to do this with a single DB query.
      *
      * Note that the standard plugins do not use this mechanism, becuase all their
-     * settings are stored in the quiz table.
+     * settings are stored in the gnrquiz table.
      *
-     * @param int $quizid the quiz id.
-     * @return object mdl_quiz row with extra fields.
+     * @param int $gnrquizid the gnrquiz id.
+     * @return object mdl_gnrquiz row with extra fields.
      */
-    public static function load_gnrquiz_and_settings($quizid) {
+    public static function load_gnrquiz_and_settings($gnrquizid) {
         global $DB;
 
         $rules = self::get_rule_classes();
-        list($sql, $params) = self::get_load_sql($quizid, $rules, 'gnrquiz.*');
-        $quiz = $DB->get_record_sql($sql, $params, MUST_EXIST);
+        list($sql, $params) = self::get_load_sql($gnrquizid, $rules, 'gnrquiz.*');
+        $gnrquiz = $DB->get_record_sql($sql, $params, MUST_EXIST);
 
         foreach ($rules as $rule) {
-            foreach ($rule::get_extra_settings($quizid) as $name => $value) {
-                $quiz->$name = $value;
+            foreach ($rule::get_extra_settings($gnrquizid) as $name => $value) {
+                $gnrquiz->$name = $value;
             }
         }
 
-        return $quiz;
+        return $gnrquiz;
     }
 
     /**
@@ -294,8 +294,8 @@ class gnrquiz_access_manager {
     }
 
     /**
-     * Provide a description of the rules that apply to this quiz, such
-     * as is shown at the top of the quiz view page. Note that not all
+     * Provide a description of the rules that apply to this gnrquiz, such
+     * as is shown at the top of the gnrquiz view page. Note that not all
      * rules consider themselves important enough to output a description.
      *
      * @return array an array of description messages which may be empty. It
@@ -310,7 +310,7 @@ class gnrquiz_access_manager {
     }
 
     /**
-     * Whether or not a user should be allowed to start a new attempt at this quiz now.
+     * Whether or not a user should be allowed to start a new attempt at this gnrquiz now.
      * If there are any restrictions in force now, return an array of reasons why access
      * should be blocked. If access is OK, return false.
      *
@@ -376,7 +376,7 @@ class gnrquiz_access_manager {
             $method = 'get';
         }
         return new mod_gnrquiz_preflight_check_form($url->out_omit_querystring(),
-                array('rules' => $this->rules, 'gnrquizobj' => $this->quizobj,
+                array('rules' => $this->rules, 'gnrquizobj' => $this->gnrquizobj,
                       'attemptid' => $attemptid, 'hidden' => $url->params()), $method);
     }
 
@@ -404,13 +404,13 @@ class gnrquiz_access_manager {
 
     /**
      * Do any of the rules mean that this student will no be allowed any further attempts at this
-     * quiz. Used, for example, to change the label by the grade displayed on the view page from
+     * gnrquiz. Used, for example, to change the label by the grade displayed on the view page from
      * 'your current grade is' to 'your final grade is'.
      *
      * @param int $numattempts the number of previous attempts this user has made.
      * @param object $lastattempt information about the user's last completed attempt.
      * @return bool true if there is no way the user will ever be allowed to attempt
-     *      this quiz again.
+     *      this gnrquiz again.
      */
     public function is_finished($numprevattempts, $lastattempt) {
         foreach ($this->rules as $rule) {
@@ -471,7 +471,7 @@ class gnrquiz_access_manager {
     }
 
     /**
-     * @return bolean if this quiz should only be shown to students in a popup window.
+     * @return bolean if this gnrquiz should only be shown to students in a popup window.
      */
     public function attempt_must_be_in_popup() {
         foreach ($this->rules as $rule) {
@@ -495,25 +495,25 @@ class gnrquiz_access_manager {
     }
 
     /**
-     * Send the user back to the quiz view page. Normally this is just a redirect, but
+     * Send the user back to the gnrquiz view page. Normally this is just a redirect, but
      * If we were in a secure window, we close this window, and reload the view window we came from.
      *
      * This method does not return;
      *
-     * @param mod_gnrquiz_renderer $output the quiz renderer.
+     * @param mod_gnrquiz_renderer $output the gnrquiz renderer.
      * @param string $message optional message to output while redirecting.
      */
     public function back_to_view_page($output, $message = '') {
         if ($this->attempt_must_be_in_popup()) {
-            echo $output->close_attempt_popup($this->quizobj->view_url(), $message);
+            echo $output->close_attempt_popup($this->gnrquizobj->view_url(), $message);
             die();
         } else {
-            redirect($this->quizobj->view_url(), $message);
+            redirect($this->gnrquizobj->view_url(), $message);
         }
     }
 
     /**
-     * Make some text into a link to review the quiz, if that is appropriate.
+     * Make some text into a link to review the gnrquiz, if that is appropriate.
      *
      * @param string $linktext some text.
      * @param object $attempt the attempt object
@@ -527,15 +527,15 @@ class gnrquiz_access_manager {
             return $output->no_review_message('');
         }
 
-        $when = gnrquiz_attempt_state($this->quizobj->get_quiz(), $attempt);
-        $reviewoptions = mod_gnrquiz_display_options::make_from_quiz(
-                $this->quizobj->get_quiz(), $when);
+        $when = gnrquiz_attempt_state($this->gnrquizobj->get_gnrquiz(), $attempt);
+        $reviewoptions = mod_gnrquiz_display_options::make_from_gnrquiz(
+                $this->gnrquizobj->get_gnrquiz(), $when);
 
         if (!$reviewoptions->attempt) {
-            return $output->no_review_message($this->quizobj->cannot_review_message($when, true));
+            return $output->no_review_message($this->gnrquizobj->cannot_review_message($when, true));
 
         } else {
-            return $output->review_link($this->quizobj->review_url($attempt->id),
+            return $output->review_link($this->gnrquizobj->review_url($attempt->id),
                     $this->attempt_must_be_in_popup(), $this->get_popup_options());
         }
     }

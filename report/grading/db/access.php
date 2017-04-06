@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Capability definitions for the quiz manual grading report.
+ * Capability definitions for the gnrquiz manual grading report.
  *
  * @package   gnrquiz_grading
  * @copyright 2010 The Open University

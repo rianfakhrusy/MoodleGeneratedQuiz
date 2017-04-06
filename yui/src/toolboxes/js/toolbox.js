@@ -70,7 +70,7 @@ var CSS = {
     BODY = Y.one(document.body);
 
 // Setup the basic namespace.
-M.mod_quiz = M.mod_quiz || {};
+M.mod_gnrquiz = M.mod_gnrquiz || {};
 
 /**
  * The toolbox class is a generic class which should never be directly
@@ -110,7 +110,7 @@ Y.extend(TOOLBOX, Y.Base, {
 
         data.sesskey = M.cfg.sesskey;
         data.courseid = this.get('courseid');
-        data.quizid = this.get('gnrquizid');
+        data.gnrquizid = this.get('gnrquizid');
 
         var uri = M.cfg.wwwroot + this.get('ajaxurl');
 
@@ -174,7 +174,7 @@ Y.extend(TOOLBOX, Y.Base, {
     }
 },
 {
-    NAME: 'mod_quiz-toolbox',
+    NAME: 'mod_gnrquiz-toolbox',
     ATTRS: {
         /**
          * The ID of the Moodle Course being edited.
@@ -194,7 +194,7 @@ Y.extend(TOOLBOX, Y.Base, {
          * @default 'topics'
          * @type String
          */
-        quizid: {
+        gnrquizid: {
             'value': 0
         },
         /**

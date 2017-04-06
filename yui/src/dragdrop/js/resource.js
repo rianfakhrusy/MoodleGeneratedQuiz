@@ -44,13 +44,13 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
             cloneNode: true
         });
         del.dd.plug(Y.Plugin.DDConstrained, {
-            // Keep it inside the .mod-quiz-edit-content
+            // Keep it inside the .mod-gnrquiz-edit-content
             constrain: '#' + CSS.SLOTS
         });
         del.dd.plug(Y.Plugin.DDWinScroll);
 
-        M.mod_quiz.quizbase.register_module(this);
-        M.mod_quiz.dragres = this;
+        M.mod_gnrquiz.gnrquizbase.register_module(this);
+        M.mod_gnrquiz.dragres = this;
     },
 
     /**
@@ -60,7 +60,7 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
      * @param {String} baseselector The CSS selector or node to limit scope to
      */
     setup_for_section: function() {
-        Y.Node.all('.mod-quiz-edit-content ul.slots ul.section').each(function(resources) {
+        Y.Node.all('.mod-gnrquiz-edit-content ul.slots ul.section').each(function(resources) {
             resources.setAttribute('data-draggroups', this.groups.join(' '));
             // Define empty ul as droptarget, so that item could be moved to empty list
             new Y.DD.Drop({
@@ -126,20 +126,20 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
         // Prepare request parameters
         params.sesskey = M.cfg.sesskey;
         params.courseid = this.get('courseid');
-        params.quizid = this.get('gnrquizid');
+        params.gnrquizid = this.get('gnrquizid');
         params['class'] = 'resource';
         params.field = 'move';
-        params.id = Number(Y.Moodle.mod_quiz.util.slot.getId(dragnode));
+        params.id = Number(Y.Moodle.mod_gnrquiz.util.slot.getId(dragnode));
         params.sectionId = Y.Moodle.core_course.util.section.getId(dropnode.ancestor('li.section', true));
 
         var previousslot = dragnode.previous(SELECTOR.SLOT);
         if (previousslot) {
-            params.previousid = Number(Y.Moodle.mod_quiz.util.slot.getId(previousslot));
+            params.previousid = Number(Y.Moodle.mod_gnrquiz.util.slot.getId(previousslot));
         }
 
         var previouspage = dragnode.previous(SELECTOR.PAGE);
         if (previouspage) {
-            params.page = Number(Y.Moodle.mod_quiz.util.page.getId(previouspage));
+            params.page = Number(Y.Moodle.mod_gnrquiz.util.page.getId(previouspage));
         }
 
         // Do AJAX request
@@ -156,12 +156,12 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
                 success: function(tid, response) {
                     var responsetext = Y.JSON.parse(response.responseText);
                     var params = {element: dragnode, visible: responsetext.visible};
-                    M.mod_quiz.quizbase.invoke_function('set_visibility_resource_ui', params);
+                    M.mod_gnrquiz.gnrquizbase.invoke_function('set_visibility_resource_ui', params);
                     this.unlock_drag_handle(drag, CSS.EDITINGMOVE);
                     window.setTimeout(function() {
                         spinner.hide();
                     }, 250);
-                    M.mod_quiz.resource_toolbox.reorganise_edit_page();
+                    M.mod_gnrquiz.resource_toolbox.reorganise_edit_page();
                 },
                 failure: function(tid, response) {
                     this.ajax_failure(response);
@@ -211,12 +211,12 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
         this.drop_over(e);
     }
 }, {
-    NAME: 'mod_quiz-dragdrop-resource',
+    NAME: 'mod_gnrquiz-dragdrop-resource',
     ATTRS: {
         courseid: {
             value: null
         },
-        quizid: {
+        gnrquizid: {
             value: null
         },
         ajaxurl: {
@@ -228,7 +228,7 @@ Y.extend(DRAGRESOURCE, M.core.dragdrop, {
     }
 });
 
-M.mod_quiz = M.mod_quiz || {};
-M.mod_quiz.init_resource_dragdrop = function(params) {
+M.mod_gnrquiz = M.mod_gnrquiz || {};
+M.mod_gnrquiz.init_resource_dragdrop = function(params) {
     new DRAGRESOURCE(params);
 };

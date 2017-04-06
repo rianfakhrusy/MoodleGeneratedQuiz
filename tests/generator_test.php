@@ -17,7 +17,7 @@
 /**
  * PHPUnit data generator tests
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   phpunit
  * @copyright  2012 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * PHPUnit data generator testcase
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   phpunit
  * @copyright  2012 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -43,21 +43,21 @@ class mod_gnrquiz_generator_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('gnrquiz'));
 
         /** @var mod_gnrquiz_generator $generator */
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_gnrquiz');
         $this->assertInstanceOf('mod_gnrquiz_generator', $generator);
         $this->assertEquals('gnrquiz', $generator->get_modulename());
 
         $generator->create_instance(array('course'=>$SITE->id));
         $generator->create_instance(array('course'=>$SITE->id));
-        $quiz = $generator->create_instance(array('course'=>$SITE->id));
+        $gnrquiz = $generator->create_instance(array('course'=>$SITE->id));
         $this->assertEquals(3, $DB->count_records('gnrquiz'));
 
-        $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id);
-        $this->assertEquals($quiz->id, $cm->instance);
+        $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id);
+        $this->assertEquals($gnrquiz->id, $cm->instance);
         $this->assertEquals('gnrquiz', $cm->modname);
         $this->assertEquals($SITE->id, $cm->course);
 
         $context = context_module::instance($cm->id);
-        $this->assertEquals($quiz->cmid, $context->instanceid);
+        $this->assertEquals($gnrquiz->cmid, $context->instanceid);
     }
 }

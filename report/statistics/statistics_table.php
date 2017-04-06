@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Quiz statistics report, table for showing statistics of each question in the quiz.
+ * Quiz statistics report, table for showing statistics of each question in the gnrquiz.
  *
  * @package   gnrquiz_statistics
  * @copyright 2008 Jamie Pratt
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir.'/tablelib.php');
 
 /**
- * This table has one row for each question in the quiz, with sub-rows when
+ * This table has one row for each question in the gnrquiz, with sub-rows when
  * random questions and variants appear.
  *
  * There are columns for the various item and position statistics.
@@ -36,30 +36,30 @@ require_once($CFG->libdir.'/tablelib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class gnrquiz_statistics_table extends flexible_table {
-    /** @var object the quiz settings. */
-    protected $quiz;
+    /** @var object the gnrquiz settings. */
+    protected $gnrquiz;
 
-    /** @var integer the quiz course_module id. */
+    /** @var integer the gnrquiz course_module id. */
     protected $cmid;
 
     /**
      * Constructor.
      */
     public function __construct() {
-        parent::__construct('mod-quiz-report-statistics-report');
+        parent::__construct('mod-gnrquiz-report-statistics-report');
     }
 
     /**
      * Set up the columns and headers and other properties of the table and then
      * call flexible_table::setup() method.
      *
-     * @param object $quiz the quiz settings
-     * @param int $cmid the quiz course_module id
+     * @param object $gnrquiz the gnrquiz settings
+     * @param int $cmid the gnrquiz course_module id
      * @param moodle_url $reporturl the URL to redisplay this report.
      * @param int $s number of attempts included in the statistics.
      */
-    public function statistics_setup($quiz, $cmid, $reporturl, $s) {
-        $this->quiz = $quiz;
+    public function statistics_setup($gnrquiz, $cmid, $reporturl, $s) {
+        $this->gnrquiz = $gnrquiz;
         $this->cmid = $cmid;
 
         // Define the table columns.
@@ -169,7 +169,7 @@ class gnrquiz_statistics_table extends flexible_table {
      * @return string contents of this table cell.
      */
     protected function col_actions($questionstat) {
-        return gnrquiz_question_action_icons($this->quiz, $this->cmid,
+        return gnrquiz_question_action_icons($this->gnrquiz, $this->cmid,
                 $questionstat->question, $this->baseurl, $questionstat->variant);
     }
 
@@ -309,13 +309,13 @@ class gnrquiz_statistics_table extends flexible_table {
 
     /**
      * The intended question weight. Maximum mark for the question as a percentage
-     * of maximum mark for the quiz. That is, the indended influence this question
+     * of maximum mark for the gnrquiz. That is, the indended influence this question
      * on the student's overall mark.
      * @param \core_question\statistics\questions\calculated $questionstat stats for the question.
      * @return string contents of this table cell.
      */
     protected function col_intended_weight($questionstat) {
-        return gnrquiz_report_scale_summarks_as_percentage($questionstat->maxmark, $this->quiz);
+        return gnrquiz_report_scale_summarks_as_percentage($questionstat->maxmark, $this->gnrquiz);
     }
 
     /**
@@ -349,7 +349,7 @@ class gnrquiz_statistics_table extends flexible_table {
     /**
      * Discrimination index. This is the product moment correlation coefficient
      * between the fraction for this question, and the average fraction for the
-     * other questions in this quiz.
+     * other questions in this gnrquiz.
      * @param \core_question\statistics\questions\calculated $questionstat stats for the question.
      * @return string contents of this table cell.
      */

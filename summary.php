@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page prints a summary of a quiz attempt before it is submitted.
+ * This page prints a summary of a gnrquiz attempt before it is submitted.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2009 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,7 +40,7 @@ if ($attemptobj->get_userid() != $USER->id) {
     if ($attemptobj->has_capability('mod/gnrquiz:viewreports')) {
         redirect($attemptobj->review_url(null));
     } else {
-        throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'notyourattempt');
+        throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'notyourattempt');
     }
 }
 
@@ -56,7 +56,7 @@ if ($attemptobj->is_preview_user()) {
 // Check access.
 $accessmanager = $attemptobj->get_access_manager(time());
 $accessmanager->setup_attempt_page($PAGE);
-$output = $PAGE->get_renderer('mod_quiz');
+$output = $PAGE->get_renderer('mod_gnrquiz');
 $messages = $accessmanager->prevent_access();
 if (!$attemptobj->is_preview_user() && $messages) {
     print_error('attempterror', 'gnrquiz', $attemptobj->view_url(),
@@ -77,7 +77,7 @@ if ($attemptobj->is_finished()) {
 }
 
 // Arrange for the navigation to be displayed.
-if (empty($attemptobj->get_quiz()->showblocks)) {
+if (empty($attemptobj->get_gnrquiz()->showblocks)) {
     $PAGE->blocks->show_only_fake_blocks();
 }
 

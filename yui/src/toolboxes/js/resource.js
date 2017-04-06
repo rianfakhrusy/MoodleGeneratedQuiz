@@ -4,10 +4,10 @@
  * Resource and activity toolbox class.
  *
  * This class is responsible for managing AJAX interactions with activities and resources
- * when viewing a quiz in editing mode.
+ * when viewing a gnrquiz in editing mode.
  *
- * @module mod_quiz-resource-toolbox
- * @namespace M.mod_quiz.resource_toolbox
+ * @module mod_gnrquiz-resource-toolbox
+ * @namespace M.mod_gnrquiz.resource_toolbox
  */
 
 /**
@@ -16,7 +16,7 @@
  * This is a class extending TOOLBOX containing code specific to resources
  *
  * This class is responsible for managing AJAX interactions with activities and resources
- * when viewing a quiz in editing mode.
+ * when viewing a gnrquiz in editing mode.
  *
  * @class resources
  * @constructor
@@ -61,7 +61,7 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
      * @protected
      */
     initializer: function() {
-        M.mod_quiz.quizbase.register_module(this);
+        M.mod_gnrquiz.gnrquizbase.register_module(this);
         Y.delegate('click', this.handle_data_action, BODY, SELECTOR.ACTIVITYACTION, this);
         Y.delegate('click', this.handle_data_action, BODY, SELECTOR.DEPENDENCY_LINK, this);
     },
@@ -171,12 +171,12 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
             var data = {
                 'class': 'resource',
                 'action': 'DELETE',
-                'id': Y.Moodle.mod_quiz.util.slot.getId(element)
+                'id': Y.Moodle.mod_gnrquiz.util.slot.getId(element)
             };
             this.send_request(data, spinner, function(response) {
                 if (response.deleted) {
                     // Actually remove the element.
-                    Y.Moodle.mod_quiz.util.slot.remove(element);
+                    Y.Moodle.mod_gnrquiz.util.slot.remove(element);
                     this.reorganise_edit_page();
                     if (M.core.actionmenu && M.core.actionmenu.instance) {
                         M.core.actionmenu.instance.hideMenu(ev);
@@ -213,7 +213,7 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
             data = {
                 'class'   : 'resource',
                 'field'   : 'getmaxmark',
-                'id'      : Y.Moodle.mod_quiz.util.slot.getId(activity)
+                'id'      : Y.Moodle.mod_gnrquiz.util.slot.getId(activity)
             };
 
         // Prevent the default actions.
@@ -292,7 +292,7 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
                 'class'   : 'resource',
                 'field'   : 'updatemaxmark',
                 'maxmark'   : newmaxmark,
-                'id'      : Y.Moodle.mod_quiz.util.slot.getId(activity)
+                'id'      : Y.Moodle.mod_gnrquiz.util.slot.getId(activity)
             };
             this.send_request(data, spinner, function(response) {
                 if (response.instancemaxmark) {
@@ -377,17 +377,17 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
         var data = {
             'class': 'resource',
             'field': 'updatepagebreak',
-            'id':    Y.Moodle.mod_quiz.util.slot.getId(nextactivity),
+            'id':    Y.Moodle.mod_gnrquiz.util.slot.getId(nextactivity),
             'value': value
         };
 
         this.send_request(data, spinner, function(response) {
             if (response.slots) {
                 if (action === 'addpagebreak') {
-                    Y.Moodle.mod_quiz.util.page.add(activity);
+                    Y.Moodle.mod_gnrquiz.util.page.add(activity);
                 } else {
-                    var page = activity.next(Y.Moodle.mod_quiz.util.page.SELECTORS.PAGE);
-                    Y.Moodle.mod_quiz.util.page.remove(page, true);
+                    var page = activity.next(Y.Moodle.mod_gnrquiz.util.page.SELECTORS.PAGE);
+                    Y.Moodle.mod_gnrquiz.util.page.remove(page, true);
                 }
                 this.reorganise_edit_page();
             }
@@ -416,13 +416,13 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
         var data = {
             'class': 'resource',
             'field': 'updatedependency',
-            'id':    Y.Moodle.mod_quiz.util.slot.getId(activity),
+            'id':    Y.Moodle.mod_gnrquiz.util.slot.getId(activity),
             'value': action === 'adddependency' ? 1 : 0
         };
 
         this.send_request(data, spinner, function(response) {
             if (response.hasOwnProperty('requireprevious')) {
-                Y.Moodle.mod_quiz.util.slot.updateDependencyIcon(activity, response.requireprevious);
+                Y.Moodle.mod_gnrquiz.util.slot.updateDependencyIcon(activity, response.requireprevious);
             }
         });
 
@@ -436,26 +436,26 @@ Y.extend(RESOURCETOOLBOX, TOOLBOX, {
      * @method reorganise_edit_page
      */
     reorganise_edit_page: function() {
-        Y.Moodle.mod_quiz.util.slot.reorderSlots();
-        Y.Moodle.mod_quiz.util.slot.reorderPageBreaks();
-        Y.Moodle.mod_quiz.util.page.reorderPages();
-        Y.Moodle.mod_quiz.util.slot.updateOneSlotSections();
-        Y.Moodle.mod_quiz.util.slot.updateAllDependencyIcons();
+        Y.Moodle.mod_gnrquiz.util.slot.reorderSlots();
+        Y.Moodle.mod_gnrquiz.util.slot.reorderPageBreaks();
+        Y.Moodle.mod_gnrquiz.util.page.reorderPages();
+        Y.Moodle.mod_gnrquiz.util.slot.updateOneSlotSections();
+        Y.Moodle.mod_gnrquiz.util.slot.updateAllDependencyIcons();
     },
 
-    NAME : 'mod_quiz-resource-toolbox',
+    NAME : 'mod_gnrquiz-resource-toolbox',
     ATTRS : {
         courseid : {
             'value' : 0
         },
-        quizid : {
+        gnrquizid : {
             'value' : 0
         }
     }
 });
 
-M.mod_quiz.resource_toolbox = null;
-M.mod_quiz.init_resource_toolbox = function(config) {
-    M.mod_quiz.resource_toolbox = new RESOURCETOOLBOX(config);
-    return M.mod_quiz.resource_toolbox;
+M.mod_gnrquiz.resource_toolbox = null;
+M.mod_gnrquiz.init_resource_toolbox = function(config) {
+    M.mod_gnrquiz.resource_toolbox = new RESOURCETOOLBOX(config);
+    return M.mod_gnrquiz.resource_toolbox;
 };

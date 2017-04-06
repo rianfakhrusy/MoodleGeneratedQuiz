@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz responses report class.
+ * This file defines the gnrquiz responses report class.
  *
  * @package   gnrquiz_responses
  * @copyright 2006 Jean-Michel Vedrine
@@ -48,12 +48,12 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/responses/first_or_all_respons
  */
 class gnrquiz_responses_report extends gnrquiz_attempts_report {
 
-    public function display($quiz, $cm, $course) {
+    public function display($gnrquiz, $cm, $course) {
         global $OUTPUT;
 
         list($currentgroup, $students, $groupstudents, $allowed) =
-                $this->init('responses', 'gnrquiz_responses_settings_form', $quiz, $cm, $course);
-        $options = new gnrquiz_responses_options('responses', $quiz, $cm, $course);
+                $this->init('responses', 'gnrquiz_responses_settings_form', $gnrquiz, $cm, $course);
+        $options = new gnrquiz_responses_options('responses', $gnrquiz, $cm, $course);
 
         if ($fromform = $this->form->get_data()) {
             $options->process_settings_from_form($fromform);
@@ -66,13 +66,13 @@ class gnrquiz_responses_report extends gnrquiz_attempts_report {
 
         if ($options->attempts == self::ALL_WITH) {
             // This option is only available to users who can access all groups in
-            // groups mode, so setting allowed to empty (which means all quiz attempts
+            // groups mode, so setting allowed to empty (which means all gnrquiz attempts
             // are accessible, is not a security porblem.
             $allowed = array();
         }
 
         // Load the required questions.
-        $questions = gnrquiz_report_get_significant_questions($quiz);
+        $questions = gnrquiz_report_get_significant_questions($gnrquiz);
 
         // Prepare for downloading, if applicable.
         $courseshortname = format_string($course->shortname, true,
@@ -82,22 +82,22 @@ class gnrquiz_responses_report extends gnrquiz_attempts_report {
         } else {
             $tableclassname = 'gnrquiz_first_or_all_responses_table';
         }
-        $table = new $tableclassname($quiz, $this->context, $this->qmsubselect,
+        $table = new $tableclassname($gnrquiz, $this->context, $this->qmsubselect,
                 $options, $groupstudents, $students, $questions, $options->get_url());
         $filename = gnrquiz_report_download_filename(get_string('responsesfilename', 'gnrquiz_responses'),
-                $courseshortname, $quiz->name);
+                $courseshortname, $gnrquiz->name);
         $table->is_downloading($options->download, $filename,
-                $courseshortname . ' ' . format_string($quiz->name, true));
+                $courseshortname . ' ' . format_string($gnrquiz->name, true));
         if ($table->is_downloading()) {
             raise_memory_limit(MEMORY_EXTRA);
         }
 
-        $this->process_actions($quiz, $cm, $currentgroup, $groupstudents, $allowed, $options->get_url());
+        $this->process_actions($gnrquiz, $cm, $currentgroup, $groupstudents, $allowed, $options->get_url());
 
         // Start output.
         if (!$table->is_downloading()) {
             // Only print headers if not asked to download data.
-            $this->print_header_and_tabs($cm, $course, $quiz, $this->mode);
+            $this->print_header_and_tabs($cm, $course, $gnrquiz, $this->mode);
         }
 
         if ($groupmode = groups_get_activity_groupmode($cm)) {
@@ -110,15 +110,15 @@ class gnrquiz_responses_report extends gnrquiz_attempts_report {
         // Print information on the number of existing attempts.
         if (!$table->is_downloading()) {
             // Do not print notices when downloading.
-            if ($strattemptnum = gnrquiz_num_attempt_summary($quiz, $cm, true, $currentgroup)) {
-                echo '<div class="quizattemptcounts">' . $strattemptnum . '</div>';
+            if ($strattemptnum = gnrquiz_num_attempt_summary($gnrquiz, $cm, true, $currentgroup)) {
+                echo '<div class="gnrquizattemptcounts">' . $strattemptnum . '</div>';
             }
         }
 
-        $hasquestions = gnrquiz_has_questions($quiz->id);
+        $hasquestions = gnrquiz_has_questions($gnrquiz->id);
         if (!$table->is_downloading()) {
             if (!$hasquestions) {
-                echo gnrquiz_no_questions_message($quiz, $cm, $this->context);
+                echo gnrquiz_no_questions_message($gnrquiz, $cm, $this->context);
             } else if (!$students) {
                 echo $OUTPUT->notification(get_string('nostudentsyet'));
             } else if ($currentgroup && !$groupstudents) {
@@ -141,8 +141,8 @@ class gnrquiz_responses_report extends gnrquiz_attempts_report {
             if (!$table->is_downloading()) {
                 // Print information on the grading method.
                 if ($strattempthighlight = gnrquiz_report_highlighting_grading_method(
-                        $quiz, $this->qmsubselect, $options->onlygraded)) {
-                    echo '<div class="quizattemptcounts">' . $strattempthighlight . '</div>';
+                        $gnrquiz, $this->qmsubselect, $options->onlygraded)) {
+                    echo '<div class="gnrquizattemptcounts">' . $strattempthighlight . '</div>';
                 }
             }
 
@@ -162,7 +162,7 @@ class gnrquiz_responses_report extends gnrquiz_attempts_report {
                 $this->add_time_columns($columns, $headers);
             }
 
-            $this->add_grade_columns($quiz, $options->usercanseegrades, $columns, $headers);
+            $this->add_grade_columns($gnrquiz, $options->usercanseegrades, $columns, $headers);
 
             foreach ($questions as $id => $question) {
                 if ($options->showqtext) {

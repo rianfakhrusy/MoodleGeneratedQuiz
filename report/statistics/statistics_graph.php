@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This script renders the quiz statistics graph.
+ * This script renders the gnrquiz statistics graph.
  *
  * It takes one parameter, the gnrquiz_statistics.id. This is enough to identify the
- * quiz etc.
+ * gnrquiz etc.
  *
  * It plots a bar graph showing certain question statistics plotted against
  * question number.
@@ -35,15 +35,15 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/reportlib.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/report/statistics/statisticslib.php');
 
 // Get the parameters.
-$quizid = required_param('gnrquizid', PARAM_INT);
+$gnrquizid = required_param('gnrquizid', PARAM_INT);
 $currentgroup = required_param('currentgroup', PARAM_INT);
 $whichattempts = required_param('whichattempts', PARAM_INT);
 
-$quiz = $DB->get_record('gnrquiz', array('id' => $quizid), '*', MUST_EXIST);
-$cm = get_coursemodule_from_instance('gnrquiz', $quiz->id);
+$gnrquiz = $DB->get_record('gnrquiz', array('id' => $gnrquizid), '*', MUST_EXIST);
+$cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id);
 
 // Check access.
-require_login($quiz->course, false, $cm);
+require_login($gnrquiz->course, false, $cm);
 $modcontext = context_module::instance($cm->id);
 require_capability('gnrquiz/statistics:view', $modcontext);
 
@@ -62,10 +62,10 @@ if (empty($currentgroup)) {
     $groupstudents = get_users_by_capability($modcontext, array('mod/gnrquiz:reviewmyattempts', 'mod/gnrquiz:attempt'),
                                              '', '', '', '', $currentgroup, '', false);
 }
-$qubaids = gnrquiz_statistics_qubaids_condition($quizid, $groupstudents, $whichattempts);
+$qubaids = gnrquiz_statistics_qubaids_condition($gnrquizid, $groupstudents, $whichattempts);
 
 // Load the rest of the required data.
-$questions = gnrquiz_report_get_significant_questions($quiz);
+$questions = gnrquiz_report_get_significant_questions($gnrquiz);
 
 // Only load main question not sub questions.
 $questionstatistics = $DB->get_records_select('question_statistics', 'hashcode = ? AND slot IS NOT NULL',

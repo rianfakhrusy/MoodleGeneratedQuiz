@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Capability definitions for the quiz statistics report.
+ * Capability definitions for the gnrquiz statistics report.
  *
  * @package   gnrquiz_statistics
  * @copyright 2008 Jamie Pratt

@@ -17,7 +17,7 @@
 /**
  * Quiz external API
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   external
  * @copyright  2016 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -32,7 +32,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 /**
  * Quiz external functions
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   external
  * @copyright  2016 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -41,12 +41,12 @@ require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 class mod_gnrquiz_external extends external_api {
 
     /**
-     * Describes the parameters for get_quizzes_by_courses.
+     * Describes the parameters for get_gnrquizzes_by_courses.
      *
      * @return external_external_function_parameters
      * @since Moodle 3.1
      */
-    public static function get_quizzes_by_courses_parameters() {
+    public static function get_gnrquizzes_by_courses_parameters() {
         return new external_function_parameters (
             array(
                 'courseids' => new external_multiple_structure(
@@ -57,23 +57,23 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Returns a list of quizzes in a provided list of courses,
-     * if no list is provided all quizzes that the user can view will be returned.
+     * Returns a list of gnrquizzes in a provided list of courses,
+     * if no list is provided all gnrquizzes that the user can view will be returned.
      *
      * @param array $courseids Array of course ids
-     * @return array of quizzes details
+     * @return array of gnrquizzes details
      * @since Moodle 3.1
      */
-    public static function get_quizzes_by_courses($courseids = array()) {
+    public static function get_gnrquizzes_by_courses($courseids = array()) {
         global $USER;
 
         $warnings = array();
-        $returnedquizzes = array();
+        $returnedgnrquizzes = array();
 
         $params = array(
             'courseids' => $courseids,
         );
-        $params = self::validate_parameters(self::get_quizzes_by_courses_parameters(), $params);
+        $params = self::validate_parameters(self::get_gnrquizzes_by_courses_parameters(), $params);
 
         $mycourses = array();
         if (empty($params['courseids'])) {
@@ -86,43 +86,43 @@ class mod_gnrquiz_external extends external_api {
 
             list($courses, $warnings) = external_util::validate_courses($params['courseids'], $mycourses);
 
-            // Get the quizzes in this course, this function checks users visibility permissions.
+            // Get the gnrquizzes in this course, this function checks users visibility permissions.
             // We can avoid then additional validate_context calls.
-            $quizzes = get_all_instances_in_courses("quiz", $courses);
-            foreach ($quizzes as $quiz) {
-                $context = context_module::instance($quiz->coursemodule);
+            $gnrquizzes = get_all_instances_in_courses("gnrquiz", $courses);
+            foreach ($gnrquizzes as $gnrquiz) {
+                $context = context_module::instance($gnrquiz->coursemodule);
 
-                // Update quiz with override information.
-                $quiz = gnrquiz_update_effective_access($quiz, $USER->id);
+                // Update gnrquiz with override information.
+                $gnrquiz = gnrquiz_update_effective_access($gnrquiz, $USER->id);
 
                 // Entry to return.
-                $quizdetails = array();
+                $gnrquizdetails = array();
                 // First, we return information that any user can see in the web interface.
-                $quizdetails['id'] = $quiz->id;
-                $quizdetails['coursemodule']      = $quiz->coursemodule;
-                $quizdetails['course']            = $quiz->course;
-                $quizdetails['name']              = external_format_string($quiz->name, $context->id);
+                $gnrquizdetails['id'] = $gnrquiz->id;
+                $gnrquizdetails['coursemodule']      = $gnrquiz->coursemodule;
+                $gnrquizdetails['course']            = $gnrquiz->course;
+                $gnrquizdetails['name']              = external_format_string($gnrquiz->name, $context->id);
 
                 if (has_capability('mod/gnrquiz:view', $context)) {
                     // Format intro.
-                    list($quizdetails['intro'], $quizdetails['introformat']) = external_format_text($quiz->intro,
-                                                                    $quiz->introformat, $context->id, 'mod_quiz', 'intro', null);
+                    list($gnrquizdetails['intro'], $gnrquizdetails['introformat']) = external_format_text($gnrquiz->intro,
+                                                                    $gnrquiz->introformat, $context->id, 'mod_gnrquiz', 'intro', null);
 
                     $viewablefields = array('timeopen', 'timeclose', 'grademethod', 'section', 'visible', 'groupmode',
                                             'groupingid');
 
                     $timenow = time();
-                    $quizobj = quiz::create($quiz->id, $USER->id);
-                    $accessmanager = new gnrquiz_access_manager($quizobj, $timenow, has_capability('mod/gnrquiz:ignoretimelimits',
+                    $gnrquizobj = gnrquiz::create($gnrquiz->id, $USER->id);
+                    $accessmanager = new gnrquiz_access_manager($gnrquizobj, $timenow, has_capability('mod/gnrquiz:ignoretimelimits',
                                                                 $context, null, false));
 
-                    // Fields the user could see if have access to the quiz.
+                    // Fields the user could see if have access to the gnrquiz.
                     if (!$accessmanager->prevent_access()) {
                         // Some times this function returns just empty.
-                        $hasfeedback = gnrquiz_has_feedback($quiz);
-                        $quizdetails['hasfeedback'] = (!empty($hasfeedback)) ? 1 : 0;
-                        $quizdetails['hasquestions'] = (int) $quizobj->has_questions();
-                        $quizdetails['autosaveperiod'] = get_config('gnrquiz', 'autosaveperiod');
+                        $hasfeedback = gnrquiz_has_feedback($gnrquiz);
+                        $gnrquizdetails['hasfeedback'] = (!empty($hasfeedback)) ? 1 : 0;
+                        $gnrquizdetails['hasquestions'] = (int) $gnrquizobj->has_questions();
+                        $gnrquizdetails['autosaveperiod'] = get_config('quiz', 'autosaveperiod');
 
                         $additionalfields = array('timelimit', 'attempts', 'attemptonlast', 'grademethod', 'decimalpoints',
                                                     'questiondecimalpoints', 'reviewattempt', 'reviewcorrectness', 'reviewmarks',
@@ -141,41 +141,41 @@ class mod_gnrquiz_external extends external_api {
                     }
 
                     foreach ($viewablefields as $field) {
-                        $quizdetails[$field] = $quiz->{$field};
+                        $gnrquizdetails[$field] = $gnrquiz->{$field};
                     }
                 }
-                $returnedquizzes[] = $quizdetails;
+                $returnedgnrquizzes[] = $gnrquizdetails;
             }
         }
         $result = array();
-        $result['gnrquizzes'] = $returnedquizzes;
+        $result['gnrquizzes'] = $returnedgnrquizzes;
         $result['warnings'] = $warnings;
         return $result;
     }
 
     /**
-     * Describes the get_quizzes_by_courses return value.
+     * Describes the get_gnrquizzes_by_courses return value.
      *
      * @return external_single_structure
      * @since Moodle 3.1
      */
-    public static function get_quizzes_by_courses_returns() {
+    public static function get_gnrquizzes_by_courses_returns() {
         return new external_single_structure(
             array(
                 'gnrquizzes' => new external_multiple_structure(
                     new external_single_structure(
                         array(
                             'id' => new external_value(PARAM_INT, 'Standard Moodle primary key.'),
-                            'course' => new external_value(PARAM_INT, 'Foreign key reference to the course this quiz is part of.'),
+                            'course' => new external_value(PARAM_INT, 'Foreign key reference to the course this gnrquiz is part of.'),
                             'coursemodule' => new external_value(PARAM_INT, 'Course module id.'),
                             'name' => new external_value(PARAM_RAW, 'Quiz name.'),
                             'intro' => new external_value(PARAM_RAW, 'Quiz introduction text.', VALUE_OPTIONAL),
                             'introformat' => new external_format_value('intro', VALUE_OPTIONAL),
-                            'timeopen' => new external_value(PARAM_INT, 'The time when this quiz opens. (0 = no restriction.)',
+                            'timeopen' => new external_value(PARAM_INT, 'The time when this gnrquiz opens. (0 = no restriction.)',
                                                                 VALUE_OPTIONAL),
-                            'timeclose' => new external_value(PARAM_INT, 'The time when this quiz closes. (0 = no restriction.)',
+                            'timeclose' => new external_value(PARAM_INT, 'The time when this gnrquiz closes. (0 = no restriction.)',
                                                                 VALUE_OPTIONAL),
-                            'timelimit' => new external_value(PARAM_INT, 'The time limit for quiz attempts, in seconds.',
+                            'timelimit' => new external_value(PARAM_INT, 'The time limit for gnrquiz attempts, in seconds.',
                                                                 VALUE_OPTIONAL),
                             'overduehandling' => new external_value(PARAM_ALPHA, 'The method used to handle overdue attempts.
                                                                     \'autosubmit\', \'graceperiod\' or \'autoabandon\'.',
@@ -186,60 +186,60 @@ class mod_gnrquiz_external extends external_api {
                             'preferredbehaviour' => new external_value(PARAM_ALPHANUMEXT, 'The behaviour to ask questions to use.',
                                                                         VALUE_OPTIONAL),
                             'canredoquestions' => new external_value(PARAM_INT, 'Allows students to redo any completed question
-                                                                        within a quiz attempt.', VALUE_OPTIONAL),
+                                                                        within a gnrquiz attempt.', VALUE_OPTIONAL),
                             'attempts' => new external_value(PARAM_INT, 'The maximum number of attempts a student is allowed.',
                                                                 VALUE_OPTIONAL),
                             'attemptonlast' => new external_value(PARAM_INT, 'Whether subsequent attempts start from the answer
                                                                     to the previous attempt (1) or start blank (0).',
                                                                     VALUE_OPTIONAL),
-                            'grademethod' => new external_value(PARAM_INT, 'One of the values QUIZ_GRADEHIGHEST, QUIZ_GRADEAVERAGE,
-                                                                    QUIZ_ATTEMPTFIRST or QUIZ_ATTEMPTLAST.', VALUE_OPTIONAL),
+                            'grademethod' => new external_value(PARAM_INT, 'One of the values GNRQUIZ_GRADEHIGHEST, GNRQUIZ_GRADEAVERAGE,
+                                                                    GNRQUIZ_ATTEMPTFIRST or GNRQUIZ_ATTEMPTLAST.', VALUE_OPTIONAL),
                             'decimalpoints' => new external_value(PARAM_INT, 'Number of decimal points to use when displaying
                                                                     grades.', VALUE_OPTIONAL),
                             'questiondecimalpoints' => new external_value(PARAM_INT, 'Number of decimal points to use when
                                                                             displaying question grades.
                                                                             (-1 means use decimalpoints.)', VALUE_OPTIONAL),
-                            'reviewattempt' => new external_value(PARAM_INT, 'Whether users are allowed to review their quiz
+                            'reviewattempt' => new external_value(PARAM_INT, 'Whether users are allowed to review their gnrquiz
                                                                     attempts at various times. This is a bit field, decoded by the
                                                                     mod_gnrquiz_display_options class. It is formed by ORing together
                                                                     the constants defined there.', VALUE_OPTIONAL),
-                            'reviewcorrectness' => new external_value(PARAM_INT, 'Whether users are allowed to review their quiz
+                            'reviewcorrectness' => new external_value(PARAM_INT, 'Whether users are allowed to review their gnrquiz
                                                                         attempts at various times.
                                                                         A bit field, like reviewattempt.', VALUE_OPTIONAL),
-                            'reviewmarks' => new external_value(PARAM_INT, 'Whether users are allowed to review their quiz attempts
+                            'reviewmarks' => new external_value(PARAM_INT, 'Whether users are allowed to review their gnrquiz attempts
                                                                 at various times. A bit field, like reviewattempt.',
                                                                 VALUE_OPTIONAL),
                             'reviewspecificfeedback' => new external_value(PARAM_INT, 'Whether users are allowed to review their
-                                                                            quiz attempts at various times. A bit field, like
+                                                                            gnrquiz attempts at various times. A bit field, like
                                                                             reviewattempt.', VALUE_OPTIONAL),
                             'reviewgeneralfeedback' => new external_value(PARAM_INT, 'Whether users are allowed to review their
-                                                                            quiz attempts at various times. A bit field, like
+                                                                            gnrquiz attempts at various times. A bit field, like
                                                                             reviewattempt.', VALUE_OPTIONAL),
-                            'reviewrightanswer' => new external_value(PARAM_INT, 'Whether users are allowed to review their quiz
+                            'reviewrightanswer' => new external_value(PARAM_INT, 'Whether users are allowed to review their gnrquiz
                                                                         attempts at various times. A bit field, like
                                                                         reviewattempt.', VALUE_OPTIONAL),
-                            'reviewoverallfeedback' => new external_value(PARAM_INT, 'Whether users are allowed to review their quiz
+                            'reviewoverallfeedback' => new external_value(PARAM_INT, 'Whether users are allowed to review their gnrquiz
                                                                             attempts at various times. A bit field, like
                                                                             reviewattempt.', VALUE_OPTIONAL),
                             'questionsperpage' => new external_value(PARAM_INT, 'How often to insert a page break when editing
-                                                                        the quiz, or when shuffling the question order.',
+                                                                        the gnrquiz, or when shuffling the question order.',
                                                                         VALUE_OPTIONAL),
                             'navmethod' => new external_value(PARAM_ALPHA, 'Any constraints on how the user is allowed to navigate
-                                                                around the quiz. Currently recognised values are
+                                                                around the gnrquiz. Currently recognised values are
                                                                 \'free\' and \'seq\'.', VALUE_OPTIONAL),
                             'shuffleanswers' => new external_value(PARAM_INT, 'Whether the parts of the question should be shuffled,
                                                                     in those question types that support it.', VALUE_OPTIONAL),
                             'sumgrades' => new external_value(PARAM_FLOAT, 'The total of all the question instance maxmarks.',
                                                                 VALUE_OPTIONAL),
-                            'grade' => new external_value(PARAM_FLOAT, 'The total that the quiz overall grade is scaled to be
+                            'grade' => new external_value(PARAM_FLOAT, 'The total that the gnrquiz overall grade is scaled to be
                                                             out of.', VALUE_OPTIONAL),
-                            'timecreated' => new external_value(PARAM_INT, 'The time when the quiz was added to the course.',
+                            'timecreated' => new external_value(PARAM_INT, 'The time when the gnrquiz was added to the course.',
                                                                 VALUE_OPTIONAL),
                             'timemodified' => new external_value(PARAM_INT, 'Last modified time.',
                                                                     VALUE_OPTIONAL),
                             'password' => new external_value(PARAM_RAW, 'A password that the student must enter before starting or
-                                                                continuing a quiz attempt.', VALUE_OPTIONAL),
-                            'subnet' => new external_value(PARAM_RAW, 'Used to restrict the IP addresses from which this quiz can
+                                                                continuing a gnrquiz attempt.', VALUE_OPTIONAL),
+                            'subnet' => new external_value(PARAM_RAW, 'Used to restrict the IP addresses from which this gnrquiz can
                                                             be attempted. The format is as requried by the address_in_subnet
                                                             function.', VALUE_OPTIONAL),
                             'browsersecurity' => new external_value(PARAM_ALPHANUMEXT, 'Restriciton on the browser the student must
@@ -252,14 +252,14 @@ class mod_gnrquiz_external extends external_api {
                                                                     attempt and on the review page.', VALUE_OPTIONAL),
                             'showblocks' => new external_value(PARAM_INT, 'Whether blocks should be shown on the attempt.php and
                                                                 review.php pages.', VALUE_OPTIONAL),
-                            'completionattemptsexhausted' => new external_value(PARAM_INT, 'Mark quiz complete when the student has
+                            'completionattemptsexhausted' => new external_value(PARAM_INT, 'Mark gnrquiz complete when the student has
                                                                                 exhausted the maximum number of attempts',
                                                                                 VALUE_OPTIONAL),
                             'completionpass' => new external_value(PARAM_INT, 'Whether to require passing grade', VALUE_OPTIONAL),
                             'autosaveperiod' => new external_value(PARAM_INT, 'Auto-save delay', VALUE_OPTIONAL),
-                            'hasfeedback' => new external_value(PARAM_INT, 'Whether the quiz has any non-blank feedback text',
+                            'hasfeedback' => new external_value(PARAM_INT, 'Whether the gnrquiz has any non-blank feedback text',
                                                                 VALUE_OPTIONAL),
-                            'hasquestions' => new external_value(PARAM_INT, 'Whether the quiz has questions', VALUE_OPTIONAL),
+                            'hasquestions' => new external_value(PARAM_INT, 'Whether the gnrquiz has questions', VALUE_OPTIONAL),
                             'section' => new external_value(PARAM_INT, 'Course section id', VALUE_OPTIONAL),
                             'visible' => new external_value(PARAM_INT, 'Module visibility', VALUE_OPTIONAL),
                             'groupmode' => new external_value(PARAM_INT, 'Group mode', VALUE_OPTIONAL),
@@ -274,27 +274,27 @@ class mod_gnrquiz_external extends external_api {
 
 
     /**
-     * Utility function for validating a quiz.
+     * Utility function for validating a gnrquiz.
      *
-     * @param int $quizid quiz instance id
-     * @return array array containing the quiz, course, context and course module objects
+     * @param int $gnrquizid gnrquiz instance id
+     * @return array array containing the gnrquiz, course, context and course module objects
      * @since  Moodle 3.1
      */
-    protected static function validate_quiz($quizid) {
+    protected static function validate_gnrquiz($gnrquizid) {
         global $DB;
 
         // Request and permission validation.
-        $quiz = $DB->get_record('gnrquiz', array('id' => $quizid), '*', MUST_EXIST);
-        list($course, $cm) = get_course_and_cm_from_instance($quiz, 'gnrquiz');
+        $gnrquiz = $DB->get_record('gnrquiz', array('id' => $gnrquizid), '*', MUST_EXIST);
+        list($course, $cm) = get_course_and_cm_from_instance($gnrquiz, 'gnrquiz');
 
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
-        return array($quiz, $course, $cm, $context);
+        return array($gnrquiz, $course, $cm, $context);
     }
 
     /**
-     * Describes the parameters for view_quiz.
+     * Describes the parameters for view_gnrquiz.
      *
      * @return external_external_function_parameters
      * @since Moodle 3.1
@@ -310,21 +310,21 @@ class mod_gnrquiz_external extends external_api {
     /**
      * Trigger the course module viewed event and update the module completion status.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @return array of warnings and status result
      * @since Moodle 3.1
      * @throws moodle_exception
      */
-    public static function view_quiz($quizid) {
+    public static function view_gnrquiz($gnrquizid) {
         global $DB;
 
-        $params = self::validate_parameters(self::view_gnrquiz_parameters(), array('gnrquizid' => $quizid));
+        $params = self::validate_parameters(self::view_gnrquiz_parameters(), array('gnrquizid' => $gnrquizid));
         $warnings = array();
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
         // Trigger course_module_viewed event and completion.
-        gnrquiz_view($quiz, $course, $cm, $context);
+        gnrquiz_view($gnrquiz, $course, $cm, $context);
 
         $result = array();
         $result['status'] = true;
@@ -333,7 +333,7 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Describes the view_quiz return value.
+     * Describes the view_gnrquiz return value.
      *
      * @return external_single_structure
      * @since Moodle 3.1
@@ -366,30 +366,30 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Return a list of attempts for the given quiz and user.
+     * Return a list of attempts for the given gnrquiz and user.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @param int $userid user id
-     * @param string $status quiz status: all, finished or unfinished
+     * @param string $status gnrquiz status: all, finished or unfinished
      * @param bool $includepreviews whether to include previews or not
      * @return array of warnings and the list of attempts
      * @since Moodle 3.1
      * @throws invalid_parameter_exception
      */
-    public static function get_user_attempts($quizid, $userid = 0, $status = 'finished', $includepreviews = false) {
+    public static function get_user_attempts($gnrquizid, $userid = 0, $status = 'finished', $includepreviews = false) {
         global $DB, $USER;
 
         $warnings = array();
 
         $params = array(
-            'gnrquizid' => $quizid,
+            'gnrquizid' => $gnrquizid,
             'userid' => $userid,
             'status' => $status,
             'includepreviews' => $includepreviews,
         );
         $params = self::validate_parameters(self::get_user_attempts_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
         if (!in_array($params['status'], array('all', 'finished', 'unfinished'))) {
             throw new invalid_parameter_exception('Invalid status value');
@@ -408,7 +408,7 @@ class mod_gnrquiz_external extends external_api {
             require_capability('mod/gnrquiz:viewreports', $context);
         }
 
-        $attempts = gnrquiz_get_user_attempts($quiz->id, $user->id, $params['status'], $params['includepreviews']);
+        $attempts = gnrquiz_get_user_attempts($gnrquiz->id, $user->id, $params['status'], $params['includepreviews']);
 
         $result = array();
         $result['attempts'] = $attempts;
@@ -425,14 +425,14 @@ class mod_gnrquiz_external extends external_api {
         return new external_single_structure(
             array(
                 'id' => new external_value(PARAM_INT, 'Attempt id.', VALUE_OPTIONAL),
-                'gnrquiz' => new external_value(PARAM_INT, 'Foreign key reference to the quiz that was attempted.',
+                'gnrquiz' => new external_value(PARAM_INT, 'Foreign key reference to the gnrquiz that was attempted.',
                                                 VALUE_OPTIONAL),
                 'userid' => new external_value(PARAM_INT, 'Foreign key reference to the user whose attempt this is.',
                                                 VALUE_OPTIONAL),
-                'attempt' => new external_value(PARAM_INT, 'Sequentially numbers this students attempts at this quiz.',
+                'attempt' => new external_value(PARAM_INT, 'Sequentially numbers this students attempts at this gnrquiz.',
                                                 VALUE_OPTIONAL),
                 'uniqueid' => new external_value(PARAM_INT, 'Foreign key reference to the question_usage that holds the
-                                                    details of the the question_attempts that make up this quiz
+                                                    details of the the question_attempts that make up this gnrquiz
                                                     attempt.', VALUE_OPTIONAL),
                 'layout' => new external_value(PARAM_RAW, 'Attempt layout.', VALUE_OPTIONAL),
                 'currentpage' => new external_value(PARAM_INT, 'Attempt current page.', VALUE_OPTIONAL),
@@ -443,7 +443,7 @@ class mod_gnrquiz_external extends external_api {
                 'timefinish' => new external_value(PARAM_INT, 'Time when the attempt was submitted.
                                                     0 if the attempt has not been submitted yet.', VALUE_OPTIONAL),
                 'timemodified' => new external_value(PARAM_INT, 'Last modified time.', VALUE_OPTIONAL),
-                'timecheckstate' => new external_value(PARAM_INT, 'Next time quiz cron should check attempt for
+                'timecheckstate' => new external_value(PARAM_INT, 'Next time gnrquiz cron should check attempt for
                                                         state changes.  NULL means never check.', VALUE_OPTIONAL),
                 'sumgrades' => new external_value(PARAM_FLOAT, 'Total marks for this attempt.', VALUE_OPTIONAL),
             )
@@ -481,25 +481,25 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Get the best current grade for the given user on a quiz.
+     * Get the best current grade for the given user on a gnrquiz.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @param int $userid user id
      * @return array of warnings and the grade information
      * @since Moodle 3.1
      */
-    public static function get_user_best_grade($quizid, $userid = 0) {
+    public static function get_user_best_grade($gnrquizid, $userid = 0) {
         global $DB, $USER;
 
         $warnings = array();
 
         $params = array(
-            'gnrquizid' => $quizid,
+            'gnrquizid' => $gnrquizid,
             'userid' => $userid,
         );
         $params = self::validate_parameters(self::get_user_best_grade_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
         // Default value for userid.
         if (empty($params['userid'])) {
@@ -515,7 +515,7 @@ class mod_gnrquiz_external extends external_api {
         }
 
         $result = array();
-        $grade = gnrquiz_get_best_grade($quiz, $user->id);
+        $grade = gnrquiz_get_best_grade($gnrquiz, $user->id);
 
         if ($grade === null) {
             $result['hasgrade'] = false;
@@ -536,7 +536,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_user_best_grade_returns() {
         return new external_single_structure(
             array(
-                'hasgrade' => new external_value(PARAM_BOOL, 'Whether the user has a grade on the given quiz.'),
+                'hasgrade' => new external_value(PARAM_BOOL, 'Whether the user has a grade on the given gnrquiz.'),
                 'grade' => new external_value(PARAM_FLOAT, 'The grade (only if the user has a grade).', VALUE_OPTIONAL),
                 'warnings' => new external_warnings(),
             )
@@ -560,25 +560,25 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Combines the review options from a number of different quiz attempts.
+     * Combines the review options from a number of different gnrquiz attempts.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @param int $userid user id (empty for current user)
      * @return array of warnings and the review options
      * @since Moodle 3.1
      */
-    public static function get_combined_review_options($quizid, $userid = 0) {
+    public static function get_combined_review_options($gnrquizid, $userid = 0) {
         global $DB, $USER;
 
         $warnings = array();
 
         $params = array(
-            'gnrquizid' => $quizid,
+            'gnrquizid' => $gnrquizid,
             'userid' => $userid,
         );
         $params = self::validate_parameters(self::get_combined_review_options_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
         // Default value for userid.
         if (empty($params['userid'])) {
@@ -593,13 +593,13 @@ class mod_gnrquiz_external extends external_api {
             require_capability('mod/gnrquiz:viewreports', $context);
         }
 
-        $attempts = gnrquiz_get_user_attempts($quiz->id, $user->id, 'all', true);
+        $attempts = gnrquiz_get_user_attempts($gnrquiz->id, $user->id, 'all', true);
 
         $result = array();
         $result['someoptions'] = [];
         $result['alloptions'] = [];
 
-        list($someoptions, $alloptions) = gnrquiz_get_combined_reviewoptions($quiz, $attempts);
+        list($someoptions, $alloptions) = gnrquiz_get_combined_reviewoptions($gnrquiz, $attempts);
 
         foreach (array('someoptions', 'alloptions') as $typeofoption) {
             foreach ($$typeofoption as $key => $value) {
@@ -669,53 +669,53 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Starts a new attempt at a quiz.
+     * Starts a new attempt at a gnrquiz.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @param array $preflightdata preflight required data (like passwords)
      * @param bool $forcenew Whether to force a new attempt or not.
      * @return array of warnings and the attempt basic data
      * @since Moodle 3.1
      * @throws moodle_gnrquiz_exception
      */
-    public static function start_attempt($quizid, $preflightdata = array(), $forcenew = false) {
+    public static function start_attempt($gnrquizid, $preflightdata = array(), $forcenew = false) {
         global $DB, $USER;
 
         $warnings = array();
         $attempt = array();
 
         $params = array(
-            'gnrquizid' => $quizid,
+            'gnrquizid' => $gnrquizid,
             'preflightdata' => $preflightdata,
             'forcenew' => $forcenew,
         );
         $params = self::validate_parameters(self::start_attempt_parameters(), $params);
         $forcenew = $params['forcenew'];
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
-        $quizobj = quiz::create($cm->instance, $USER->id);
+        $gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
 
         // Check questions.
-        if (!$quizobj->has_questions()) {
-            throw new moodle_gnrquiz_exception($quizobj, 'noquestionsfound');
+        if (!$gnrquizobj->has_questions()) {
+            throw new moodle_gnrquiz_exception($gnrquizobj, 'noquestionsfound');
         }
 
         // Create an object to manage all the other (non-roles) access rules.
         $timenow = time();
-        $accessmanager = $quizobj->get_access_manager($timenow);
+        $accessmanager = $gnrquizobj->get_access_manager($timenow);
 
         // Validate permissions for creating a new attempt and start a new preview attempt if required.
         list($currentattemptid, $attemptnumber, $lastattempt, $messages, $page) =
-            gnrquiz_validate_new_attempt($quizobj, $accessmanager, $forcenew, -1, false);
+            gnrquiz_validate_new_attempt($gnrquizobj, $accessmanager, $forcenew, -1, false);
 
         // Check access.
-        if (!$quizobj->is_preview_user() && $messages) {
+        if (!$gnrquizobj->is_preview_user() && $messages) {
             // Create warnings with the exact messages.
             foreach ($messages as $message) {
                 $warnings[] = array(
                     'item' => 'gnrquiz',
-                    'itemid' => $quiz->id,
+                    'itemid' => $gnrquiz->id,
                     'warningcode' => '1',
                     'message' => clean_text($message, PARAM_TEXT)
                 );
@@ -732,7 +732,7 @@ class mod_gnrquiz_external extends external_api {
                 $errors = $accessmanager->validate_preflight_check($provideddata, [], $currentattemptid);
 
                 if (!empty($errors)) {
-                    throw new moodle_gnrquiz_exception($quizobj, array_shift($errors));
+                    throw new moodle_gnrquiz_exception($gnrquizobj, array_shift($errors));
                 }
 
                 // Pre-flight check passed.
@@ -741,12 +741,12 @@ class mod_gnrquiz_external extends external_api {
 
             if ($currentattemptid) {
                 if ($lastattempt->state == gnrquiz_attempt::OVERDUE) {
-                    throw new moodle_gnrquiz_exception($quizobj, 'stateoverdue');
+                    throw new moodle_gnrquiz_exception($gnrquizobj, 'stateoverdue');
                 } else {
-                    throw new moodle_gnrquiz_exception($quizobj, 'attemptstillinprogress');
+                    throw new moodle_gnrquiz_exception($gnrquizobj, 'attemptstillinprogress');
                 }
             }
-            $attempt = gnrquiz_prepare_and_start_new_attempt($quizobj, $attemptnumber, $lastattempt);
+            $attempt = gnrquiz_prepare_and_start_new_attempt($gnrquizobj, $attemptnumber, $lastattempt);
         }
 
         $result = array();
@@ -774,7 +774,7 @@ class mod_gnrquiz_external extends external_api {
      * Utility function for validating a given attempt
      *
      * @param  array $params array of parameters including the attemptid and preflight data
-     * @param  bool $checkaccessrules whether to check the quiz access rules or not
+     * @param  bool $checkaccessrules whether to check the gnrquiz access rules or not
      * @param  bool $failifoverdue whether to return error if the attempt is overdue
      * @return  array containing the attempt object and access messages
      * @throws moodle_gnrquiz_exception
@@ -790,7 +790,7 @@ class mod_gnrquiz_external extends external_api {
 
         // Check that this attempt belongs to this user.
         if ($attemptobj->get_userid() != $USER->id) {
-            throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'notyourattempt');
+            throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'notyourattempt');
         }
 
         // General capabilities check.
@@ -808,18 +808,18 @@ class mod_gnrquiz_external extends external_api {
 
             $messages = $accessmanager->prevent_access();
             if (!$ispreviewuser && $messages) {
-                throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'attempterror');
+                throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'attempterror');
             }
         }
 
         // Attempt closed?.
         if ($attemptobj->is_finished()) {
-            throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'attemptalreadyclosed');
+            throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'attemptalreadyclosed');
         } else if ($failifoverdue && $attemptobj->get_state() == gnrquiz_attempt::OVERDUE) {
-            throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'stateoverdue');
+            throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'stateoverdue');
         }
 
-        // User submitted data (like the quiz password).
+        // User submitted data (like the gnrquiz password).
         if ($accessmanager->is_preflight_check_required($attemptobj->get_attemptid())) {
             $provideddata = array();
             foreach ($params['preflightdata'] as $data) {
@@ -828,7 +828,7 @@ class mod_gnrquiz_external extends external_api {
 
             $errors = $accessmanager->validate_preflight_check($provideddata, [], $params['attemptid']);
             if (!empty($errors)) {
-                throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), array_shift($errors));
+                throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), array_shift($errors));
             }
             // Pre-flight check passed.
             $accessmanager->notify_preflight_check_passed($params['attemptid']);
@@ -837,19 +837,19 @@ class mod_gnrquiz_external extends external_api {
         if (isset($params['page'])) {
             // Check if the page is out of range.
             if ($params['page'] != $attemptobj->force_page_number_into_range($params['page'])) {
-                throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'Invalid page number');
+                throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'Invalid page number');
             }
 
             // Prevent out of sequence access.
             if (!$attemptobj->check_page_access($params['page'])) {
-                throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'Out of sequence access');
+                throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'Out of sequence access');
             }
 
             // Check slots.
             $slots = $attemptobj->get_slots($params['page']);
 
             if (empty($slots)) {
-                throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'noquestionsfound');
+                throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'noquestionsfound');
             }
         }
 
@@ -867,10 +867,10 @@ class mod_gnrquiz_external extends external_api {
             array(
                 'slot' => new external_value(PARAM_INT, 'slot number'),
                 'type' => new external_value(PARAM_ALPHANUMEXT, 'question type, i.e: multichoice'),
-                'page' => new external_value(PARAM_INT, 'page of the quiz this question appears on'),
+                'page' => new external_value(PARAM_INT, 'page of the gnrquiz this question appears on'),
                 'html' => new external_value(PARAM_RAW, 'the question rendered'),
                 'flagged' => new external_value(PARAM_BOOL, 'whether the question is flagged or not'),
-                'number' => new external_value(PARAM_INT, 'question ordering number in the quiz', VALUE_OPTIONAL),
+                'number' => new external_value(PARAM_INT, 'question ordering number in the gnrquiz', VALUE_OPTIONAL),
                 'state' => new external_value(PARAM_ALPHA, 'the state where the question is in', VALUE_OPTIONAL),
                 'status' => new external_value(PARAM_RAW, 'current formatted state of the question', VALUE_OPTIONAL),
                 'mark' => new external_value(PARAM_RAW, 'the mark awarded', VALUE_OPTIONAL),
@@ -882,7 +882,7 @@ class mod_gnrquiz_external extends external_api {
     /**
      * Return questions information for a given attempt.
      *
-     * @param  gnrquiz_attempt  $attemptobj  the quiz attempt object
+     * @param  gnrquiz_attempt  $attemptobj  the gnrquiz attempt object
      * @param  bool  $review  whether if we are in review mode or not
      * @param  mixed  $page  string 'all' or integer page number
      * @return array array of questions including data
@@ -891,9 +891,9 @@ class mod_gnrquiz_external extends external_api {
         global $PAGE;
 
         $questions = array();
-        $contextid = $attemptobj->get_quizobj()->get_context()->id;
+        $contextid = $attemptobj->get_gnrquizobj()->get_context()->id;
         $displayoptions = $attemptobj->get_display_options($review);
-        $renderer = $PAGE->get_renderer('mod_quiz');
+        $renderer = $PAGE->get_renderer('mod_gnrquiz');
 
         foreach ($attemptobj->get_slots($page) as $slot) {
 
@@ -946,7 +946,7 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Returns information for the given attempt page for a quiz attempt in progress.
+     * Returns information for the given attempt page for a gnrquiz attempt in progress.
      *
      * @param int $attemptid attempt id
      * @param int $page page number
@@ -1028,7 +1028,7 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Returns a summary of a quiz attempt before it is submitted.
+     * Returns a summary of a gnrquiz attempt before it is submitted.
      *
      * @param int $attemptid attempt id
      * @param int $preflightdata preflight required data (like passwords)
@@ -1100,7 +1100,7 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Processes save requests during the quiz. This function is intended for the quiz auto-save feature.
+     * Processes save requests during the gnrquiz. This function is intended for the gnrquiz auto-save feature.
      *
      * @param int $attemptid attempt id
      * @param array $data the data to be saved
@@ -1189,7 +1189,7 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Process responses during an attempt at a quiz and also deals with attempts finishing.
+     * Process responses during an attempt at a gnrquiz and also deals with attempts finishing.
      *
      * @param int $attemptid attempt id
      * @param array $data the data to be saved
@@ -1263,12 +1263,12 @@ class mod_gnrquiz_external extends external_api {
         $displayoptions = $attemptobj->get_display_options(true);
         if ($attemptobj->is_own_attempt()) {
             if (!$attemptobj->is_finished()) {
-                throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'attemptclosed');
+                throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'attemptclosed');
             } else if (!$displayoptions->attempt) {
                 throw new moodle_exception($attemptobj->cannot_review_message());
             }
         } else if (!$attemptobj->is_review_allowed()) {
-            throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'noreviewattempt');
+            throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'noreviewattempt');
         }
         return array($attemptobj, $displayoptions);
     }
@@ -1330,13 +1330,13 @@ class mod_gnrquiz_external extends external_api {
             // This text does not need formatting (no need for external_format_[string|text]).
             $result['additionaldata'][] = array(
                 'id' => $key,
-                'title' => $data['title'], $attemptobj->get_quizobj()->get_context()->id,
+                'title' => $data['title'], $attemptobj->get_gnrquizobj()->get_context()->id,
                 'content' => $data['content'],
             );
         }
 
         // Feedback if there is any, and the user is allowed to see it now.
-        $grade = gnrquiz_rescale_grade($attemptobj->get_attempt()->sumgrades, $attemptobj->get_quiz(), false);
+        $grade = gnrquiz_rescale_grade($attemptobj->get_attempt()->sumgrades, $attemptobj->get_gnrquiz(), false);
 
         $feedback = $attemptobj->get_overall_feedback($grade);
         if ($displayoptions->overallfeedback && $feedback) {
@@ -1361,7 +1361,7 @@ class mod_gnrquiz_external extends external_api {
     public static function get_attempt_review_returns() {
         return new external_single_structure(
             array(
-                'grade' => new external_value(PARAM_RAW, 'grade for the quiz (or empty or "notyetgraded")'),
+                'grade' => new external_value(PARAM_RAW, 'grade for the gnrquiz (or empty or "notyetgraded")'),
                 'attempt' => self::attempt_structure(),
                 'additionaldata' => new external_multiple_structure(
                     new external_single_structure(
@@ -1427,7 +1427,7 @@ class mod_gnrquiz_external extends external_api {
 
         // Update attempt page, throwing an exception if $page is not valid.
         if (!$attemptobj->set_currentpage($params['page'])) {
-            throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'Out of sequence access');
+            throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'Out of sequence access');
         }
 
         $result = array();
@@ -1572,7 +1572,7 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Describes the parameters for view_quiz.
+     * Describes the parameters for view_gnrquiz.
      *
      * @return external_external_function_parameters
      * @since Moodle 3.1
@@ -1587,34 +1587,34 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Get the feedback text that should be show to a student who got the given grade in the given quiz.
+     * Get the feedback text that should be show to a student who got the given grade in the given gnrquiz.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @param float $grade the grade to check
      * @return array of warnings and status result
      * @since Moodle 3.1
      * @throws moodle_exception
      */
-    public static function get_gnrquiz_feedback_for_grade($quizid, $grade) {
+    public static function get_gnrquiz_feedback_for_grade($gnrquizid, $grade) {
         global $DB;
 
         $params = array(
-            'gnrquizid' => $quizid,
+            'gnrquizid' => $gnrquizid,
             'grade' => $grade,
         );
         $params = self::validate_parameters(self::get_gnrquiz_feedback_for_grade_parameters(), $params);
         $warnings = array();
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
         $result = array();
         $result['feedbacktext'] = '';
         $result['feedbacktextformat'] = FORMAT_MOODLE;
 
-        $feedback = gnrquiz_feedback_record_for_grade($params['grade'], $quiz);
+        $feedback = gnrquiz_feedback_record_for_grade($params['grade'], $gnrquiz);
         if (!empty($feedback->feedbacktext)) {
             list($text, $format) = external_format_text($feedback->feedbacktext, $feedback->feedbacktextformat, $context->id,
-                                                        'mod_quiz', 'feedback', $feedback->id);
+                                                        'mod_gnrquiz', 'feedback', $feedback->id);
             $result['feedbacktext'] = $text;
             $result['feedbacktextformat'] = $format;
         }
@@ -1654,24 +1654,24 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Return access information for a given quiz.
+     * Return access information for a given gnrquiz.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @return array of warnings and the access information
      * @since Moodle 3.1
      * @throws  moodle_gnrquiz_exception
      */
-    public static function get_gnrquiz_access_information($quizid) {
+    public static function get_gnrquiz_access_information($gnrquizid) {
         global $DB, $USER;
 
         $warnings = array();
 
         $params = array(
-            'gnrquizid' => $quizid
+            'gnrquizid' => $gnrquizid
         );
         $params = self::validate_parameters(self::get_gnrquiz_access_information_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
         $result = array();
         // Capabilities first.
@@ -1682,10 +1682,10 @@ class mod_gnrquiz_external extends external_api {
         $result['canviewreports'] = has_capability('mod/gnrquiz:viewreports', $context);;
 
         // Access manager now.
-        $quizobj = quiz::create($cm->instance, $USER->id);
+        $gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
         $ignoretimelimits = has_capability('mod/gnrquiz:ignoretimelimits', $context, null, false);
         $timenow = time();
-        $accessmanager = new gnrquiz_access_manager($quizobj, $timenow, $ignoretimelimits);
+        $accessmanager = new gnrquiz_access_manager($gnrquizobj, $timenow, $ignoretimelimits);
 
         $result['accessrules'] = $accessmanager->describe_rules();
         $result['activerulenames'] = $accessmanager->get_active_rule_names();
@@ -1704,12 +1704,12 @@ class mod_gnrquiz_external extends external_api {
     public static function get_gnrquiz_access_information_returns() {
         return new external_single_structure(
             array(
-                'canattempt' => new external_value(PARAM_BOOL, 'Whether the user can do the quiz or not.'),
-                'canmanage' => new external_value(PARAM_BOOL, 'Whether the user can edit the quiz settings or not.'),
-                'canpreview' => new external_value(PARAM_BOOL, 'Whether the user can preview the quiz or not.'),
+                'canattempt' => new external_value(PARAM_BOOL, 'Whether the user can do the gnrquiz or not.'),
+                'canmanage' => new external_value(PARAM_BOOL, 'Whether the user can edit the gnrquiz settings or not.'),
+                'canpreview' => new external_value(PARAM_BOOL, 'Whether the user can preview the gnrquiz or not.'),
                 'canreviewmyattempts' => new external_value(PARAM_BOOL, 'Whether the users can review their previous attempts
                                                                 or not.'),
-                'canviewreports' => new external_value(PARAM_BOOL, 'Whether the user can view the quiz reports or not.'),
+                'canviewreports' => new external_value(PARAM_BOOL, 'Whether the user can view the gnrquiz reports or not.'),
                 'accessrules' => new external_multiple_structure(
                                     new external_value(PARAM_TEXT, 'rule description'), 'list of rules'),
                 'activerulenames' => new external_multiple_structure(
@@ -1737,49 +1737,49 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Return access information for a given attempt in a quiz.
+     * Return access information for a given attempt in a gnrquiz.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @param int $attemptid attempt id, 0 for the user last attempt if exists
      * @return array of warnings and the access information
      * @since Moodle 3.1
      * @throws  moodle_gnrquiz_exception
      */
-    public static function get_attempt_access_information($quizid, $attemptid = 0) {
+    public static function get_attempt_access_information($gnrquizid, $attemptid = 0) {
         global $DB, $USER;
 
         $warnings = array();
 
         $params = array(
-            'gnrquizid' => $quizid,
+            'gnrquizid' => $gnrquizid,
             'attemptid' => $attemptid,
         );
         $params = self::validate_parameters(self::get_attempt_access_information_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
         $attempttocheck = 0;
         if (!empty($params['attemptid'])) {
             $attemptobj = gnrquiz_attempt::create($params['attemptid']);
             if ($attemptobj->get_userid() != $USER->id) {
-                throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'notyourattempt');
+                throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'notyourattempt');
             }
             $attempttocheck = $attemptobj->get_attempt();
         }
 
         // Access manager now.
-        $quizobj = quiz::create($cm->instance, $USER->id);
+        $gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
         $ignoretimelimits = has_capability('mod/gnrquiz:ignoretimelimits', $context, null, false);
         $timenow = time();
-        $accessmanager = new gnrquiz_access_manager($quizobj, $timenow, $ignoretimelimits);
+        $accessmanager = new gnrquiz_access_manager($gnrquizobj, $timenow, $ignoretimelimits);
 
-        $attempts = gnrquiz_get_user_attempts($quiz->id, $USER->id, 'finished', true);
+        $attempts = gnrquiz_get_user_attempts($gnrquiz->id, $USER->id, 'finished', true);
         $lastfinishedattempt = end($attempts);
-        if ($unfinishedattempt = gnrquiz_get_user_attempt_unfinished($quiz->id, $USER->id)) {
+        if ($unfinishedattempt = gnrquiz_get_user_attempt_unfinished($gnrquiz->id, $USER->id)) {
             $attempts[] = $unfinishedattempt;
 
             // Check if the attempt is now overdue. In that case the state will change.
-            $quizobj->create_attempt_object($unfinishedattempt)->handle_if_time_expired(time(), false);
+            $gnrquizobj->create_attempt_object($unfinishedattempt)->handle_if_time_expired(time(), false);
 
             if ($unfinishedattempt->state != gnrquiz_attempt::IN_PROGRESS and $unfinishedattempt->state != gnrquiz_attempt::OVERDUE) {
                 $lastfinishedattempt = $unfinishedattempt;
@@ -1843,33 +1843,33 @@ class mod_gnrquiz_external extends external_api {
     }
 
     /**
-     * Return the potential question types that would be required for a given quiz.
+     * Return the potential question types that would be required for a given gnrquiz.
      * Please note that for random question types we return the potential question types in the category choosen.
      *
-     * @param int $quizid quiz instance id
+     * @param int $gnrquizid gnrquiz instance id
      * @return array of warnings and the access information
      * @since Moodle 3.1
      * @throws  moodle_gnrquiz_exception
      */
-    public static function get_gnrquiz_required_qtypes($quizid) {
+    public static function get_gnrquiz_required_qtypes($gnrquizid) {
         global $DB, $USER;
 
         $warnings = array();
 
         $params = array(
-            'gnrquizid' => $quizid
+            'gnrquizid' => $gnrquizid
         );
         $params = self::validate_parameters(self::get_gnrquiz_required_qtypes_parameters(), $params);
 
-        list($quiz, $course, $cm, $context) = self::validate_quiz($params['gnrquizid']);
+        list($gnrquiz, $course, $cm, $context) = self::validate_gnrquiz($params['gnrquizid']);
 
-        $quizobj = quiz::create($cm->instance, $USER->id);
-        $quizobj->preload_questions();
-        $quizobj->load_questions();
+        $gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
+        $gnrquizobj->preload_questions();
+        $gnrquizobj->load_questions();
 
         // Question types used.
         $result = array();
-        $result['questiontypes'] = $quizobj->get_all_question_types_used(true);
+        $result['questiontypes'] = $gnrquizobj->get_all_question_types_used(true);
         $result['warnings'] = $warnings;
         return $result;
     }
@@ -1884,7 +1884,7 @@ class mod_gnrquiz_external extends external_api {
         return new external_single_structure(
             array(
                 'questiontypes' => new external_multiple_structure(
-                                    new external_value(PARAM_PLUGIN, 'question type'), 'list of question types used in the quiz'),
+                                    new external_value(PARAM_PLUGIN, 'question type'), 'list of question types used in the gnrquiz'),
                 'warnings' => new external_warnings(),
             )
         );

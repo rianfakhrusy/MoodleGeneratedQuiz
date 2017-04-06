@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_gnrquiz-gnrquizbase",
+    "builds": {
+        "moodle-mod_gnrquiz-gnrquizbase": {
+            "jsfiles": [
+                "gnrquizbase.js"
+            ]
+        }
+    }
+}

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_openclosedate plugin.
+ * Implementaton of the gnrquizaccess_openclosedate plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage openclosedate
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,31 +35,31 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_openclosedate extends gnrquiz_access_rule_base {
+class gnrquizaccess_openclosedate extends gnrquiz_access_rule_base {
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
-        // This rule is always used, even if the quiz has no open or close date.
-        return new self($quizobj, $timenow);
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
+        // This rule is always used, even if the gnrquiz has no open or close date.
+        return new self($gnrquizobj, $timenow);
     }
 
     public function description() {
         $result = array();
-        if ($this->timenow < $this->quiz->timeopen) {
+        if ($this->timenow < $this->gnrquiz->timeopen) {
             $result[] = get_string('gnrquiznotavailable', 'gnrquizaccess_openclosedate',
-                    userdate($this->quiz->timeopen));
-            if ($this->quiz->timeclose) {
-                $result[] = get_string('gnrquizcloseson', 'gnrquiz', userdate($this->quiz->timeclose));
+                    userdate($this->gnrquiz->timeopen));
+            if ($this->gnrquiz->timeclose) {
+                $result[] = get_string('gnrquizcloseson', 'gnrquiz', userdate($this->gnrquiz->timeclose));
             }
 
-        } else if ($this->quiz->timeclose && $this->timenow > $this->quiz->timeclose) {
-            $result[] = get_string('gnrquizclosed', 'gnrquiz', userdate($this->quiz->timeclose));
+        } else if ($this->gnrquiz->timeclose && $this->timenow > $this->gnrquiz->timeclose) {
+            $result[] = get_string('gnrquizclosed', 'gnrquiz', userdate($this->gnrquiz->timeclose));
 
         } else {
-            if ($this->quiz->timeopen) {
-                $result[] = get_string('gnrquizopenedon', 'gnrquiz', userdate($this->quiz->timeopen));
+            if ($this->gnrquiz->timeopen) {
+                $result[] = get_string('gnrquizopenedon', 'gnrquiz', userdate($this->gnrquiz->timeopen));
             }
-            if ($this->quiz->timeclose) {
-                $result[] = get_string('gnrquizcloseson', 'gnrquiz', userdate($this->quiz->timeclose));
+            if ($this->gnrquiz->timeclose) {
+                $result[] = get_string('gnrquizcloseson', 'gnrquiz', userdate($this->gnrquiz->timeclose));
             }
         }
 
@@ -69,23 +69,23 @@ class quizaccess_openclosedate extends gnrquiz_access_rule_base {
     public function prevent_access() {
         $message = get_string('notavailable', 'gnrquizaccess_openclosedate');
 
-        if ($this->timenow < $this->quiz->timeopen) {
+        if ($this->timenow < $this->gnrquiz->timeopen) {
             return $message;
         }
 
-        if (!$this->quiz->timeclose) {
+        if (!$this->gnrquiz->timeclose) {
             return false;
         }
 
-        if ($this->timenow <= $this->quiz->timeclose) {
+        if ($this->timenow <= $this->gnrquiz->timeclose) {
             return false;
         }
 
-        if ($this->quiz->overduehandling != 'graceperiod') {
+        if ($this->gnrquiz->overduehandling != 'graceperiod') {
             return $message;
         }
 
-        if ($this->timenow <= $this->quiz->timeclose + $this->quiz->graceperiod) {
+        if ($this->timenow <= $this->gnrquiz->timeclose + $this->gnrquiz->graceperiod) {
             return false;
         }
 
@@ -93,12 +93,12 @@ class quizaccess_openclosedate extends gnrquiz_access_rule_base {
     }
 
     public function is_finished($numprevattempts, $lastattempt) {
-        return $this->quiz->timeclose && $this->timenow > $this->quiz->timeclose;
+        return $this->gnrquiz->timeclose && $this->timenow > $this->gnrquiz->timeclose;
     }
 
     public function end_time($attempt) {
-        if ($this->quiz->timeclose) {
-            return $this->quiz->timeclose;
+        if ($this->gnrquiz->timeclose) {
+            return $this->gnrquiz->timeclose;
         }
         return false;
     }
@@ -106,13 +106,13 @@ class quizaccess_openclosedate extends gnrquiz_access_rule_base {
     public function time_left_display($attempt, $timenow) {
         // If this is a teacher preview after the close date, do not show
         // the time.
-        if ($attempt->preview && $timenow > $this->quiz->timeclose) {
+        if ($attempt->preview && $timenow > $this->gnrquiz->timeclose) {
             return false;
         }
         // Otherwise, return to the time left until the close date, providing that is
-        // less than QUIZ_SHOW_TIME_BEFORE_DEADLINE.
+        // less than GNRQUIZ_SHOW_TIME_BEFORE_DEADLINE.
         $endtime = $this->end_time($attempt);
-        if ($endtime !== false && $timenow > $endtime - QUIZ_SHOW_TIME_BEFORE_DEADLINE) {
+        if ($endtime !== false && $timenow > $endtime - GNRQUIZ_SHOW_TIME_BEFORE_DEADLINE) {
             return $endtime - $timenow;
         }
         return false;

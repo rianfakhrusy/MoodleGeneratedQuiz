@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the renderer for the quiz module.
+ * Defines the renderer for the gnrquiz module.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2011 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * The renderer for the quiz module.
+ * The renderer for the gnrquiz module.
  *
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -100,7 +100,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $output = '';
         $output .= $this->header();
         $output .= $this->heading(format_string($attemptobj->get_gnrquiz_name(), true,
-                                  array("context" => $attemptobj->get_quizobj()->get_context())));
+                                  array("context" => $attemptobj->get_gnrquizobj()->get_context())));
         $output .= $this->notification($message);
         $output .= $this->close_window_button();
         $output .= $this->footer();
@@ -143,7 +143,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
 
         $output = '';
         $output .= html_writer::start_tag('table', array(
-                'class' => 'generaltable generalbox quizreviewsummary'));
+                'class' => 'generaltable generalbox gnrquizreviewsummary'));
         $output .= html_writer::start_tag('tbody');
         foreach ($summarydata as $rowdata) {
             if ($rowdata['title'] instanceof renderable) {
@@ -204,7 +204,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
             return $content;
         }
 
-        $this->page->requires->js_init_call('M.mod_quiz.init_review_form', null, false,
+        $this->page->requires->js_init_call('M.mod_gnrquiz.init_review_form', null, false,
                 gnrquiz_get_js_module());
 
         $output = '';
@@ -234,16 +234,16 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $url = $attemptobj->view_url();
 
         if ($attemptobj->get_access_manager(time())->attempt_must_be_in_popup()) {
-            $this->page->requires->js_init_call('M.mod_quiz.secure_window.init_close_button',
+            $this->page->requires->js_init_call('M.mod_gnrquiz.secure_window.init_close_button',
                     array($url), false, gnrquiz_get_js_module());
             return html_writer::empty_tag('input', array('type' => 'button',
                     'value' => get_string('finishreview', 'gnrquiz'),
                     'id' => 'secureclosebutton',
-                    'class' => 'mod_quiz-next-nav'));
+                    'class' => 'mod_gnrquiz-next-nav'));
 
         } else {
             return html_writer::link($url, get_string('finishreview', 'gnrquiz'),
-                    array('class' => 'mod_quiz-next-nav'));
+                    array('class' => 'mod_gnrquiz-next-nav'));
         }
     }
 
@@ -265,19 +265,19 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $nav = '';
         if ($page > 0) {
             $nav .= link_arrow_left(get_string('navigateprevious', 'gnrquiz'),
-                    $attemptobj->review_url(null, $page - 1, $showall), false, 'mod_quiz-prev-nav');
+                    $attemptobj->review_url(null, $page - 1, $showall), false, 'mod_gnrquiz-prev-nav');
         }
         if ($lastpage) {
             $nav .= $this->finish_review_link($attemptobj);
         } else {
             $nav .= link_arrow_right(get_string('navigatenext', 'gnrquiz'),
-                    $attemptobj->review_url(null, $page + 1, $showall), false, 'mod_quiz-next-nav');
+                    $attemptobj->review_url(null, $page + 1, $showall), false, 'mod_gnrquiz-next-nav');
         }
         return html_writer::tag('div', $nav, array('class' => 'submitbtns'));
     }
 
     /**
-     * Return the HTML of the quiz timer.
+     * Return the HTML of the gnrquiz timer.
      * @return string HTML content.
      */
     public function countdown_timer(gnrquiz_attempt $attemptobj, $timenow) {
@@ -288,7 +288,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
             $timerstartvalue = $timeleft;
             if (!$ispreview) {
                 // Make sure the timer starts just above zero. If $timeleft was <= 0, then
-                // this will just have the effect of causing the quiz to be submitted immediately.
+                // this will just have the effect of causing the gnrquiz to be submitted immediately.
                 $timerstartvalue = max($timerstartvalue, 1);
             }
             $this->initialise_timer($timerstartvalue, $ispreview);
@@ -338,14 +338,14 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $output .= html_writer::tag('div', $panel->render_end_bits($this),
                 array('class' => 'othernav'));
 
-        $this->page->requires->js_init_call('M.mod_quiz.nav.init', null, false,
+        $this->page->requires->js_init_call('M.mod_gnrquiz.nav.init', null, false,
                 gnrquiz_get_js_module());
 
         return $output;
     }
 
     /**
-     * Display a quiz navigation button.
+     * Display a gnrquiz navigation button.
      *
      * @param gnrquiz_nav_question_button $button
      * @return string HTML fragment.
@@ -381,7 +381,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
                         html_writer::tag('span', '', array('class' => 'trafficlight')) .
                         get_string($qnostring, 'gnrquiz', $a);
         $tagattributes = array('class' => implode(' ', $classes), 'id' => $button->id,
-                                  'title' => $button->statestring, 'data-quiz-page' => $button->page);
+                                  'title' => $button->statestring, 'data-gnrquiz-page' => $button->page);
 
         if ($button->url) {
             return html_writer::link($button->url, $tagcontents, $tagattributes);
@@ -391,13 +391,13 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Display a quiz navigation heading.
+     * Display a gnrquiz navigation heading.
      *
      * @param gnrquiz_nav_section_heading $heading the heading.
      * @return string HTML fragment.
      */
     protected function render_gnrquiz_nav_section_heading(gnrquiz_nav_section_heading $heading) {
-        return $this->heading($heading->heading, 3, 'mod_quiz-section-heading');
+        return $this->heading($heading->heading, 3, 'mod_gnrquiz-section-heading');
     }
 
     /**
@@ -420,12 +420,12 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         return implode(', ', $attemptlinks);
     }
 
-    public function start_attempt_page(quiz $quizobj, mod_gnrquiz_preflight_check_form $mform) {
+    public function start_attempt_page(gnrquiz $gnrquizobj, mod_gnrquiz_preflight_check_form $mform) {
         $output = '';
         $output .= $this->header();
-        $output .= $this->heading(format_string($quizobj->get_gnrquiz_name(), true,
-                                  array("context" => $quizobj->get_context())));
-        $output .= $this->gnrquiz_intro($quizobj->get_quiz(), $quizobj->get_cm());
+        $output .= $this->heading(format_string($gnrquizobj->get_gnrquiz_name(), true,
+                                  array("context" => $gnrquizobj->get_context())));
+        $output .= $this->gnrquiz_intro($gnrquizobj->get_gnrquiz(), $gnrquizobj->get_cm());
         $output .= $mform->render();
         $output .= $this->footer();
         return $output;
@@ -490,7 +490,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
                     $attemptobj->attempt_url($slot, $page), $this);
         }
 
-        $navmethod = $attemptobj->get_quiz()->navmethod;
+        $navmethod = $attemptobj->get_gnrquiz()->navmethod;
         $output .= $this->attempt_navigation_buttons($page, $attemptobj->is_last_page($page), $navmethod);
 
         // Some hidden fields to trach what is going on.
@@ -526,8 +526,8 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
      * Display the prev/next buttons that go at the bottom of each page of the attempt.
      *
      * @param int $page the page number. Starts at 0 for the first page.
-     * @param bool $lastpage is this the last page in the quiz?
-     * @param string $navmethod Optional quiz attribute, 'free' (default) or 'sequential'
+     * @param bool $lastpage is this the last page in the gnrquiz?
+     * @param string $navmethod Optional gnrquiz attribute, 'free' (default) or 'sequential'
      * @return string HTML fragment.
      */
     protected function attempt_navigation_buttons($page, $lastpage, $navmethod = 'free') {
@@ -536,7 +536,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $output .= html_writer::start_tag('div', array('class' => 'submitbtns'));
         if ($page > 0 && $navmethod == 'free') {
             $output .= html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'previous',
-                    'value' => get_string('navigateprevious', 'gnrquiz'), 'class' => 'mod_quiz-prev-nav'));
+                    'value' => get_string('navigateprevious', 'gnrquiz'), 'class' => 'mod_gnrquiz-prev-nav'));
         }
         if ($lastpage) {
             $nextlabel = get_string('endtest', 'gnrquiz');
@@ -544,7 +544,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
             $nextlabel = get_string('navigatenext', 'gnrquiz');
         }
         $output .= html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'next',
-                'value' => $nextlabel, 'class' => 'mod_quiz-next-nav'));
+                'value' => $nextlabel, 'class' => 'mod_gnrquiz-next-nav'));
         $output .= html_writer::end_tag('div');
 
         return $output;
@@ -559,7 +559,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
      */
     public function redo_question_button($slot, $disabled) {
         $attributes = array('type' => 'submit',  'name' => 'redoslot' . $slot,
-                'value' => get_string('redoquestion', 'gnrquiz'), 'class' => 'mod_quiz-redo_question_button');
+                'value' => get_string('redoquestion', 'gnrquiz'), 'class' => 'mod_gnrquiz-redo_question_button');
         if ($disabled) {
             $attributes['disabled'] = 'disabled';
         }
@@ -572,7 +572,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
      */
     public function initialise_timer($timerstartvalue, $ispreview) {
         $options = array($timerstartvalue, (bool)$ispreview);
-        $this->page->requires->js_init_call('M.mod_quiz.timer.init', $options, false, gnrquiz_get_js_module());
+        $this->page->requires->js_init_call('M.mod_gnrquiz.timer.init', $options, false, gnrquiz_get_js_module());
     }
 
     /**
@@ -595,7 +595,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
             $output .= html_writer::tag('p', get_string('pleaseclose', 'gnrquiz'));
             $delay = 0;
         }
-        $this->page->requires->js_init_call('M.mod_quiz.secure_window.close',
+        $this->page->requires->js_init_call('M.mod_gnrquiz.secure_window.close',
                 array($url, $delay), false, gnrquiz_get_js_module());
 
         $output .= $this->box_end();
@@ -648,7 +648,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
     public function summary_table($attemptobj, $displayoptions) {
         // Prepare the summary table header.
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable quizsummaryofattempt boxaligncenter';
+        $table->attributes['class'] = 'generaltable gnrquizsummaryofattempt boxaligncenter';
         $table->head = array(get_string('question', 'gnrquiz'), get_string('status', 'gnrquiz'));
         $table->align = array('left', 'left');
         $table->size = array('', '');
@@ -765,21 +765,21 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
      * Generates the view page
      *
      * @param int $course The id of the course
-     * @param array $quiz Array conting quiz data
+     * @param array $gnrquiz Array conting gnrquiz data
      * @param int $cm Course Module ID
      * @param int $context The page context ID
-     * @param array $infomessages information about this quiz
+     * @param array $infomessages information about this gnrquiz
      * @param mod_gnrquiz_view_object $viewobj
      * @param string $buttontext text for the start/continue attempt button, if
      *      it should be shown.
      * @param array $infomessages further information about why the student cannot
-     *      attempt this quiz now, if appicable this quiz
+     *      attempt this gnrquiz now, if appicable this gnrquiz
      */
-    public function view_page($course, $quiz, $cm, $context, $viewobj) {
+    public function view_page($course, $gnrquiz, $cm, $context, $viewobj) {
         $output = '';
-        $output .= $this->view_information($quiz, $cm, $context, $viewobj->infomessages);
-        $output .= $this->view_table($quiz, $context, $viewobj);
-        $output .= $this->view_result_info($quiz, $context, $cm, $viewobj);
+        $output .= $this->view_information($gnrquiz, $cm, $context, $viewobj->infomessages);
+        $output .= $this->view_table($gnrquiz, $context, $viewobj);
+        $output .= $this->view_result_info($gnrquiz, $context, $cm, $viewobj);
         $output .= $this->box($this->view_page_buttons($viewobj), 'gnrquizattempt');
         return $output;
     }
@@ -794,18 +794,20 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
     public function view_page_buttons(mod_gnrquiz_view_object $viewobj) {
         global $CFG;
         $output = '';
-
-        if (!$viewobj->quizhasquestions) {
+        /*
+        //output no question message and show edit quiz button
+        if (!$viewobj->gnrquizhasquestions) {
             $output .= $this->no_questions_message($viewobj->canedit, $viewobj->editurl);
-        }
+        }*/
 
         $output .= $this->access_messages($viewobj->preventmessages);
 
-        if ($viewobj->buttontext) {
+        //attempt quiz now button, if the question is already in the quiz
+        //if ($viewobj->buttontext) {
             $output .= $this->start_attempt_button($viewobj->buttontext,
                     $viewobj->startattempturl, $viewobj->preflightcheckform,
                     $viewobj->popuprequired, $viewobj->popupoptions);
-        }
+        // }
 
         if ($viewobj->showbacktocourse) {
             $output .= $this->single_button($viewobj->backtocourseurl,
@@ -838,7 +840,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         }
 
         $button = new single_button($url, $buttontext);
-        $button->class .= ' quizstartbuttondiv';
+        $button->class .= ' gnrquizstartbuttondiv';
 
         $popupjsoptions = null;
         if ($popuprequired && $popupoptions) {
@@ -852,43 +854,43 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
             $checkform = null;
         }
 
-        $this->page->requires->js_call_amd('mod_quiz/preflightcheck', 'init',
-                array('.quizstartbuttondiv input[type=submit]', get_string('startattempt', 'gnrquiz'),
+        $this->page->requires->js_call_amd('mod_gnrquiz/preflightcheck', 'init',
+                array('.gnrquizstartbuttondiv input[type=submit]', get_string('startattempt', 'gnrquiz'),
                        '#mod_gnrquiz_preflight_form', $popupjsoptions));
 
         return $this->render($button) . $checkform;
     }
 
     /**
-     * Generate a message saying that this quiz has no questions, with a button to
+     * Generate a message saying that this gnrquiz has no questions, with a button to
      * go to the edit page, if the user has the right capability.
-     * @param object $quiz the quiz settings.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param object $cm the course_module object.
-     * @param object $context the quiz context.
+     * @param object $context the gnrquiz context.
      * @return string HTML to output.
      */
     public function no_questions_message($canedit, $editurl) {
         $output = '';
         $output .= $this->notification(get_string('noquestions', 'gnrquiz'));
         if ($canedit) {
-            $output .= $this->single_button($editurl, get_string('editquiz', 'gnrquiz'), 'get');
+            $output .= $this->single_button($editurl, get_string('editgnrquiz', 'gnrquiz'), 'get');
         }
 
         return $output;
     }
 
     /**
-     * Outputs an error message for any guests accessing the quiz
+     * Outputs an error message for any guests accessing the gnrquiz
      *
      * @param int $course The course ID
-     * @param array $quiz Array contingin quiz data
+     * @param array $gnrquiz Array contingin gnrquiz data
      * @param int $cm Course Module ID
      * @param int $context The page contect ID
      * @param array $messages Array containing any messages
      */
-    public function view_page_guest($course, $quiz, $cm, $context, $messages) {
+    public function view_page_guest($course, $gnrquiz, $cm, $context, $messages) {
         $output = '';
-        $output .= $this->view_information($quiz, $cm, $context, $messages);
+        $output .= $this->view_information($gnrquiz, $cm, $context, $messages);
         $guestno = html_writer::tag('p', get_string('guestsno', 'gnrquiz'));
         $liketologin = html_writer::tag('p', get_string('liketologin'));
         $referer = get_local_referer(false);
@@ -900,15 +902,15 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
      * Outputs and error message for anyone who is not enrolle don the course
      *
      * @param int $course The course ID
-     * @param array $quiz Array contingin quiz data
+     * @param array $gnrquiz Array contingin gnrquiz data
      * @param int $cm Course Module ID
      * @param int $context The page contect ID
      * @param array $messages Array containing any messages
      */
-    public function view_page_notenrolled($course, $quiz, $cm, $context, $messages) {
+    public function view_page_notenrolled($course, $gnrquiz, $cm, $context, $messages) {
         global $CFG;
         $output = '';
-        $output .= $this->view_information($quiz, $cm, $context, $messages);
+        $output .= $this->view_information($gnrquiz, $cm, $context, $messages);
         $youneedtoenrol = html_writer::tag('p', get_string('youneedtoenrol', 'gnrquiz'));
         $button = html_writer::tag('p',
                 $this->continue_button($CFG->wwwroot . '/course/view.php?id=' . $course->id));
@@ -919,20 +921,20 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
     /**
      * Output the page information
      *
-     * @param object $quiz the quiz settings.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param object $cm the course_module object.
-     * @param object $context the quiz context.
+     * @param object $context the gnrquiz context.
      * @param array $messages any access messages that should be described.
      * @return string HTML to output.
      */
-    public function view_information($quiz, $cm, $context, $messages) {
+    public function view_information($gnrquiz, $cm, $context, $messages) {
         global $CFG;
 
         $output = '';
 
-        // Print quiz name and description.
-        $output .= $this->heading(format_string($quiz->name));
-        $output .= $this->gnrquiz_intro($quiz, $cm);
+        // Print gnrquiz name and description.
+        $output .= $this->heading(format_string($gnrquiz->name));
+        $output .= $this->gnrquiz_intro($gnrquiz, $cm);
 
         // Output any access messages.
         if ($messages) {
@@ -941,7 +943,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
 
         // Show number of attempts summary to those who can view reports.
         if (has_capability('mod/gnrquiz:viewreports', $context)) {
-            if ($strattemptnum = $this->gnrquiz_attempt_summary_link_to_reports($quiz, $cm,
+            if ($strattemptnum = $this->gnrquiz_attempt_summary_link_to_reports($gnrquiz, $cm,
                     $context)) {
                 $output .= html_writer::tag('div', $strattemptnum,
                         array('class' => 'gnrquizattemptcounts'));
@@ -951,17 +953,17 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Output the quiz intro.
-     * @param object $quiz the quiz settings.
+     * Output the gnrquiz intro.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param object $cm the course_module object.
      * @return string HTML to output.
      */
-    public function gnrquiz_intro($quiz, $cm) {
-        if (html_is_blank($quiz->intro)) {
+    public function gnrquiz_intro($gnrquiz, $cm) {
+        if (html_is_blank($gnrquiz->intro)) {
             return '';
         }
 
-        return $this->box(format_module_intro('gnrquiz', $quiz, $cm->id), 'generalbox', 'intro');
+        return $this->box(format_module_intro('gnrquiz', $gnrquiz, $cm->id), 'generalbox', 'intro');
     }
 
     /**
@@ -974,18 +976,18 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
     /**
      * Generates the table of data
      *
-     * @param array $quiz Array contining quiz data
+     * @param array $gnrquiz Array contining gnrquiz data
      * @param int $context The page context ID
      * @param mod_gnrquiz_view_object $viewobj
      */
-    public function view_table($quiz, $context, $viewobj) {
+    public function view_table($gnrquiz, $context, $viewobj) {
         if (!$viewobj->attempts) {
             return '';
         }
 
         // Prepare table header.
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable quizattemptsummary';
+        $table->attributes['class'] = 'generaltable gnrquizattemptsummary';
         $table->head = array();
         $table->align = array();
         $table->size = array();
@@ -999,13 +1001,13 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $table->size[] = '';
         if ($viewobj->markcolumn) {
             $table->head[] = get_string('marks', 'gnrquiz') . ' / ' .
-                    gnrquiz_format_grade($quiz, $quiz->sumgrades);
+                    gnrquiz_format_grade($gnrquiz, $gnrquiz->sumgrades);
             $table->align[] = 'center';
             $table->size[] = '';
         }
         if ($viewobj->gradecolumn) {
             $table->head[] = get_string('grade') . ' / ' .
-                    gnrquiz_format_grade($quiz, $quiz->grade);
+                    gnrquiz_format_grade($gnrquiz, $gnrquiz->grade);
             $table->align[] = 'center';
             $table->size[] = '';
         }
@@ -1039,14 +1041,14 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
             if ($viewobj->markcolumn) {
                 if ($attemptoptions->marks >= question_display_options::MARK_AND_MAX &&
                         $attemptobj->is_finished()) {
-                    $row[] = gnrquiz_format_grade($quiz, $attemptobj->get_sum_marks());
+                    $row[] = gnrquiz_format_grade($gnrquiz, $attemptobj->get_sum_marks());
                 } else {
                     $row[] = '';
                 }
             }
 
             // Ouside the if because we may be showing feedback but not grades.
-            $attemptgrade = gnrquiz_rescale_grade($attemptobj->get_sum_marks(), $quiz, false);
+            $attemptgrade = gnrquiz_rescale_grade($attemptobj->get_sum_marks(), $gnrquiz, false);
 
             if ($viewobj->gradecolumn) {
                 if ($attemptoptions->marks >= question_display_options::MARK_AND_MAX &&
@@ -1057,11 +1059,11 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
                             && $viewobj->numattempts > 1 && !is_null($viewobj->mygrade)
                             && $attemptobj->get_state() == gnrquiz_attempt::FINISHED
                             && $attemptgrade == $viewobj->mygrade
-                            && $quiz->grademethod == QUIZ_GRADEHIGHEST) {
+                            && $gnrquiz->grademethod == GNRQUIZ_GRADEHIGHEST) {
                         $table->rowclasses[$attemptobj->get_attempt_number()] = 'bestrow';
                     }
 
-                    $row[] = gnrquiz_format_grade($quiz, $attemptgrade);
+                    $row[] = gnrquiz_format_grade($gnrquiz, $attemptgrade);
                 } else {
                     $row[] = '';
                 }
@@ -1074,7 +1076,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
 
             if ($viewobj->feedbackcolumn && $attemptobj->is_finished()) {
                 if ($attemptoptions->overallfeedback) {
-                    $row[] = gnrquiz_feedback_for_grade($attemptgrade, $quiz, $context);
+                    $row[] = gnrquiz_feedback_for_grade($attemptgrade, $gnrquiz, $context);
                 } else {
                     $row[] = '';
                 }
@@ -1122,14 +1124,14 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Generates data pertaining to quiz results
+     * Generates data pertaining to gnrquiz results
      *
-     * @param array $quiz Array containing quiz data
+     * @param array $gnrquiz Array containing gnrquiz data
      * @param int $context The page context ID
      * @param int $cm The Course Module Id
      * @param mod_gnrquiz_view_object $viewobj
      */
-    public function view_result_info($quiz, $context, $cm, $viewobj) {
+    public function view_result_info($gnrquiz, $context, $cm, $viewobj) {
         $output = '';
         if (!$viewobj->numattempts && !$viewobj->gradecolumn && is_null($viewobj->mygrade)) {
             return $output;
@@ -1139,14 +1141,14 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         if ($viewobj->overallstats) {
             if ($viewobj->moreattempts) {
                 $a = new stdClass();
-                $a->method = gnrquiz_get_grading_option_name($quiz->grademethod);
-                $a->mygrade = gnrquiz_format_grade($quiz, $viewobj->mygrade);
-                $a->quizgrade = gnrquiz_format_grade($quiz, $quiz->grade);
+                $a->method = gnrquiz_get_grading_option_name($gnrquiz->grademethod);
+                $a->mygrade = gnrquiz_format_grade($gnrquiz, $viewobj->mygrade);
+                $a->gnrquizgrade = gnrquiz_format_grade($gnrquiz, $gnrquiz->grade);
                 $resultinfo .= $this->heading(get_string('gradesofar', 'gnrquiz', $a), 3);
             } else {
                 $a = new stdClass();
-                $a->grade = gnrquiz_format_grade($quiz, $viewobj->mygrade);
-                $a->maxgrade = gnrquiz_format_grade($quiz, $quiz->grade);
+                $a->grade = gnrquiz_format_grade($gnrquiz, $viewobj->mygrade);
+                $a->maxgrade = gnrquiz_format_grade($gnrquiz, $gnrquiz->grade);
                 $a = get_string('outofshort', 'gnrquiz', $a);
                 $resultinfo .= $this->heading(get_string('yourfinalgradeis', 'gnrquiz', $a), 3);
             }
@@ -1164,7 +1166,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         if ($viewobj->feedbackcolumn) {
             $resultinfo .= $this->heading(get_string('overallfeedback', 'gnrquiz'), 3);
             $resultinfo .= html_writer::div(
-                    gnrquiz_feedback_for_grade($viewobj->mygrade, $quiz, $context),
+                    gnrquiz_feedback_for_grade($viewobj->mygrade, $gnrquiz, $context),
                     'gnrquizgradefeedback') . "\n";
         }
 
@@ -1208,12 +1210,12 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
 
     /**
      * Returns the same as {@link gnrquiz_num_attempt_summary()} but wrapped in a link
-     * to the quiz reports.
+     * to the gnrquiz reports.
      *
-     * @param object $quiz the quiz object. Only $quiz->id is used at the moment.
+     * @param object $gnrquiz the gnrquiz object. Only $gnrquiz->id is used at the moment.
      * @param object $cm the cm object. Only $cm->course, $cm->groupmode and $cm->groupingid
      * fields are used at the moment.
-     * @param object $context the quiz context.
+     * @param object $context the gnrquiz context.
      * @param bool $returnzero if false (default), when no attempts have been made '' is returned
      * instead of 'Attempts: 0'.
      * @param int $currentgroup if there is a concept of current group where this method is being
@@ -1221,10 +1223,10 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
      *         (e.g. a report) pass it in here. Default 0 which means no current group.
      * @return string HTML fragment for the link.
      */
-    public function gnrquiz_attempt_summary_link_to_reports($quiz, $cm, $context,
+    public function gnrquiz_attempt_summary_link_to_reports($gnrquiz, $cm, $context,
                                                           $returnzero = false, $currentgroup = 0) {
         global $CFG;
-        $summary = gnrquiz_num_attempt_summary($quiz, $cm, $returnzero, $currentgroup);
+        $summary = gnrquiz_num_attempt_summary($gnrquiz, $cm, $returnzero, $currentgroup);
         if (!$summary) {
             return '';
         }
@@ -1274,9 +1276,9 @@ class mod_gnrquiz_links_to_other_attempts implements renderable {
 
 
 class mod_gnrquiz_view_object {
-    /** @var array $infomessages of messages with information to display about the quiz. */
+    /** @var array $infomessages of messages with information to display about the gnrquiz. */
     public $infomessages;
-    /** @var array $attempts contains all the user's attempts at this quiz. */
+    /** @var array $attempts contains all the user's attempts at this gnrquiz. */
     public $attempts;
     /** @var array $attemptobjs gnrquiz_attempt objects corresponding to $attempts. */
     public $attemptobjs;
@@ -1285,9 +1287,9 @@ class mod_gnrquiz_view_object {
     /** @var bool $canreviewmine whether the current user has the capability to
      *       review their own attempts. */
     public $canreviewmine;
-    /** @var bool $canedit whether the current user has the capability to edit the quiz. */
+    /** @var bool $canedit whether the current user has the capability to edit the gnrquiz. */
     public $canedit;
-    /** @var moodle_url $editurl the URL for editing this quiz. */
+    /** @var moodle_url $editurl the URL for editing this gnrquiz. */
     public $editurl;
     /** @var int $attemptcolumn contains the number of attempts done. */
     public $attemptcolumn;
@@ -1303,7 +1305,7 @@ class mod_gnrquiz_view_object {
     public $timenow;
     /** @var int $numattempts contains the total number of attempts. */
     public $numattempts;
-    /** @var float $mygrade contains the user's final grade for a quiz. */
+    /** @var float $mygrade contains the user's final grade for a gnrquiz. */
     public $mygrade;
     /** @var bool $moreattempts whether this user is allowed more attempts. */
     public $moreattempts;
@@ -1316,7 +1318,7 @@ class mod_gnrquiz_view_object {
     /** @var object $lastfinishedattempt the last attempt from the attempts array. */
     public $lastfinishedattempt;
     /** @var array $preventmessages of messages telling the user why they can't
-     *       attempt the quiz now. */
+     *       attempt the gnrquiz now. */
     public $preventmessages;
     /** @var string $buttontext caption for the start attempt button. If this is null, show no
      *      button, or if it is '' show a back to the course button. */
@@ -1334,8 +1336,8 @@ class mod_gnrquiz_view_object {
     public $popuprequired;
     /** @var array options to use for the popup window, if required. */
     public $popupoptions;
-    /** @var bool $quizhasquestions whether the quiz has any questions. */
-    public $quizhasquestions;
+    /** @var bool $gnrquizhasquestions whether the gnrquiz has any questions. */
+    public $gnrquizhasquestions;
 
     public function __get($field) {
         switch ($field) {

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Standard plugin entry points of the quiz statistics report.
+ * Standard plugin entry points of the gnrquiz statistics report.
  *
  * @package   gnrquiz_statistics
  * @copyright 2011 The Open University
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @package  gnrquiz_statistics
  * @category files
- * @param context $previewcontext the quiz context
+ * @param context $previewcontext the gnrquiz context
  * @param int $questionid the question id.
  * @param context $filecontext the file (question) context
  * @param string $filecomponent the component the file belongs to.
@@ -66,7 +66,7 @@ function gnrquiz_statistics_question_preview_pluginfile($previewcontext, $questi
 function gnrquiz_statistics_cron() {
     global $DB;
 
-    mtrace("\n  Cleaning up old quiz statistics cache records...", '');
+    mtrace("\n  Cleaning up old gnrquiz statistics cache records...", '');
 
     $expiretime = time() - 5*HOURSECS;
     $DB->delete_records_select('gnrquiz_statistics', 'timemodified < ?', array($expiretime));

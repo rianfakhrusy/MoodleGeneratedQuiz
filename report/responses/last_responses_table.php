@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz responses table for showing last try at question.
+ * This file defines the gnrquiz responses table for showing last try at question.
  *
  * @package   gnrquiz_responses
  * @copyright 2008 Jean-Michel Vedrine
@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/attemptsreport_table.php');
 
 
 /**
- * This is a table subclass for displaying the quiz responses report.
+ * This is a table subclass for displaying the gnrquiz responses report.
  *
  * @copyright 2008 Jean-Michel Vedrine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -38,7 +38,7 @@ class gnrquiz_last_responses_table extends gnrquiz_attempts_report_table {
 
     /**
      * Constructor
-     * @param object $quiz
+     * @param object $gnrquiz
      * @param context $context
      * @param string $qmsubselect
      * @param gnrquiz_responses_options $options
@@ -47,9 +47,9 @@ class gnrquiz_last_responses_table extends gnrquiz_attempts_report_table {
      * @param array $questions
      * @param moodle_url $reporturl
      */
-    public function __construct($quiz, $context, $qmsubselect, gnrquiz_responses_options $options,
+    public function __construct($gnrquiz, $context, $qmsubselect, gnrquiz_responses_options $options,
             $groupstudents, $students, $questions, $reporturl) {
-        parent::__construct('mod-quiz-report-responses-report', $quiz, $context,
+        parent::__construct('mod-gnrquiz-report-responses-report', $gnrquiz, $context,
                 $qmsubselect, $options, $groupstudents, $students, $questions, $reporturl);
     }
 
@@ -67,12 +67,12 @@ class gnrquiz_last_responses_table extends gnrquiz_attempts_report_table {
             return '-';
         }
 
-        $grade = gnrquiz_rescale_grade($attempt->sumgrades, $this->quiz);
+        $grade = gnrquiz_rescale_grade($attempt->sumgrades, $this->gnrquiz);
         if ($this->is_downloading()) {
             return $grade;
         }
 
-        $gradehtml = '<a href="review.php?q=' . $this->quiz->id . '&amp;attempt=' .
+        $gradehtml = '<a href="review.php?q=' . $this->gnrquiz->id . '&amp;attempt=' .
                 $attempt->attempt . '">' . $grade . '</a>';
         return $gradehtml;
     }

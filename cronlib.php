@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library code used by quiz cron.
+ * Library code used by gnrquiz cron.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2012 the Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,7 +41,7 @@ class mod_gnrquiz_overdue_attempt_updater {
      * Do the processing required.
      * @param int $timenow the time to consider as 'now' during the processing.
      * @param int $processto only process attempt with timecheckstate longer ago than this.
-     * @return array with two elements, the number of attempt considered, and how many different quizzes that was.
+     * @return array with two elements, the number of attempt considered, and how many different gnrquizzes that was.
      */
     public function update_overdue_attempts($timenow, $processto) {
         global $DB;
@@ -49,39 +49,39 @@ class mod_gnrquiz_overdue_attempt_updater {
         $attemptstoprocess = $this->get_list_of_overdue_attempts($processto);
 
         $course = null;
-        $quiz = null;
+        $gnrquiz = null;
         $cm = null;
 
         $count = 0;
-        $quizcount = 0;
+        $gnrquizcount = 0;
         foreach ($attemptstoprocess as $attempt) {
             try {
 
-                // If we have moved on to a different quiz, fetch the new data.
-                if (!$quiz || $attempt->quiz != $quiz->id) {
-                    $quiz = $DB->get_record('gnrquiz', array('id' => $attempt->quiz), '*', MUST_EXIST);
-                    $cm = get_coursemodule_from_instance('gnrquiz', $attempt->quiz);
-                    $quizcount += 1;
+                // If we have moved on to a different gnrquiz, fetch the new data.
+                if (!$gnrquiz || $attempt->gnrquiz != $gnrquiz->id) {
+                    $gnrquiz = $DB->get_record('gnrquiz', array('id' => $attempt->gnrquiz), '*', MUST_EXIST);
+                    $cm = get_coursemodule_from_instance('gnrquiz', $attempt->gnrquiz);
+                    $gnrquizcount += 1;
                 }
 
                 // If we have moved on to a different course, fetch the new data.
-                if (!$course || $course->id != $quiz->course) {
-                    $course = $DB->get_record('course', array('id' => $quiz->course), '*', MUST_EXIST);
+                if (!$course || $course->id != $gnrquiz->course) {
+                    $course = $DB->get_record('course', array('id' => $gnrquiz->course), '*', MUST_EXIST);
                 }
 
-                // Make a specialised version of the quiz settings, with the relevant overrides.
-                $quizforuser = clone($quiz);
-                $quizforuser->timeclose = $attempt->usertimeclose;
-                $quizforuser->timelimit = $attempt->usertimelimit;
+                // Make a specialised version of the gnrquiz settings, with the relevant overrides.
+                $gnrquizforuser = clone($gnrquiz);
+                $gnrquizforuser->timeclose = $attempt->usertimeclose;
+                $gnrquizforuser->timelimit = $attempt->usertimelimit;
 
                 // Trigger any transitions that are required.
-                $attemptobj = new gnrquiz_attempt($attempt, $quizforuser, $cm, $course);
+                $attemptobj = new gnrquiz_attempt($attempt, $gnrquizforuser, $cm, $course);
                 $attemptobj->handle_if_time_expired($timenow, false);
                 $count += 1;
 
             } catch (moodle_exception $e) {
                 // If an error occurs while processing one attempt, don't let that kill cron.
-                mtrace("Error while processing attempt {$attempt->id} at {$attempt->quiz} quiz:");
+                mtrace("Error while processing attempt {$attempt->id} at {$attempt->gnrquiz} gnrquiz:");
                 mtrace($e->getMessage());
                 mtrace($e->getTraceAsString());
                 // Close down any currently open transactions, otherwise one error
@@ -91,34 +91,34 @@ class mod_gnrquiz_overdue_attempt_updater {
         }
 
         $attemptstoprocess->close();
-        return array($count, $quizcount);
+        return array($count, $gnrquizcount);
     }
 
     /**
      * @return moodle_recordset of gnrquiz_attempts that need to be processed because time has
-     *     passed. The array is sorted by courseid then quizid.
+     *     passed. The array is sorted by courseid then gnrquizid.
      */
     public function get_list_of_overdue_attempts($processto) {
         global $DB;
 
 
         // SQL to compute timeclose and timelimit for each attempt:
-        $quizausersql = gnrquiz_get_attempt_usertime_sql(
-                "iquiza.state IN ('inprogress', 'overdue') AND iquiza.timecheckstate <= :iprocessto");
+        $gnrquizausersql = gnrquiz_get_attempt_usertime_sql(
+                "ignrquiza.state IN ('inprogress', 'overdue') AND ignrquiza.timecheckstate <= :iprocessto");
 
         // This query should have all the gnrquiz_attempts columns.
         return $DB->get_recordset_sql("
-         SELECT quiza.*,
-                quizauser.usertimeclose,
-                quizauser.usertimelimit
+         SELECT gnrquiza.*,
+                gnrquizauser.usertimeclose,
+                gnrquizauser.usertimelimit
 
-           FROM {gnrquiz_attempts} quiza
-           JOIN {quiz} quiz ON quiz.id = quiza.quiz
-           JOIN ( $quizausersql ) quizauser ON quizauser.id = quiza.id
+           FROM {gnrquiz_attempts} gnrquiza
+           JOIN {gnrquiz} gnrquiz ON gnrquiz.id = gnrquiza.gnrquiz
+           JOIN ( $gnrquizausersql ) gnrquizauser ON gnrquizauser.id = gnrquiza.id
 
           WHERE gnrquiza.state IN ('inprogress', 'overdue')
-            AND quiza.timecheckstate <= :processto
-       ORDER BY quiz.course, quiza.quiz",
+            AND gnrquiza.timecheckstate <= :processto
+       ORDER BY gnrquiz.course, gnrquiza.gnrquiz",
 
                 array('processto' => $processto, 'iprocessto' => $processto));
     }

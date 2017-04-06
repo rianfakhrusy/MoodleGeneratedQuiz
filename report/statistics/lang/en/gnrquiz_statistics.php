@@ -35,9 +35,9 @@ $string['analysisvariant'] = '"{$a->name}" variant {$a->variant}';
 $string['attempts'] = 'Attempts';
 $string['attemptsall'] = 'all attempts';
 $string['attemptsfirst'] = 'first attempt';
-$string['backtoquizreport'] = 'Back to main statistics report page.';
+$string['backtognrquizreport'] = 'Back to main statistics report page.';
 $string['calculatefrom'] = 'Calculate statistics from';
-$string['calculatingallstats'] = 'Calculating statistics for quiz, questions and analysing response data';
+$string['calculatingallstats'] = 'Calculating statistics for gnrquiz, questions and analysing response data';
 $string['cic'] = 'Coefficient of internal consistency (for {$a})';
 $string['completestatsfilename'] = 'completestats';
 $string['count'] = 'Count';
@@ -53,7 +53,7 @@ $string['effective_weight'] = 'Effective weight';
 $string['errordeleting'] = 'Error deleting old {$a} records.';
 $string['errormedian'] = 'Error fetching median';
 $string['errorpowerquestions'] = 'Error fetching data to calculate variance for question grades';
-$string['errorpowers'] = 'Error fetching data to calculate variance for quiz grades';
+$string['errorpowers'] = 'Error fetching data to calculate variance for gnrquiz grades';
 $string['errorrandom'] = 'Error getting sub item data';
 $string['errorratio'] = 'Error ratio (for {$a})';
 $string['errorstatisticsquestions'] = 'Error fetching data to calculate statistics for question grades';
@@ -76,12 +76,12 @@ $string['minimumfacility'] = 'Minimum facility';
 $string['modelresponse'] = 'Model response';
 $string['nameforvariant'] = 'Variant {$a->variant} of {$a->name}';
 $string['negcovar'] = 'Negative covariance of grade with total attempt grade';
-$string['negcovar_help'] = 'This question\'s grade for this set of attempts on the quiz varies in an opposite way to the overall attempt grade. This means overall attempt grade tends to be below average when the grade for this question is above average and vice-versa.
+$string['negcovar_help'] = 'This question\'s grade for this set of attempts on the gnrquiz varies in an opposite way to the overall attempt grade. This means overall attempt grade tends to be below average when the grade for this question is above average and vice-versa.
 
-Our equation for effective question weight cannot be calculated in this case. The calculations for effective question weight for other questions in this quiz are the effective question weight for these questions if the highlighted questions with a negative covariance are given a maximum grade of zero.
+Our equation for effective question weight cannot be calculated in this case. The calculations for effective question weight for other questions in this gnrquiz are the effective question weight for these questions if the highlighted questions with a negative covariance are given a maximum grade of zero.
 
-If you edit a quiz and give these question(s) with negative covariance a max grade of zero then the effective question weight of these questions will be zero and the real effective question weight of other questions will be as calculated now.';
-$string['nogradedattempts'] = 'No attempts have been made at this quiz, or all attempts have questions that need manual grading.';
+If you edit a gnrquiz and give these question(s) with negative covariance a max grade of zero then the effective question weight of these questions will be zero and the real effective question weight of other questions will be as calculated now.';
+$string['nogradedattempts'] = 'No attempts have been made at this gnrquiz, or all attempts have questions that need manual grading.';
 $string['nostudentsingroup'] = 'There are no students in this group yet';
 $string['optiongrade'] = 'Partial credit';
 $string['partofquestion'] = 'Part of question';

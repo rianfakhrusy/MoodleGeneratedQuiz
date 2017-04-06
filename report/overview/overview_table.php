@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz grades table.
+ * This file defines the gnrquiz grades table.
  *
  * @package   gnrquiz_overview
  * @copyright 2008 Jamie Pratt
@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/attemptsreport_table.php');
 
 
 /**
- * This is a table subclass for displaying the quiz grades report.
+ * This is a table subclass for displaying the gnrquiz grades report.
  *
  * @copyright 2008 Jamie Pratt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -40,7 +40,7 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
 
     /**
      * Constructor
-     * @param object $quiz
+     * @param object $gnrquiz
      * @param context $context
      * @param string $qmsubselect
      * @param gnrquiz_overview_options $options
@@ -49,9 +49,9 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
      * @param array $questions
      * @param moodle_url $reporturl
      */
-    public function __construct($quiz, $context, $qmsubselect,
+    public function __construct($gnrquiz, $context, $qmsubselect,
             gnrquiz_overview_options $options, $groupstudents, $students, $questions, $reporturl) {
-        parent::__construct('mod-quiz-report-overview-report', $quiz , $context,
+        parent::__construct('mod-gnrquiz-report-overview-report', $gnrquiz , $context,
                 $qmsubselect, $options, $groupstudents, $students, $questions, $reporturl);
     }
 
@@ -87,10 +87,10 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
 
         list($fields, $from, $where, $params) = $this->base_sql($users);
         $record = $DB->get_record_sql("
-                SELECT AVG(quiza.sumgrades) AS grade, COUNT(quiza.sumgrades) AS numaveraged
+                SELECT AVG(gnrquiza.sumgrades) AS grade, COUNT(gnrquiza.sumgrades) AS numaveraged
                   FROM $from
                  WHERE $where", $params);
-        $record->grade = gnrquiz_rescale_grade($record->grade, $this->quiz, false);
+        $record->grade = gnrquiz_rescale_grade($record->grade, $this->gnrquiz, false);
 
         if ($this->is_downloading()) {
             $namekey = 'lastname';
@@ -101,7 +101,7 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
             $namekey    => $label,
             'sumgrades' => $this->format_average($record),
             'feedbacktext'=> strip_tags(gnrquiz_report_feedback_for_grade(
-                                        $record->grade, $this->quiz->id, $this->context))
+                                        $record->grade, $this->gnrquiz->id, $this->context))
         );
 
         if ($this->options->slotmarks) {
@@ -131,7 +131,7 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
             if (isset($gradeaverages[$question->slot]) && $question->maxmark > 0) {
                 $record = $gradeaverages[$question->slot];
                 $record->grade = gnrquiz_rescale_grade(
-                        $record->averagefraction * $question->maxmark, $this->quiz, false);
+                        $record->averagefraction * $question->maxmark, $this->gnrquiz, false);
 
             } else {
                 $record = new stdClass();
@@ -153,9 +153,9 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
         if (is_null($record->grade)) {
             $average = '-';
         } else if ($question) {
-            $average = gnrquiz_format_question_grade($this->quiz, $record->grade);
+            $average = gnrquiz_format_question_grade($this->gnrquiz, $record->grade);
         } else {
-            $average = gnrquiz_format_grade($this->quiz, $record->grade);
+            $average = gnrquiz_format_grade($this->gnrquiz, $record->grade);
         }
 
         if ($this->download) {
@@ -184,7 +184,7 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
             return '-';
         }
 
-        $grade = gnrquiz_rescale_grade($attempt->sumgrades, $this->quiz);
+        $grade = gnrquiz_rescale_grade($attempt->sumgrades, $this->gnrquiz);
         if ($this->is_downloading()) {
             return $grade;
         }
@@ -205,8 +205,8 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
                             [$question->slot]->fraction * $question->maxmark;
                 }
             }
-            $newsumgrade = gnrquiz_rescale_grade($newsumgrade, $this->quiz);
-            $oldsumgrade = gnrquiz_rescale_grade($oldsumgrade, $this->quiz);
+            $newsumgrade = gnrquiz_rescale_grade($newsumgrade, $this->gnrquiz);
+            $oldsumgrade = gnrquiz_rescale_grade($oldsumgrade, $this->gnrquiz);
             $grade = html_writer::tag('del', $oldsumgrade) . '/' .
                     html_writer::empty_tag('br') . $newsumgrade;
         }
@@ -246,7 +246,7 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
             }
         } else {
             $grade = gnrquiz_rescale_grade(
-                    $stepdata->fraction * $question->maxmark, $this->quiz, 'question');
+                    $stepdata->fraction * $question->maxmark, $this->gnrquiz, 'question');
         }
 
         if ($this->is_downloading()) {
@@ -257,10 +257,10 @@ class gnrquiz_overview_table extends gnrquiz_attempts_report_table {
             $gradefromdb = $grade;
             $newgrade = gnrquiz_rescale_grade(
                     $this->regradedqs[$attempt->usageid][$slot]->newfraction * $question->maxmark,
-                    $this->quiz, 'question');
+                    $this->gnrquiz, 'question');
             $oldgrade = gnrquiz_rescale_grade(
                     $this->regradedqs[$attempt->usageid][$slot]->oldfraction * $question->maxmark,
-                    $this->quiz, 'question');
+                    $this->gnrquiz, 'question');
 
             $grade = html_writer::tag('del', $oldgrade) . '/' .
                     html_writer::empty_tag('br') . $newgrade;

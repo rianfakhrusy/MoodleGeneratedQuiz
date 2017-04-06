@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page handles listing of quiz overrides
+ * This page handles listing of gnrquiz overrides
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2010 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -33,7 +33,7 @@ $cmid = required_param('cmid', PARAM_INT);
 $mode = optional_param('mode', '', PARAM_ALPHA); // One of 'user' or 'group', default is 'group'.
 
 list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'gnrquiz');
-$quiz = $DB->get_record('gnrquiz', array('id' => $cm->instance), '*', MUST_EXIST);
+$gnrquiz = $DB->get_record('gnrquiz', array('id' => $cm->instance), '*', MUST_EXIST);
 
 // Get the course groups.
 $groups = groups_get_all_groups($cm->course);
@@ -67,7 +67,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('overrides', 'gnrquiz'));
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($quiz->name, true, array('context' => $context)));
+echo $OUTPUT->heading(format_string($gnrquiz->name, true, array('context' => $context)));
 
 // Delete orphaned group overrides.
 $sql = 'SELECT o.id
@@ -75,8 +75,8 @@ $sql = 'SELECT o.id
             ON o.groupid = g.id
             WHERE o.groupid IS NOT NULL
               AND g.id IS NULL
-              AND o.quiz = ?';
-$params = array($quiz->id);
+              AND o.gnrquiz = ?';
+$params = array($gnrquiz->id);
 $orphaned = $DB->get_records_sql($sql, $params);
 if (!empty($orphaned)) {
     $DB->delete_records_list('gnrquiz_overrides', 'id', array_keys($orphaned));
@@ -88,18 +88,18 @@ if ($groupmode) {
     $sql = 'SELECT o.*, g.name
                 FROM {gnrquiz_overrides} o
                 JOIN {groups} g ON o.groupid = g.id
-                WHERE o.quiz = :quizid
+                WHERE o.gnrquiz = :gnrquizid
                 ORDER BY g.name';
-    $params = array('gnrquizid' => $quiz->id);
+    $params = array('gnrquizid' => $gnrquiz->id);
 } else {
     $colname = get_string('user');
     list($sort, $params) = users_order_by_sql('u');
     $sql = 'SELECT o.*, ' . get_all_user_name_fields(true, 'u') . '
             FROM {gnrquiz_overrides} o
             JOIN {user} u ON o.userid = u.id
-            WHERE o.quiz = :quizid
+            WHERE o.gnrquiz = :gnrquizid
             ORDER BY ' . $sort;
-    $params['gnrquizid'] = $quiz->id;
+    $params['gnrquizid'] = $gnrquiz->id;
 }
 
 $overrides = $DB->get_records_sql($sql, $params);
@@ -131,7 +131,7 @@ foreach ($overrides as $override) {
     // Check for inactive overrides.
     if (!$groupmode) {
         if (!has_capability('mod/gnrquiz:attempt', $context, $override->userid)) {
-            // User not allowed to take the quiz.
+            // User not allowed to take the gnrquiz.
             $active = false;
         } else if (!\core_availability\info_module::is_user_visible($cm, $override->userid)) {
             // User cannot access the module.
@@ -260,7 +260,7 @@ if ($groupmode) {
             get_string('addnewgroupoverride', 'gnrquiz'), 'post', $options);
 } else {
     $users = array();
-    // See if there are any students in the quiz.
+    // See if there are any students in the gnrquiz.
     $users = get_users_by_capability($context, 'mod/gnrquiz:attempt', 'u.id');
     $info = new \core_availability\info_module($cm);
     $users = $info->filter_user_list($users);

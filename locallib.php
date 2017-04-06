@@ -15,15 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of functions used by the quiz module.
+ * Library of functions used by the gnrquiz module.
  *
- * This contains functions that are called from within the quiz module only
+ * This contains functions that are called from within the gnrquiz module only
  * Functions that are also called by core Moodle are in {@link lib.php}
  * This script also loads the code in {@link questionlib.php} which holds
  * the module-indpendent code for handling questions and which in turn
  * initialises all the questiontype classes.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  1999 onwards Martin Dougiamas and others {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -44,29 +44,29 @@ require_once($CFG->libdir . '/questionlib.php');
 
 /**
  * @var int We show the countdown timer if there is less than this amount of time left before the
- * the quiz close date. (1 hour)
+ * the gnrquiz close date. (1 hour)
  */
 define('GNRQUIZ_SHOW_TIME_BEFORE_DEADLINE', '3600');
 
 /**
  * @var int If there are fewer than this many seconds left when the student submits
- * a page of the quiz, then do not take them to the next page of the quiz. Instead
- * close the quiz immediately.
+ * a page of the gnrquiz, then do not take them to the next page of the gnrquiz. Instead
+ * close the gnrquiz immediately.
  */
 define('GNRQUIZ_MIN_TIME_TO_CONTINUE', '2');
 
 /**
- * @var int We show no image when user selects No image from dropdown menu in quiz settings.
+ * @var int We show no image when user selects No image from dropdown menu in gnrquiz settings.
  */
 define('GNRQUIZ_SHOWIMAGE_NONE', 0);
 
 /**
- * @var int We show small image when user selects small image from dropdown menu in quiz settings.
+ * @var int We show small image when user selects small image from dropdown menu in gnrquiz settings.
  */
 define('GNRQUIZ_SHOWIMAGE_SMALL', 1);
 
 /**
- * @var int We show Large image when user selects Large image from dropdown menu in quiz settings.
+ * @var int We show Large image when user selects Large image from dropdown menu in gnrquiz settings.
  */
 define('GNRQUIZ_SHOWIMAGE_LARGE', 2);
 
@@ -74,40 +74,40 @@ define('GNRQUIZ_SHOWIMAGE_LARGE', 2);
 // Functions related to attempts ///////////////////////////////////////////////
 
 /**
- * Creates an object to represent a new attempt at a quiz
+ * Creates an object to represent a new attempt at a gnrquiz
  *
- * Creates an attempt object to represent an attempt at the quiz by the current
+ * Creates an attempt object to represent an attempt at the gnrquiz by the current
  * user starting at the current time. The ->id field is not set. The object is
  * NOT written to the database.
  *
- * @param object $quizobj the quiz object to create an attempt for.
+ * @param object $gnrquizobj the gnrquiz object to create an attempt for.
  * @param int $attemptnumber the sequence number for the attempt.
  * @param object $lastattempt the previous attempt by this user, if any. Only needed
- *         if $attemptnumber > 1 and $quiz->attemptonlast is true.
+ *         if $attemptnumber > 1 and $gnrquiz->attemptonlast is true.
  * @param int $timenow the time the attempt was started at.
  * @param bool $ispreview whether this new attempt is a preview.
- * @param int $userid  the id of the user attempting this quiz.
+ * @param int $userid  the id of the user attempting this gnrquiz.
  *
  * @return object the newly created attempt object.
  */
-function gnrquiz_create_attempt(quiz $quizobj, $attemptnumber, $lastattempt, $timenow, $ispreview = false, $userid = null) {
+function gnrquiz_create_attempt(gnrquiz $gnrquizobj, $attemptnumber, $lastattempt, $timenow, $ispreview = false, $userid = null) {
     global $USER;
 
     if ($userid === null) {
         $userid = $USER->id;
     }
 
-    $quiz = $quizobj->get_quiz();
-    if ($quiz->sumgrades < 0.000005 && $quiz->grade > 0.000005) {
+    $gnrquiz = $gnrquizobj->get_gnrquiz();
+    if ($gnrquiz->sumgrades < 0.000005 && $gnrquiz->grade > 0.000005) {
         throw new moodle_exception('cannotstartgradesmismatch', 'gnrquiz',
-                new moodle_url('/mod/gnrquiz/view.php', array('q' => $quiz->id)),
-                    array('grade' => gnrquiz_format_grade($quiz, $quiz->grade)));
+                new moodle_url('/mod/gnrquiz/view.php', array('q' => $gnrquiz->id)),
+                    array('grade' => gnrquiz_format_grade($gnrquiz, $gnrquiz->grade)));
     }
 
-    if ($attemptnumber == 1 || !$quiz->attemptonlast) {
+    if ($attemptnumber == 1 || !$gnrquiz->attemptonlast) {
         // We are not building on last attempt so create a new attempt.
         $attempt = new stdClass();
-        $attempt->quiz = $quiz->id;
+        $attempt->gnrquiz = $gnrquiz->id;
         $attempt->userid = $userid;
         $attempt->preview = 0;
         $attempt->layout = '';
@@ -132,7 +132,7 @@ function gnrquiz_create_attempt(quiz $quizobj, $attemptnumber, $lastattempt, $ti
         $attempt->preview = 1;
     }
 
-    $timeclose = $quizobj->get_access_manager($timenow)->get_end_time($attempt);
+    $timeclose = $gnrquizobj->get_access_manager($timenow)->get_end_time($attempt);
     if ($timeclose === false || $ispreview) {
         $attempt->timecheckstate = null;
     } else {
@@ -142,9 +142,9 @@ function gnrquiz_create_attempt(quiz $quizobj, $attemptnumber, $lastattempt, $ti
     return $attempt;
 }
 /**
- * Start a normal, new, quiz attempt.
+ * Start a normal, new, gnrquiz attempt.
  *
- * @param quiz      $quizobj            the quiz object to start an attempt for.
+ * @param gnrquiz      $gnrquizobj            the gnrquiz object to start an attempt for.
  * @param question_usage_by_activity $quba
  * @param object    $attempt
  * @param integer   $attemptnumber      starting from 1
@@ -157,16 +157,16 @@ function gnrquiz_create_attempt(quiz $quizobj, $attemptnumber, $lastattempt, $ti
  * @throws moodle_exception
  * @return object   modified attempt object
  */
-function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $timenow,
+function gnrquiz_start_new_attempt($gnrquizobj, $quba, $attempt, $attemptnumber, $timenow,
                                 $questionids = array(), $forcedvariantsbyslot = array()) {
 
-    // Usages for this user's previous quiz attempts.
-    $qubaids = new \mod_quiz\question\qubaids_for_users_attempts(
-            $quizobj->get_quizid(), $attempt->userid);
+    // Usages for this user's previous gnrquiz attempts.
+    $qubaids = new \mod_gnrquiz\question\qubaids_for_users_attempts(
+            $gnrquizobj->get_gnrquizid(), $attempt->userid);
 
-    // Fully load all the questions in this quiz.
-    $quizobj->preload_questions();
-    $quizobj->load_questions();
+    // Fully load all the questions in this gnrquiz.
+    $gnrquizobj->preload_questions();
+    $gnrquizobj->load_questions();
 
     // First load all the non-random questions.
     $randomfound = false;
@@ -174,7 +174,7 @@ function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $t
     $questions = array();
     $maxmark = array();
     $page = array();
-    foreach ($quizobj->get_questions() as $questiondata) {
+    foreach ($gnrquizobj->get_questions() as $questiondata) {
         $slot += 1;
         $maxmark[$slot] = $questiondata->maxmark;
         $page[$slot] = $questiondata->page;
@@ -182,7 +182,7 @@ function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $t
             $randomfound = true;
             continue;
         }
-        if (!$quizobj->get_quiz()->shuffleanswers) {
+        if (!$gnrquizobj->get_gnrquiz()->shuffleanswers) {
             $questiondata->options->shuffleanswers = false;
         }
         $questions[$slot] = question_bank::make_question($questiondata);
@@ -201,7 +201,7 @@ function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $t
         }
         $randomloader = new \core_question\bank\random_question_loader($qubaids, $usedquestionids);
 
-        foreach ($quizobj->get_questions() as $questiondata) {
+        foreach ($gnrquizobj->get_questions() as $questiondata) {
             $slot += 1;
             if ($questiondata->qtype != 'random') {
                 continue;
@@ -212,7 +212,7 @@ function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $t
                 if ($randomloader->is_question_available($questiondata->category,
                         (bool) $questiondata->questiontext, $questionids[$quba->next_slot_number()])) {
                     $questions[$slot] = question_bank::load_question(
-                            $questionids[$quba->next_slot_number()], $quizobj->get_quiz()->shuffleanswers);
+                            $questionids[$quba->next_slot_number()], $gnrquizobj->get_gnrquiz()->shuffleanswers);
                     continue;
                 } else {
                     throw new coding_exception('Forced question id not available.');
@@ -224,11 +224,11 @@ function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $t
                         (bool) $questiondata->questiontext);
             if ($questionid === null) {
                 throw new moodle_exception('notenoughrandomquestions', 'gnrquiz',
-                                           $quizobj->view_url(), $questiondata);
+                                           $gnrquizobj->view_url(), $questiondata);
             }
 
             $questions[$slot] = question_bank::load_question($questionid,
-                    $quizobj->get_quiz()->shuffleanswers);
+                    $gnrquizobj->get_gnrquiz()->shuffleanswers);
         }
     }
 
@@ -254,7 +254,7 @@ function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $t
     $quba->start_all_questions($variantstrategy, $timenow);
 
     // Work out the attempt layout.
-    $sections = $quizobj->get_sections();
+    $sections = $gnrquizobj->get_sections();
     foreach ($sections as $i => $section) {
         if (isset($sections[$i + 1])) {
             $sections[$i]->lastslot = $sections[$i + 1]->firstslot - 1;
@@ -273,7 +273,7 @@ function gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $t
             shuffle($questionsinthissection);
             $questionsonthispage = 0;
             foreach ($questionsinthissection as $slot) {
-                if ($questionsonthispage && $questionsonthispage == $quizobj->get_quiz()->questionsperpage) {
+                if ($questionsonthispage && $questionsonthispage == $gnrquizobj->get_gnrquiz()->questionsperpage) {
                     $layout[] = 0;
                     $questionsonthispage = 0;
                 }
@@ -335,14 +335,14 @@ function gnrquiz_start_attempt_built_on_last($quba, $attempt, $lastattempt) {
 }
 
 /**
- * The save started question usage and quiz attempt in db and log the started attempt.
+ * The save started question usage and gnrquiz attempt in db and log the started attempt.
  *
- * @param quiz                       $quizobj
+ * @param gnrquiz                       $gnrquizobj
  * @param question_usage_by_activity $quba
  * @param object                     $attempt
  * @return object                    attempt object with uniqueid and id set.
  */
-function gnrquiz_attempt_save_started($quizobj, $quba, $attempt) {
+function gnrquiz_attempt_save_started($gnrquizobj, $quba, $attempt) {
     global $DB;
     // Save the attempt in the database.
     question_engine::save_questions_usage_by_activity($quba);
@@ -353,22 +353,22 @@ function gnrquiz_attempt_save_started($quizobj, $quba, $attempt) {
     $params = array(
         'objectid' => $attempt->id,
         'relateduserid' => $attempt->userid,
-        'courseid' => $quizobj->get_courseid(),
-        'context' => $quizobj->get_context()
+        'courseid' => $gnrquizobj->get_courseid(),
+        'context' => $gnrquizobj->get_context()
     );
     // Decide which event we are using.
     if ($attempt->preview) {
         $params['other'] = array(
-            'gnrquizid' => $quizobj->get_quizid()
+            'gnrquizid' => $gnrquizobj->get_gnrquizid()
         );
-        $event = \mod_quiz\event\attempt_preview_started::create($params);
+        $event = \mod_gnrquiz\event\attempt_preview_started::create($params);
     } else {
-        $event = \mod_quiz\event\attempt_started::create($params);
+        $event = \mod_gnrquiz\event\attempt_started::create($params);
 
     }
 
     // Trigger the event.
-    $event->add_record_snapshot('gnrquiz', $quizobj->get_quiz());
+    $event->add_record_snapshot('gnrquiz', $gnrquizobj->get_gnrquiz());
     $event->add_record_snapshot('gnrquiz_attempts', $attempt);
     $event->trigger();
 
@@ -377,15 +377,15 @@ function gnrquiz_attempt_save_started($quizobj, $quba, $attempt) {
 
 /**
  * Returns an unfinished attempt (if there is one) for the given
- * user on the given quiz. This function does not return preview attempts.
+ * user on the given gnrquiz. This function does not return preview attempts.
  *
- * @param int $quizid the id of the quiz.
+ * @param int $gnrquizid the id of the gnrquiz.
  * @param int $userid the id of the user.
  *
  * @return mixed the unfinished attempt if there is one, false if not.
  */
-function gnrquiz_get_user_attempt_unfinished($quizid, $userid) {
-    $attempts = gnrquiz_get_user_attempts($quizid, $userid, 'unfinished', true);
+function gnrquiz_get_user_attempt_unfinished($gnrquizid, $userid) {
+    $attempts = gnrquiz_get_user_attempts($gnrquizid, $userid, 'unfinished', true);
     if ($attempts) {
         return array_shift($attempts);
     } else {
@@ -394,12 +394,12 @@ function gnrquiz_get_user_attempt_unfinished($quizid, $userid) {
 }
 
 /**
- * Delete a quiz attempt.
+ * Delete a gnrquiz attempt.
  * @param mixed $attempt an integer attempt id or an attempt object
  *      (row of the gnrquiz_attempts table).
- * @param object $quiz the quiz object.
+ * @param object $gnrquiz the gnrquiz object.
  */
-function gnrquiz_delete_attempt($attempt, $quiz) {
+function gnrquiz_delete_attempt($attempt, $gnrquiz) {
     global $DB;
     if (is_numeric($attempt)) {
         if (!$attempt = $DB->get_record('gnrquiz_attempts', array('id' => $attempt))) {
@@ -407,15 +407,15 @@ function gnrquiz_delete_attempt($attempt, $quiz) {
         }
     }
 
-    if ($attempt->quiz != $quiz->id) {
-        debugging("Trying to delete attempt $attempt->id which belongs to quiz $attempt->quiz " .
-                "but was passed quiz $quiz->id.");
+    if ($attempt->gnrquiz != $gnrquiz->id) {
+        debugging("Trying to delete attempt $attempt->id which belongs to gnrquiz $attempt->gnrquiz " .
+                "but was passed gnrquiz $gnrquiz->id.");
         return;
     }
 
-    if (!isset($quiz->cmid)) {
-        $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id, $quiz->course);
-        $quiz->cmid = $cm->id;
+    if (!isset($gnrquiz->cmid)) {
+        $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id, $gnrquiz->course);
+        $gnrquiz->cmid = $cm->id;
     }
 
     question_engine::delete_questions_usage_by_activity($attempt->uniqueid);
@@ -426,68 +426,68 @@ function gnrquiz_delete_attempt($attempt, $quiz) {
         $params = array(
             'objectid' => $attempt->id,
             'relateduserid' => $attempt->userid,
-            'context' => context_module::instance($quiz->cmid),
+            'context' => context_module::instance($gnrquiz->cmid),
             'other' => array(
-                'gnrquizid' => $quiz->id
+                'gnrquizid' => $gnrquiz->id
             )
         );
-        $event = \mod_quiz\event\attempt_deleted::create($params);
+        $event = \mod_gnrquiz\event\attempt_deleted::create($params);
         $event->add_record_snapshot('gnrquiz_attempts', $attempt);
         $event->trigger();
     }
 
     // Search gnrquiz_attempts for other instances by this user.
-    // If none, then delete record for this quiz, this user from gnrquiz_grades
+    // If none, then delete record for this gnrquiz, this user from gnrquiz_grades
     // else recalculate best grade.
     $userid = $attempt->userid;
-    if (!$DB->record_exists('gnrquiz_attempts', array('userid' => $userid, 'gnrquiz' => $quiz->id))) {
-        $DB->delete_records('gnrquiz_grades', array('userid' => $userid, 'gnrquiz' => $quiz->id));
+    if (!$DB->record_exists('gnrquiz_attempts', array('userid' => $userid, 'gnrquiz' => $gnrquiz->id))) {
+        $DB->delete_records('gnrquiz_grades', array('userid' => $userid, 'gnrquiz' => $gnrquiz->id));
     } else {
-        gnrquiz_save_best_grade($quiz, $userid);
+        gnrquiz_save_best_grade($gnrquiz, $userid);
     }
 
-    gnrquiz_update_grades($quiz, $userid);
+    gnrquiz_update_grades($gnrquiz, $userid);
 }
 
 /**
- * Delete all the preview attempts at a quiz, or possibly all the attempts belonging
+ * Delete all the preview attempts at a gnrquiz, or possibly all the attempts belonging
  * to one user.
- * @param object $quiz the quiz object.
+ * @param object $gnrquiz the gnrquiz object.
  * @param int $userid (optional) if given, only delete the previews belonging to this user.
  */
-function gnrquiz_delete_previews($quiz, $userid = null) {
+function gnrquiz_delete_previews($gnrquiz, $userid = null) {
     global $DB;
-    $conditions = array('gnrquiz' => $quiz->id, 'preview' => 1);
+    $conditions = array('gnrquiz' => $gnrquiz->id, 'preview' => 1);
     if (!empty($userid)) {
         $conditions['userid'] = $userid;
     }
     $previewattempts = $DB->get_records('gnrquiz_attempts', $conditions);
     foreach ($previewattempts as $attempt) {
-        gnrquiz_delete_attempt($attempt, $quiz);
+        gnrquiz_delete_attempt($attempt, $gnrquiz);
     }
 }
 
 /**
- * @param int $quizid The quiz id.
- * @return bool whether this quiz has any (non-preview) attempts.
+ * @param int $gnrquizid The gnrquiz id.
+ * @return bool whether this gnrquiz has any (non-preview) attempts.
  */
-function gnrquiz_has_attempts($quizid) {
+function gnrquiz_has_attempts($gnrquizid) {
     global $DB;
-    return $DB->record_exists('gnrquiz_attempts', array('gnrquiz' => $quizid, 'preview' => 0));
+    return $DB->record_exists('gnrquiz_attempts', array('gnrquiz' => $gnrquizid, 'preview' => 0));
 }
 
-// Functions to do with quiz layout and pages //////////////////////////////////
+// Functions to do with gnrquiz layout and pages //////////////////////////////////
 
 /**
- * Repaginate the questions in a quiz
- * @param int $quizid the id of the quiz to repaginate.
+ * Repaginate the questions in a gnrquiz
+ * @param int $gnrquizid the id of the gnrquiz to repaginate.
  * @param int $slotsperpage number of items to put on each page. 0 means unlimited.
  */
-function gnrquiz_repaginate_questions($quizid, $slotsperpage) {
+function gnrquiz_repaginate_questions($gnrquizid, $slotsperpage) {
     global $DB;
     $trans = $DB->start_delegated_transaction();
 
-    $sections = $DB->get_records('gnrquiz_sections', array('gnrquizid' => $quizid), 'firstslot ASC');
+    $sections = $DB->get_records('gnrquiz_sections', array('gnrquizid' => $gnrquizid), 'firstslot ASC');
     $firstslots = array();
     foreach ($sections as $section) {
         if ((int)$section->firstslot === 1) {
@@ -496,7 +496,7 @@ function gnrquiz_repaginate_questions($quizid, $slotsperpage) {
         $firstslots[] = $section->firstslot;
     }
 
-    $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $quizid),
+    $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $gnrquizid),
             'slot');
     $currentpage = 1;
     $slotsonthispage = 0;
@@ -515,44 +515,44 @@ function gnrquiz_repaginate_questions($quizid, $slotsperpage) {
     $trans->allow_commit();
 }
 
-// Functions to do with quiz grades ////////////////////////////////////////////
+// Functions to do with gnrquiz grades ////////////////////////////////////////////
 
 /**
  * Convert the raw grade stored in $attempt into a grade out of the maximum
- * grade for this quiz.
+ * grade for this gnrquiz.
  *
  * @param float $rawgrade the unadjusted grade, fof example $attempt->sumgrades
- * @param object $quiz the quiz object. Only the fields grade, sumgrades and decimalpoints are used.
+ * @param object $gnrquiz the gnrquiz object. Only the fields grade, sumgrades and decimalpoints are used.
  * @param bool|string $format whether to format the results for display
  *      or 'question' to format a question grade (different number of decimal places.
  * @return float|string the rescaled grade, or null/the lang string 'notyetgraded'
  *      if the $grade is null.
  */
-function gnrquiz_rescale_grade($rawgrade, $quiz, $format = true) {
+function gnrquiz_rescale_grade($rawgrade, $gnrquiz, $format = true) {
     if (is_null($rawgrade)) {
         $grade = null;
-    } else if ($quiz->sumgrades >= 0.000005) {
-        $grade = $rawgrade * $quiz->grade / $quiz->sumgrades;
+    } else if ($gnrquiz->sumgrades >= 0.000005) {
+        $grade = $rawgrade * $gnrquiz->grade / $gnrquiz->sumgrades;
     } else {
         $grade = 0;
     }
     if ($format === 'question') {
-        $grade = gnrquiz_format_question_grade($quiz, $grade);
+        $grade = gnrquiz_format_question_grade($gnrquiz, $grade);
     } else if ($format) {
-        $grade = gnrquiz_format_grade($quiz, $grade);
+        $grade = gnrquiz_format_grade($gnrquiz, $grade);
     }
     return $grade;
 }
 
 /**
- * Get the feedback object for this grade on this quiz.
+ * Get the feedback object for this grade on this gnrquiz.
  *
- * @param float $grade a grade on this quiz.
- * @param object $quiz the quiz settings.
+ * @param float $grade a grade on this gnrquiz.
+ * @param object $gnrquiz the gnrquiz settings.
  * @return false|stdClass the record object or false if there is not feedback for the given grade
  * @since  Moodle 3.1
  */
-function gnrquiz_feedback_record_for_grade($grade, $quiz) {
+function gnrquiz_feedback_record_for_grade($grade, $gnrquiz) {
     global $DB;
 
     // With CBM etc, it is possible to get -ve grades, which would then not match
@@ -560,27 +560,27 @@ function gnrquiz_feedback_record_for_grade($grade, $quiz) {
     $grade = max($grade, 0);
 
     $feedback = $DB->get_record_select('gnrquiz_feedback',
-            'gnrquizid = ? AND mingrade <= ? AND ? < maxgrade', array($quiz->id, $grade, $grade));
+            'gnrquizid = ? AND mingrade <= ? AND ? < maxgrade', array($gnrquiz->id, $grade, $grade));
 
     return $feedback;
 }
 
 /**
  * Get the feedback text that should be show to a student who
- * got this grade on this quiz. The feedback is processed ready for diplay.
+ * got this grade on this gnrquiz. The feedback is processed ready for diplay.
  *
- * @param float $grade a grade on this quiz.
- * @param object $quiz the quiz settings.
- * @param object $context the quiz context.
+ * @param float $grade a grade on this gnrquiz.
+ * @param object $gnrquiz the gnrquiz settings.
+ * @param object $context the gnrquiz context.
  * @return string the comment that corresponds to this grade (empty string if there is not one.
  */
-function gnrquiz_feedback_for_grade($grade, $quiz, $context) {
+function gnrquiz_feedback_for_grade($grade, $gnrquiz, $context) {
 
     if (is_null($grade)) {
         return '';
     }
 
-    $feedback = gnrquiz_feedback_record_for_grade($grade, $quiz);
+    $feedback = gnrquiz_feedback_record_for_grade($grade, $gnrquiz);
 
     if (empty($feedback->feedbacktext)) {
         return '';
@@ -590,64 +590,64 @@ function gnrquiz_feedback_for_grade($grade, $quiz, $context) {
     $formatoptions = new stdClass();
     $formatoptions->noclean = true;
     $feedbacktext = file_rewrite_pluginfile_urls($feedback->feedbacktext, 'pluginfile.php',
-            $context->id, 'mod_quiz', 'feedback', $feedback->id);
+            $context->id, 'mod_gnrquiz', 'feedback', $feedback->id);
     $feedbacktext = format_text($feedbacktext, $feedback->feedbacktextformat, $formatoptions);
 
     return $feedbacktext;
 }
 
 /**
- * @param object $quiz the quiz database row.
- * @return bool Whether this quiz has any non-blank feedback text.
+ * @param object $gnrquiz the gnrquiz database row.
+ * @return bool Whether this gnrquiz has any non-blank feedback text.
  */
-function gnrquiz_has_feedback($quiz) {
+function gnrquiz_has_feedback($gnrquiz) {
     global $DB;
     static $cache = array();
-    if (!array_key_exists($quiz->id, $cache)) {
-        $cache[$quiz->id] = gnrquiz_has_grades($quiz) &&
-                $DB->record_exists_select('gnrquiz_feedback', "quizid = ? AND " .
+    if (!array_key_exists($gnrquiz->id, $cache)) {
+        $cache[$gnrquiz->id] = gnrquiz_has_grades($gnrquiz) &&
+                $DB->record_exists_select('gnrquiz_feedback', "gnrquizid = ? AND " .
                     $DB->sql_isnotempty('gnrquiz_feedback', 'feedbacktext', false, true),
-                array($quiz->id));
+                array($gnrquiz->id));
     }
-    return $cache[$quiz->id];
+    return $cache[$gnrquiz->id];
 }
 
 /**
- * Update the sumgrades field of the quiz. This needs to be called whenever
- * the grading structure of the quiz is changed. For example if a question is
+ * Update the sumgrades field of the gnrquiz. This needs to be called whenever
+ * the grading structure of the gnrquiz is changed. For example if a question is
  * added or removed, or a question weight is changed.
  *
  * You should call {@link gnrquiz_delete_previews()} before you call this function.
  *
- * @param object $quiz a quiz.
+ * @param object $gnrquiz a gnrquiz.
  */
-function gnrquiz_update_sumgrades($quiz) {
+function gnrquiz_update_sumgrades($gnrquiz) {
     global $DB;
 
-    $sql = 'UPDATE {quiz}
+    $sql = 'UPDATE {gnrquiz}
             SET sumgrades = COALESCE((
                 SELECT SUM(maxmark)
                 FROM {gnrquiz_slots}
-                WHERE gnrquizid = {quiz}.id
+                WHERE gnrquizid = {gnrquiz}.id
             ), 0)
             WHERE id = ?';
-    $DB->execute($sql, array($quiz->id));
-    $quiz->sumgrades = $DB->get_field('gnrquiz', 'sumgrades', array('id' => $quiz->id));
+    $DB->execute($sql, array($gnrquiz->id));
+    $gnrquiz->sumgrades = $DB->get_field('gnrquiz', 'sumgrades', array('id' => $gnrquiz->id));
 
-    if ($quiz->sumgrades < 0.000005 && gnrquiz_has_attempts($quiz->id)) {
-        // If the quiz has been attempted, and the sumgrades has been
+    if ($gnrquiz->sumgrades < 0.000005 && gnrquiz_has_attempts($gnrquiz->id)) {
+        // If the gnrquiz has been attempted, and the sumgrades has been
         // set to 0, then we must also set the maximum possible grade to 0, or
         // we will get a divide by zero error.
-        gnrquiz_set_grade(0, $quiz);
+        gnrquiz_set_grade(0, $gnrquiz);
     }
 }
 
 /**
- * Update the sumgrades field of the attempts at a quiz.
+ * Update the sumgrades field of the attempts at a gnrquiz.
  *
- * @param object $quiz a quiz.
+ * @param object $gnrquiz a gnrquiz.
  */
-function gnrquiz_update_all_attempt_sumgrades($quiz) {
+function gnrquiz_update_all_attempt_sumgrades($gnrquiz) {
     global $DB;
     $dm = new question_engine_data_mapper();
     $timenow = time();
@@ -658,44 +658,44 @@ function gnrquiz_update_all_attempt_sumgrades($quiz) {
                 sumgrades = (
                     {$dm->sum_usage_marks_subquery('uniqueid')}
                 )
-            WHERE gnrquiz = :quizid AND state = :finishedstate";
-    $DB->execute($sql, array('timenow' => $timenow, 'gnrquizid' => $quiz->id,
+            WHERE gnrquiz = :gnrquizid AND state = :finishedstate";
+    $DB->execute($sql, array('timenow' => $timenow, 'gnrquizid' => $gnrquiz->id,
             'finishedstate' => gnrquiz_attempt::FINISHED));
 }
 
 /**
- * The quiz grade is the maximum that student's results are marked out of. When it
+ * The gnrquiz grade is the maximum that student's results are marked out of. When it
  * changes, the corresponding data in gnrquiz_grades and gnrquiz_feedback needs to be
  * rescaled. After calling this function, you probably need to call
  * gnrquiz_update_all_attempt_sumgrades, gnrquiz_update_all_final_grades and
  * gnrquiz_update_grades.
  *
- * @param float $newgrade the new maximum grade for the quiz.
- * @param object $quiz the quiz we are updating. Passed by reference so its
+ * @param float $newgrade the new maximum grade for the gnrquiz.
+ * @param object $gnrquiz the gnrquiz we are updating. Passed by reference so its
  *      grade field can be updated too.
  * @return bool indicating success or failure.
  */
-function gnrquiz_set_grade($newgrade, $quiz) {
+function gnrquiz_set_grade($newgrade, $gnrquiz) {
     global $DB;
     // This is potentially expensive, so only do it if necessary.
-    if (abs($quiz->grade - $newgrade) < 1e-7) {
+    if (abs($gnrquiz->grade - $newgrade) < 1e-7) {
         // Nothing to do.
         return true;
     }
 
-    $oldgrade = $quiz->grade;
-    $quiz->grade = $newgrade;
+    $oldgrade = $gnrquiz->grade;
+    $gnrquiz->grade = $newgrade;
 
     // Use a transaction, so that on those databases that support it, this is safer.
     $transaction = $DB->start_delegated_transaction();
 
-    // Update the quiz table.
-    $DB->set_field('gnrquiz', 'grade', $newgrade, array('id' => $quiz->instance));
+    // Update the gnrquiz table.
+    $DB->set_field('gnrquiz', 'grade', $newgrade, array('id' => $gnrquiz->instance));
 
     if ($oldgrade < 1) {
         // If the old grade was zero, we cannot rescale, we have to recompute.
         // We also recompute if the old grade was too small to avoid underflow problems.
-        gnrquiz_update_all_final_grades($quiz);
+        gnrquiz_update_all_final_grades($gnrquiz);
 
     } else {
         // We can rescale the grades efficiently.
@@ -704,7 +704,7 @@ function gnrquiz_set_grade($newgrade, $quiz) {
                 UPDATE {gnrquiz_grades}
                 SET grade = ? * grade, timemodified = ?
                 WHERE gnrquiz = ?
-        ", array($newgrade/$oldgrade, $timemodified, $quiz->id));
+        ", array($newgrade/$oldgrade, $timemodified, $gnrquiz->id));
     }
 
     if ($oldgrade > 1e-7) {
@@ -714,28 +714,28 @@ function gnrquiz_set_grade($newgrade, $quiz) {
                 UPDATE {gnrquiz_feedback}
                 SET mingrade = ? * mingrade, maxgrade = ? * maxgrade
                 WHERE gnrquizid = ?
-        ", array($factor, $factor, $quiz->id));
+        ", array($factor, $factor, $gnrquiz->id));
     }
 
     // Update grade item and send all grades to gradebook.
-    gnrquiz_grade_item_update($quiz);
-    gnrquiz_update_grades($quiz);
+    gnrquiz_grade_item_update($gnrquiz);
+    gnrquiz_update_grades($gnrquiz);
 
     $transaction->allow_commit();
     return true;
 }
 
 /**
- * Save the overall grade for a user at a quiz in the gnrquiz_grades table
+ * Save the overall grade for a user at a gnrquiz in the gnrquiz_grades table
  *
- * @param object $quiz The quiz for which the best grade is to be calculated and then saved.
+ * @param object $gnrquiz The gnrquiz for which the best grade is to be calculated and then saved.
  * @param int $userid The userid to calculate the grade for. Defaults to the current user.
  * @param array $attempts The attempts of this user. Useful if you are
  * looping through many users. Attempts can be fetched in one master query to
  * avoid repeated querying.
  * @return bool Indicates success or failure.
  */
-function gnrquiz_save_best_grade($quiz, $userid = null, $attempts = array()) {
+function gnrquiz_save_best_grade($gnrquiz, $userid = null, $attempts = array()) {
     global $DB, $OUTPUT, $USER;
 
     if (empty($userid)) {
@@ -744,45 +744,45 @@ function gnrquiz_save_best_grade($quiz, $userid = null, $attempts = array()) {
 
     if (!$attempts) {
         // Get all the attempts made by the user.
-        $attempts = gnrquiz_get_user_attempts($quiz->id, $userid);
+        $attempts = gnrquiz_get_user_attempts($gnrquiz->id, $userid);
     }
 
     // Calculate the best grade.
-    $bestgrade = gnrquiz_calculate_best_grade($quiz, $attempts);
-    $bestgrade = gnrquiz_rescale_grade($bestgrade, $quiz, false);
+    $bestgrade = gnrquiz_calculate_best_grade($gnrquiz, $attempts);
+    $bestgrade = gnrquiz_rescale_grade($bestgrade, $gnrquiz, false);
 
     // Save the best grade in the database.
     if (is_null($bestgrade)) {
-        $DB->delete_records('gnrquiz_grades', array('gnrquiz' => $quiz->id, 'userid' => $userid));
+        $DB->delete_records('gnrquiz_grades', array('gnrquiz' => $gnrquiz->id, 'userid' => $userid));
 
     } else if ($grade = $DB->get_record('gnrquiz_grades',
-            array('gnrquiz' => $quiz->id, 'userid' => $userid))) {
+            array('gnrquiz' => $gnrquiz->id, 'userid' => $userid))) {
         $grade->grade = $bestgrade;
         $grade->timemodified = time();
         $DB->update_record('gnrquiz_grades', $grade);
 
     } else {
         $grade = new stdClass();
-        $grade->quiz = $quiz->id;
+        $grade->gnrquiz = $gnrquiz->id;
         $grade->userid = $userid;
         $grade->grade = $bestgrade;
         $grade->timemodified = time();
         $DB->insert_record('gnrquiz_grades', $grade);
     }
 
-    gnrquiz_update_grades($quiz, $userid);
+    gnrquiz_update_grades($gnrquiz, $userid);
 }
 
 /**
- * Calculate the overall grade for a quiz given a number of attempts by a particular user.
+ * Calculate the overall grade for a gnrquiz given a number of attempts by a particular user.
  *
- * @param object $quiz    the quiz settings object.
- * @param array $attempts an array of all the user's attempts at this quiz in order.
+ * @param object $gnrquiz    the gnrquiz settings object.
+ * @param array $attempts an array of all the user's attempts at this gnrquiz in order.
  * @return float          the overall grade
  */
-function gnrquiz_calculate_best_grade($quiz, $attempts) {
+function gnrquiz_calculate_best_grade($gnrquiz, $attempts) {
 
-    switch ($quiz->grademethod) {
+    switch ($gnrquiz->grademethod) {
 
         case GNRQUIZ_ATTEMPTFIRST:
             $firstattempt = reset($attempts);
@@ -819,42 +819,42 @@ function gnrquiz_calculate_best_grade($quiz, $attempts) {
 }
 
 /**
- * Update the final grade at this quiz for all students.
+ * Update the final grade at this gnrquiz for all students.
  *
  * This function is equivalent to calling gnrquiz_save_best_grade for all
  * users, but much more efficient.
  *
- * @param object $quiz the quiz settings.
+ * @param object $gnrquiz the gnrquiz settings.
  */
-function gnrquiz_update_all_final_grades($quiz) {
+function gnrquiz_update_all_final_grades($gnrquiz) {
     global $DB;
 
-    if (!$quiz->sumgrades) {
+    if (!$gnrquiz->sumgrades) {
         return;
     }
 
-    $param = array('iquizid' => $quiz->id, 'istatefinished' => gnrquiz_attempt::FINISHED);
+    $param = array('ignrquizid' => $gnrquiz->id, 'istatefinished' => gnrquiz_attempt::FINISHED);
     $firstlastattemptjoin = "JOIN (
             SELECT
-                iquiza.userid,
+                ignrquiza.userid,
                 MIN(attempt) AS firstattempt,
                 MAX(attempt) AS lastattempt
 
-            FROM {gnrquiz_attempts} iquiza
+            FROM {gnrquiz_attempts} ignrquiza
 
             WHERE
-                iquiza.state = :istatefinished AND
-                iquiza.preview = 0 AND
-                iquiza.quiz = :iquizid
+                ignrquiza.state = :istatefinished AND
+                ignrquiza.preview = 0 AND
+                ignrquiza.gnrquiz = :ignrquizid
 
-            GROUP BY iquiza.userid
-        ) first_last_attempts ON first_last_attempts.userid = quiza.userid";
+            GROUP BY ignrquiza.userid
+        ) first_last_attempts ON first_last_attempts.userid = gnrquiza.userid";
 
-    switch ($quiz->grademethod) {
+    switch ($gnrquiz->grademethod) {
         case GNRQUIZ_ATTEMPTFIRST:
             // Because of the where clause, there will only be one row, but we
             // must still use an aggregate function.
-            $select = 'MAX(quiza.sumgrades)';
+            $select = 'MAX(gnrquiza.sumgrades)';
             $join = $firstlastattemptjoin;
             $where = 'gnrquiza.attempt = first_last_attempts.firstattempt AND';
             break;
@@ -862,46 +862,46 @@ function gnrquiz_update_all_final_grades($quiz) {
         case GNRQUIZ_ATTEMPTLAST:
             // Because of the where clause, there will only be one row, but we
             // must still use an aggregate function.
-            $select = 'MAX(quiza.sumgrades)';
+            $select = 'MAX(gnrquiza.sumgrades)';
             $join = $firstlastattemptjoin;
             $where = 'gnrquiza.attempt = first_last_attempts.lastattempt AND';
             break;
 
         case GNRQUIZ_GRADEAVERAGE:
-            $select = 'AVG(quiza.sumgrades)';
+            $select = 'AVG(gnrquiza.sumgrades)';
             $join = '';
             $where = '';
             break;
 
         default:
         case GNRQUIZ_GRADEHIGHEST:
-            $select = 'MAX(quiza.sumgrades)';
+            $select = 'MAX(gnrquiza.sumgrades)';
             $join = '';
             $where = '';
             break;
     }
 
-    if ($quiz->sumgrades >= 0.000005) {
-        $finalgrade = $select . ' * ' . ($quiz->grade / $quiz->sumgrades);
+    if ($gnrquiz->sumgrades >= 0.000005) {
+        $finalgrade = $select . ' * ' . ($gnrquiz->grade / $gnrquiz->sumgrades);
     } else {
         $finalgrade = '0';
     }
-    $param['gnrquizid'] = $quiz->id;
-    $param['gnrquizid2'] = $quiz->id;
-    $param['gnrquizid3'] = $quiz->id;
-    $param['gnrquizid4'] = $quiz->id;
+    $param['gnrquizid'] = $gnrquiz->id;
+    $param['gnrquizid2'] = $gnrquiz->id;
+    $param['gnrquizid3'] = $gnrquiz->id;
+    $param['gnrquizid4'] = $gnrquiz->id;
     $param['statefinished'] = gnrquiz_attempt::FINISHED;
     $param['statefinished2'] = gnrquiz_attempt::FINISHED;
     $finalgradesubquery = "
-            SELECT quiza.userid, $finalgrade AS newgrade
-            FROM {gnrquiz_attempts} quiza
+            SELECT gnrquiza.userid, $finalgrade AS newgrade
+            FROM {gnrquiz_attempts} gnrquiza
             $join
             WHERE
                 $where
-                quiza.state = :statefinished AND
-                quiza.preview = 0 AND
-                quiza.quiz = :quizid3
-            GROUP BY quiza.userid";
+                gnrquiza.state = :statefinished AND
+                gnrquiza.preview = 0 AND
+                gnrquiza.gnrquiz = :gnrquizid3
+            GROUP BY gnrquiza.userid";
 
     $changedgrades = $DB->get_records_sql("
             SELECT users.userid, qg.id, qg.grade, newgrades.newgrade
@@ -909,17 +909,17 @@ function gnrquiz_update_all_final_grades($quiz) {
             FROM (
                 SELECT userid
                 FROM {gnrquiz_grades} qg
-                WHERE gnrquiz = :quizid
+                WHERE gnrquiz = :gnrquizid
             UNION
                 SELECT DISTINCT userid
-                FROM {gnrquiz_attempts} quiza2
+                FROM {gnrquiz_attempts} gnrquiza2
                 WHERE
-                    quiza2.state = :statefinished2 AND
-                    quiza2.preview = 0 AND
-                    quiza2.quiz = :quizid2
+                    gnrquiza2.state = :statefinished2 AND
+                    gnrquiza2.preview = 0 AND
+                    gnrquiza2.gnrquiz = :gnrquizid2
             ) users
 
-            LEFT JOIN {gnrquiz_grades} qg ON qg.userid = users.userid AND qg.quiz = :quizid4
+            LEFT JOIN {gnrquiz_grades} qg ON qg.userid = users.userid AND qg.gnrquiz = :gnrquizid4
 
             LEFT JOIN (
                 $finalgradesubquery
@@ -944,7 +944,7 @@ function gnrquiz_update_all_final_grades($quiz) {
 
         } else if (is_null($changedgrade->grade)) {
             $toinsert = new stdClass();
-            $toinsert->quiz = $quiz->id;
+            $toinsert->gnrquiz = $gnrquiz->id;
             $toinsert->userid = $changedgrade->userid;
             $toinsert->timemodified = $timenow;
             $toinsert->grade = $changedgrade->newgrade;
@@ -962,7 +962,7 @@ function gnrquiz_update_all_final_grades($quiz) {
     if (!empty($todelete)) {
         list($test, $params) = $DB->get_in_or_equal($todelete);
         $DB->delete_records_select('gnrquiz_grades', 'gnrquiz = ? AND userid ' . $test,
-                array_merge(array($quiz->id), $params));
+                array_merge(array($gnrquiz->id), $params));
     }
 }
 
@@ -973,8 +973,8 @@ function gnrquiz_update_all_final_grades($quiz) {
  *                    Allowed conditions:
  *                      courseid => (array|int) attempts in given course(s)
  *                      userid   => (array|int) attempts for given user(s)
- *                      quizid   => (array|int) attempts in given quiz(s)
- *                      groupid  => (array|int) quizzes with some override for given group(s)
+ *                      gnrquizid   => (array|int) attempts in given gnrquiz(s)
+ *                      groupid  => (array|int) gnrquizzes with some override for given group(s)
  *
  */
 function gnrquiz_update_open_attempts(array $conditions) {
@@ -987,57 +987,57 @@ function gnrquiz_update_open_attempts(array $conditions) {
     }
 
     $params = array();
-    $wheres = array("quiza.state IN ('inprogress', 'overdue')");
-    $iwheres = array("iquiza.state IN ('inprogress', 'overdue')");
+    $wheres = array("gnrquiza.state IN ('inprogress', 'overdue')");
+    $iwheres = array("ignrquiza.state IN ('inprogress', 'overdue')");
 
     if (isset($conditions['courseid'])) {
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['courseid'], SQL_PARAMS_NAMED, 'cid');
         $params = array_merge($params, $inparams);
-        $wheres[] = "quiza.quiz IN (SELECT q.id FROM {quiz} q WHERE q.course $incond)";
+        $wheres[] = "gnrquiza.gnrquiz IN (SELECT q.id FROM {gnrquiz} q WHERE q.course $incond)";
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['courseid'], SQL_PARAMS_NAMED, 'icid');
         $params = array_merge($params, $inparams);
-        $iwheres[] = "iquiza.quiz IN (SELECT q.id FROM {quiz} q WHERE q.course $incond)";
+        $iwheres[] = "ignrquiza.gnrquiz IN (SELECT q.id FROM {gnrquiz} q WHERE q.course $incond)";
     }
 
     if (isset($conditions['userid'])) {
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['userid'], SQL_PARAMS_NAMED, 'uid');
         $params = array_merge($params, $inparams);
-        $wheres[] = "quiza.userid $incond";
+        $wheres[] = "gnrquiza.userid $incond";
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['userid'], SQL_PARAMS_NAMED, 'iuid');
         $params = array_merge($params, $inparams);
-        $iwheres[] = "iquiza.userid $incond";
+        $iwheres[] = "ignrquiza.userid $incond";
     }
 
     if (isset($conditions['gnrquizid'])) {
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['gnrquizid'], SQL_PARAMS_NAMED, 'qid');
         $params = array_merge($params, $inparams);
-        $wheres[] = "quiza.quiz $incond";
+        $wheres[] = "gnrquiza.gnrquiz $incond";
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['gnrquizid'], SQL_PARAMS_NAMED, 'iqid');
         $params = array_merge($params, $inparams);
-        $iwheres[] = "iquiza.quiz $incond";
+        $iwheres[] = "ignrquiza.gnrquiz $incond";
     }
 
     if (isset($conditions['groupid'])) {
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['groupid'], SQL_PARAMS_NAMED, 'gid');
         $params = array_merge($params, $inparams);
-        $wheres[] = "quiza.quiz IN (SELECT qo.quiz FROM {gnrquiz_overrides} qo WHERE qo.groupid $incond)";
+        $wheres[] = "gnrquiza.gnrquiz IN (SELECT qo.gnrquiz FROM {gnrquiz_overrides} qo WHERE qo.groupid $incond)";
         list ($incond, $inparams) = $DB->get_in_or_equal($conditions['groupid'], SQL_PARAMS_NAMED, 'igid');
         $params = array_merge($params, $inparams);
-        $iwheres[] = "iquiza.quiz IN (SELECT qo.quiz FROM {gnrquiz_overrides} qo WHERE qo.groupid $incond)";
+        $iwheres[] = "ignrquiza.gnrquiz IN (SELECT qo.gnrquiz FROM {gnrquiz_overrides} qo WHERE qo.groupid $incond)";
     }
 
     // SQL to compute timeclose and timelimit for each attempt:
-    $quizausersql = gnrquiz_get_attempt_usertime_sql(
+    $gnrquizausersql = gnrquiz_get_attempt_usertime_sql(
             implode("\n                AND ", $iwheres));
 
     // SQL to compute the new timecheckstate
     $timecheckstatesql = "
-          CASE WHEN quizauser.usertimelimit = 0 AND quizauser.usertimeclose = 0 THEN NULL
-               WHEN quizauser.usertimelimit = 0 THEN quizauser.usertimeclose
-               WHEN quizauser.usertimeclose = 0 THEN quiza.timestart + quizauser.usertimelimit
-               WHEN quiza.timestart + quizauser.usertimelimit < quizauser.usertimeclose THEN quiza.timestart + quizauser.usertimelimit
-               ELSE quizauser.usertimeclose END +
-          CASE WHEN quiza.state = 'overdue' THEN quiz.graceperiod ELSE 0 END";
+          CASE WHEN gnrquizauser.usertimelimit = 0 AND gnrquizauser.usertimeclose = 0 THEN NULL
+               WHEN gnrquizauser.usertimelimit = 0 THEN gnrquizauser.usertimeclose
+               WHEN gnrquizauser.usertimeclose = 0 THEN gnrquiza.timestart + gnrquizauser.usertimelimit
+               WHEN gnrquiza.timestart + gnrquizauser.usertimelimit < gnrquizauser.usertimeclose THEN gnrquiza.timestart + gnrquizauser.usertimelimit
+               ELSE gnrquizauser.usertimeclose END +
+          CASE WHEN gnrquiza.state = 'overdue' THEN gnrquiz.graceperiod ELSE 0 END";
 
     // SQL to select which attempts to process
     $attemptselect = implode("\n                         AND ", $wheres);
@@ -1053,33 +1053,33 @@ function gnrquiz_update_open_attempts(array $conditions) {
 
     $dbfamily = $DB->get_dbfamily();
     if ($dbfamily == 'mysql') {
-        $updatesql = "UPDATE {gnrquiz_attempts} quiza
-                        JOIN {quiz} quiz ON quiz.id = quiza.quiz
-                        JOIN ( $quizausersql ) quizauser ON quizauser.id = quiza.id
-                         SET quiza.timecheckstate = $timecheckstatesql
+        $updatesql = "UPDATE {gnrquiz_attempts} gnrquiza
+                        JOIN {gnrquiz} gnrquiz ON gnrquiz.id = gnrquiza.gnrquiz
+                        JOIN ( $gnrquizausersql ) gnrquizauser ON gnrquizauser.id = gnrquiza.id
+                         SET gnrquiza.timecheckstate = $timecheckstatesql
                        WHERE $attemptselect";
     } else if ($dbfamily == 'postgres') {
-        $updatesql = "UPDATE {gnrquiz_attempts} quiza
+        $updatesql = "UPDATE {gnrquiz_attempts} gnrquiza
                          SET timecheckstate = $timecheckstatesql
-                        FROM {quiz} quiz, ( $quizausersql ) quizauser
-                       WHERE gnrquiz.id = quiza.quiz
-                         AND quizauser.id = quiza.id
+                        FROM {gnrquiz} gnrquiz, ( $gnrquizausersql ) gnrquizauser
+                       WHERE gnrquiz.id = gnrquiza.gnrquiz
+                         AND gnrquizauser.id = gnrquiza.id
                          AND $attemptselect";
     } else if ($dbfamily == 'mssql') {
-        $updatesql = "UPDATE quiza
+        $updatesql = "UPDATE gnrquiza
                          SET timecheckstate = $timecheckstatesql
-                        FROM {gnrquiz_attempts} quiza
-                        JOIN {quiz} quiz ON quiz.id = quiza.quiz
-                        JOIN ( $quizausersql ) quizauser ON quizauser.id = quiza.id
+                        FROM {gnrquiz_attempts} gnrquiza
+                        JOIN {gnrquiz} gnrquiz ON gnrquiz.id = gnrquiza.gnrquiz
+                        JOIN ( $gnrquizausersql ) gnrquizauser ON gnrquizauser.id = gnrquiza.id
                        WHERE $attemptselect";
     } else {
         // oracle, sqlite and others
-        $updatesql = "UPDATE {gnrquiz_attempts} quiza
+        $updatesql = "UPDATE {gnrquiz_attempts} gnrquiza
                          SET timecheckstate = (
                            SELECT $timecheckstatesql
-                             FROM {quiz} quiz, ( $quizausersql ) quizauser
-                            WHERE gnrquiz.id = quiza.quiz
-                              AND quizauser.id = quiza.id
+                             FROM {gnrquiz} gnrquiz, ( $gnrquizausersql ) gnrquizauser
+                            WHERE gnrquiz.id = gnrquiza.gnrquiz
+                              AND gnrquizauser.id = gnrquiza.id
                          )
                          WHERE $attemptselect";
     }
@@ -1091,7 +1091,7 @@ function gnrquiz_update_open_attempts(array $conditions) {
  * Returns SQL to compute timeclose and timelimit for every attempt, taking into account user and group overrides.
  *
  * @param string $redundantwhereclauses extra where clauses to add to the subquery
- *      for performance. These can use the table alias iquiza for the quiz attempts table.
+ *      for performance. These can use the table alias ignrquiza for the gnrquiz attempts table.
  * @return string SQL select with columns attempt.id, usertimeclose, usertimelimit.
  */
 function gnrquiz_get_attempt_usertime_sql($redundantwhereclauses = '') {
@@ -1100,36 +1100,36 @@ function gnrquiz_get_attempt_usertime_sql($redundantwhereclauses = '') {
     }
     // The multiple qgo JOINS are necessary because we want timeclose/timelimit = 0 (unlimited) to supercede
     // any other group override
-    $quizausersql = "
-          SELECT iquiza.id,
-           COALESCE(MAX(quo.timeclose), MAX(qgo1.timeclose), MAX(qgo2.timeclose), iquiz.timeclose) AS usertimeclose,
-           COALESCE(MAX(quo.timelimit), MAX(qgo3.timelimit), MAX(qgo4.timelimit), iquiz.timelimit) AS usertimelimit
+    $gnrquizausersql = "
+          SELECT ignrquiza.id,
+           COALESCE(MAX(quo.timeclose), MAX(qgo1.timeclose), MAX(qgo2.timeclose), ignrquiz.timeclose) AS usertimeclose,
+           COALESCE(MAX(quo.timelimit), MAX(qgo3.timelimit), MAX(qgo4.timelimit), ignrquiz.timelimit) AS usertimelimit
 
-           FROM {gnrquiz_attempts} iquiza
-           JOIN {quiz} iquiz ON iquiz.id = iquiza.quiz
-      LEFT JOIN {gnrquiz_overrides} quo ON quo.quiz = iquiza.quiz AND quo.userid = iquiza.userid
-      LEFT JOIN {groups_members} gm ON gm.userid = iquiza.userid
-      LEFT JOIN {gnrquiz_overrides} qgo1 ON qgo1.quiz = iquiza.quiz AND qgo1.groupid = gm.groupid AND qgo1.timeclose = 0
-      LEFT JOIN {gnrquiz_overrides} qgo2 ON qgo2.quiz = iquiza.quiz AND qgo2.groupid = gm.groupid AND qgo2.timeclose > 0
-      LEFT JOIN {gnrquiz_overrides} qgo3 ON qgo3.quiz = iquiza.quiz AND qgo3.groupid = gm.groupid AND qgo3.timelimit = 0
-      LEFT JOIN {gnrquiz_overrides} qgo4 ON qgo4.quiz = iquiza.quiz AND qgo4.groupid = gm.groupid AND qgo4.timelimit > 0
+           FROM {gnrquiz_attempts} ignrquiza
+           JOIN {gnrquiz} ignrquiz ON ignrquiz.id = ignrquiza.gnrquiz
+      LEFT JOIN {gnrquiz_overrides} quo ON quo.gnrquiz = ignrquiza.gnrquiz AND quo.userid = ignrquiza.userid
+      LEFT JOIN {groups_members} gm ON gm.userid = ignrquiza.userid
+      LEFT JOIN {gnrquiz_overrides} qgo1 ON qgo1.gnrquiz = ignrquiza.gnrquiz AND qgo1.groupid = gm.groupid AND qgo1.timeclose = 0
+      LEFT JOIN {gnrquiz_overrides} qgo2 ON qgo2.gnrquiz = ignrquiza.gnrquiz AND qgo2.groupid = gm.groupid AND qgo2.timeclose > 0
+      LEFT JOIN {gnrquiz_overrides} qgo3 ON qgo3.gnrquiz = ignrquiza.gnrquiz AND qgo3.groupid = gm.groupid AND qgo3.timelimit = 0
+      LEFT JOIN {gnrquiz_overrides} qgo4 ON qgo4.gnrquiz = ignrquiza.gnrquiz AND qgo4.groupid = gm.groupid AND qgo4.timelimit > 0
           $redundantwhereclauses
-       GROUP BY iquiza.id, iquiz.id, iquiz.timeclose, iquiz.timelimit";
-    return $quizausersql;
+       GROUP BY ignrquiza.id, ignrquiz.id, ignrquiz.timeclose, ignrquiz.timelimit";
+    return $gnrquizausersql;
 }
 
 /**
- * Return the attempt with the best grade for a quiz
+ * Return the attempt with the best grade for a gnrquiz
  *
- * Which attempt is the best depends on $quiz->grademethod. If the grade
+ * Which attempt is the best depends on $gnrquiz->grademethod. If the grade
  * method is GRADEAVERAGE then this function simply returns the last attempt.
  * @return object         The attempt with the best grade
- * @param object $quiz    The quiz for which the best grade is to be calculated
- * @param array $attempts An array of all the attempts of the user at the quiz
+ * @param object $gnrquiz    The gnrquiz for which the best grade is to be calculated
+ * @param array $attempts An array of all the attempts of the user at the gnrquiz
  */
-function gnrquiz_calculate_best_attempt($quiz, $attempts) {
+function gnrquiz_calculate_best_attempt($gnrquiz, $attempts) {
 
-    switch ($quiz->grademethod) {
+    switch ($gnrquiz->grademethod) {
 
         case GNRQUIZ_ATTEMPTFIRST:
             foreach ($attempts as $attempt) {
@@ -1158,7 +1158,7 @@ function gnrquiz_calculate_best_attempt($quiz, $attempts) {
 }
 
 /**
- * @return array int => lang string the options for calculating the quiz grade
+ * @return array int => lang string the options for calculating the gnrquiz grade
  *      from the individual attempt grades.
  */
 function gnrquiz_get_grading_options() {
@@ -1181,7 +1181,7 @@ function gnrquiz_get_grading_option_name($option) {
 }
 
 /**
- * @return array string => lang string the options for handling overdue quiz
+ * @return array string => lang string the options for handling overdue gnrquiz
  *      attempts.
  */
 function gnrquiz_get_overdue_handling_options() {
@@ -1219,7 +1219,7 @@ function gnrquiz_questions_per_page_options() {
 }
 
 /**
- * Get the human-readable name for a quiz attempt state.
+ * Get the human-readable name for a gnrquiz attempt state.
  * @param string $state one of the state constants like {@link gnrquiz_attempt::IN_PROGRESS}.
  * @return string The lang string to describe that state.
  */
@@ -1234,29 +1234,29 @@ function gnrquiz_attempt_state_name($state) {
         case gnrquiz_attempt::ABANDONED:
             return get_string('stateabandoned', 'gnrquiz');
         default:
-            throw new coding_exception('Unknown quiz attempt state.');
+            throw new coding_exception('Unknown gnrquiz attempt state.');
     }
 }
 
-// Other quiz functions ////////////////////////////////////////////////////////
+// Other gnrquiz functions ////////////////////////////////////////////////////////
 
 /**
- * @param object $quiz the quiz.
- * @param int $cmid the course_module object for this quiz.
+ * @param object $gnrquiz the gnrquiz.
+ * @param int $cmid the course_module object for this gnrquiz.
  * @param object $question the question.
  * @param string $returnurl url to return to after action is done.
  * @param int $variant which question variant to preview (optional).
  * @return string html for a number of icons linked to action pages for a
  * question - preview and edit / view icons depending on user capabilities.
  */
-function gnrquiz_question_action_icons($quiz, $cmid, $question, $returnurl, $variant = null) {
-    $html = gnrquiz_question_preview_button($quiz, $question, false, $variant) . ' ' .
+function gnrquiz_question_action_icons($gnrquiz, $cmid, $question, $returnurl, $variant = null) {
+    $html = gnrquiz_question_preview_button($gnrquiz, $question, false, $variant) . ' ' .
             gnrquiz_question_edit_button($cmid, $question, $returnurl);
     return $html;
 }
 
 /**
- * @param int $cmid the course_module.id for this quiz.
+ * @param int $cmid the course_module.id for this gnrquiz.
  * @param object $question the question.
  * @param string $returnurl url to return to after action is done.
  * @param string $contentbeforeicon some HTML content to be added inside the link, before the icon.
@@ -1305,14 +1305,14 @@ function gnrquiz_question_edit_button($cmid, $question, $returnurl, $contentafte
 }
 
 /**
- * @param object $quiz the quiz settings
+ * @param object $gnrquiz the gnrquiz settings
  * @param object $question the question
  * @param int $variant which question variant to preview (optional).
- * @return moodle_url to preview this question with the options from this quiz.
+ * @return moodle_url to preview this question with the options from this gnrquiz.
  */
-function gnrquiz_question_preview_url($quiz, $question, $variant = null) {
+function gnrquiz_question_preview_url($gnrquiz, $question, $variant = null) {
     // Get the appropriate display options.
-    $displayoptions = mod_gnrquiz_display_options::make_from_quiz($quiz,
+    $displayoptions = mod_gnrquiz_display_options::make_from_gnrquiz($gnrquiz,
             mod_gnrquiz_display_options::DURING);
 
     $maxmark = null;
@@ -1321,29 +1321,29 @@ function gnrquiz_question_preview_url($quiz, $question, $variant = null) {
     }
 
     // Work out the correcte preview URL.
-    return question_preview_url($question->id, $quiz->preferredbehaviour,
+    return question_preview_url($question->id, $gnrquiz->preferredbehaviour,
             $maxmark, $displayoptions, $variant);
 }
 
 /**
- * @param object $quiz the quiz settings
+ * @param object $gnrquiz the gnrquiz settings
  * @param object $question the question
  * @param bool $label if true, show the preview question label after the icon
  * @param int $variant which question variant to preview (optional).
  * @return the HTML for a preview question icon.
  */
-function gnrquiz_question_preview_button($quiz, $question, $label = false, $variant = null) {
+function gnrquiz_question_preview_button($gnrquiz, $question, $label = false, $variant = null) {
     global $PAGE;
     if (!question_has_capability_on($question, 'use', $question->category)) {
         return '';
     }
 
-    return $PAGE->get_renderer('mod_quiz', 'edit')->question_preview_icon($quiz, $question, $label, $variant);
+    return $PAGE->get_renderer('mod_gnrquiz', 'edit')->question_preview_icon($gnrquiz, $question, $label, $variant);
 }
 
 /**
  * @param object $attempt the attempt.
- * @param object $context the quiz context.
+ * @param object $context the gnrquiz context.
  * @return int whether flags should be shown/editable to the current user for this attempt.
  */
 function gnrquiz_get_flag_option($attempt, $context) {
@@ -1358,17 +1358,17 @@ function gnrquiz_get_flag_option($attempt, $context) {
 }
 
 /**
- * Work out what state this quiz attempt is in - in the sense used by
+ * Work out what state this gnrquiz attempt is in - in the sense used by
  * gnrquiz_get_review_options, not in the sense of $attempt->state.
- * @param object $quiz the quiz settings
+ * @param object $gnrquiz the gnrquiz settings
  * @param object $attempt the gnrquiz_attempt database row.
  * @return int one of the mod_gnrquiz_display_options::DURING,
  *      IMMEDIATELY_AFTER, LATER_WHILE_OPEN or AFTER_CLOSE constants.
  */
-function gnrquiz_attempt_state($quiz, $attempt) {
+function gnrquiz_attempt_state($gnrquiz, $attempt) {
     if ($attempt->state == gnrquiz_attempt::IN_PROGRESS) {
         return mod_gnrquiz_display_options::DURING;
-    } else if ($quiz->timeclose && time() >= $quiz->timeclose) {
+    } else if ($gnrquiz->timeclose && time() >= $gnrquiz->timeclose) {
         return mod_gnrquiz_display_options::AFTER_CLOSE;
     } else if (time() < $attempt->timefinish + 120) {
         return mod_gnrquiz_display_options::IMMEDIATELY_AFTER;
@@ -1379,16 +1379,16 @@ function gnrquiz_attempt_state($quiz, $attempt) {
 
 /**
  * The the appropraite mod_gnrquiz_display_options object for this attempt at this
- * quiz right now.
+ * gnrquiz right now.
  *
- * @param object $quiz the quiz instance.
+ * @param object $gnrquiz the gnrquiz instance.
  * @param object $attempt the attempt in question.
- * @param $context the quiz context.
+ * @param $context the gnrquiz context.
  *
  * @return mod_gnrquiz_display_options
  */
-function gnrquiz_get_review_options($quiz, $attempt, $context) {
-    $options = mod_gnrquiz_display_options::make_from_quiz($quiz, gnrquiz_attempt_state($quiz, $attempt));
+function gnrquiz_get_review_options($gnrquiz, $attempt, $context) {
+    $options = mod_gnrquiz_display_options::make_from_gnrquiz($gnrquiz, gnrquiz_attempt_state($gnrquiz, $attempt));
 
     $options->readonly = true;
     $options->flags = gnrquiz_get_flag_option($attempt, $context);
@@ -1427,19 +1427,19 @@ function gnrquiz_get_review_options($quiz, $attempt, $context) {
 }
 
 /**
- * Combines the review options from a number of different quiz attempts.
+ * Combines the review options from a number of different gnrquiz attempts.
  * Returns an array of two ojects, so the suggested way of calling this
  * funciton is:
  * list($someoptions, $alloptions) = gnrquiz_get_combined_reviewoptions(...)
  *
- * @param object $quiz the quiz instance.
+ * @param object $gnrquiz the gnrquiz instance.
  * @param array $attempts an array of attempt objects.
  *
  * @return array of two options objects, one showing which options are true for
  *          at least one of the attempts, the other showing which options are true
  *          for all attempts.
  */
-function gnrquiz_get_combined_reviewoptions($quiz, $attempts) {
+function gnrquiz_get_combined_reviewoptions($gnrquiz, $attempts) {
     $fields = array('feedback', 'generalfeedback', 'rightanswer', 'overallfeedback');
     $someoptions = new stdClass();
     $alloptions = new stdClass();
@@ -1456,8 +1456,8 @@ function gnrquiz_get_combined_reviewoptions($quiz, $attempts) {
     }
 
     foreach ($attempts as $attempt) {
-        $attemptoptions = mod_gnrquiz_display_options::make_from_quiz($quiz,
-                gnrquiz_attempt_state($quiz, $attempt));
+        $attemptoptions = mod_gnrquiz_display_options::make_from_gnrquiz($gnrquiz,
+                gnrquiz_attempt_state($gnrquiz, $attempt));
         foreach ($fields as $field) {
             $someoptions->$field = $someoptions->$field || $attemptoptions->$field;
             $alloptions->$field = $alloptions->$field && $attemptoptions->$field;
@@ -1487,7 +1487,7 @@ function gnrquiz_send_confirmation($recipient, $a) {
 
     // Prepare the message.
     $eventdata = new stdClass();
-    $eventdata->component         = 'mod_quiz';
+    $eventdata->component         = 'mod_gnrquiz';
     $eventdata->name              = 'confirmation';
     $eventdata->notification      = 1;
 
@@ -1499,8 +1499,8 @@ function gnrquiz_send_confirmation($recipient, $a) {
     $eventdata->fullmessagehtml   = '';
 
     $eventdata->smallmessage      = get_string('emailconfirmsmall', 'gnrquiz', $a);
-    $eventdata->contexturl        = $a->quizurl;
-    $eventdata->contexturlname    = $a->quizname;
+    $eventdata->contexturl        = $a->gnrquizurl;
+    $eventdata->contexturlname    = $a->gnrquizname;
 
     // ... and send it.
     return message_send($eventdata);
@@ -1523,7 +1523,7 @@ function gnrquiz_send_notification($recipient, $submitter, $a) {
 
     // Prepare the message.
     $eventdata = new stdClass();
-    $eventdata->component         = 'mod_quiz';
+    $eventdata->component         = 'mod_gnrquiz';
     $eventdata->name              = 'submission';
     $eventdata->notification      = 1;
 
@@ -1535,30 +1535,30 @@ function gnrquiz_send_notification($recipient, $submitter, $a) {
     $eventdata->fullmessagehtml   = '';
 
     $eventdata->smallmessage      = get_string('emailnotifysmall', 'gnrquiz', $a);
-    $eventdata->contexturl        = $a->quizreviewurl;
-    $eventdata->contexturlname    = $a->quizname;
+    $eventdata->contexturl        = $a->gnrquizreviewurl;
+    $eventdata->contexturlname    = $a->gnrquizname;
 
     // ... and send it.
     return message_send($eventdata);
 }
 
 /**
- * Send all the requried messages when a quiz attempt is submitted.
+ * Send all the requried messages when a gnrquiz attempt is submitted.
  *
  * @param object $course the course
- * @param object $quiz the quiz
+ * @param object $gnrquiz the gnrquiz
  * @param object $attempt this attempt just finished
- * @param object $context the quiz context
- * @param object $cm the coursemodule for this quiz
+ * @param object $context the gnrquiz context
+ * @param object $cm the coursemodule for this gnrquiz
  *
  * @return bool true if all necessary messages were sent successfully, else false.
  */
-function gnrquiz_send_notification_messages($course, $quiz, $attempt, $context, $cm) {
+function gnrquiz_send_notification_messages($course, $gnrquiz, $attempt, $context, $cm) {
     global $CFG, $DB;
 
     // Do nothing if required objects not present.
-    if (empty($course) or empty($quiz) or empty($attempt) or empty($context)) {
-        throw new coding_exception('$course, $quiz, $attempt, $context and $cm must all be set.');
+    if (empty($course) or empty($gnrquiz) or empty($attempt) or empty($context)) {
+        throw new coding_exception('$course, $gnrquiz, $attempt, $context and $cm must all be set.');
     }
 
     $submitter = $DB->get_record('user', array('id' => $attempt->userid), '*', MUST_EXIST);
@@ -1579,7 +1579,7 @@ function gnrquiz_send_notification_messages($course, $quiz, $attempt, $context, 
     if (is_array($groups) && count($groups) > 0) {
         $groups = array_keys($groups);
     } else if (groups_get_activity_groupmode($cm, $course) != NOGROUPS) {
-        // If the user is not in a group, and the quiz is set to group mode,
+        // If the user is not in a group, and the gnrquiz is set to group mode,
         // then set $groups to a non-existant id so that only users with
         // 'moodle/site:accessallgroups' get notified.
         $groups = -1;
@@ -1598,19 +1598,19 @@ function gnrquiz_send_notification_messages($course, $quiz, $attempt, $context, 
     $a->coursename      = $course->fullname;
     $a->courseshortname = $course->shortname;
     // Quiz info.
-    $a->quizname        = $quiz->name;
-    $a->quizreporturl   = $CFG->wwwroot . '/mod/gnrquiz/report.php?id=' . $cm->id;
-    $a->quizreportlink  = '<a href="' . $a->quizreporturl . '">' .
-            format_string($quiz->name) . ' report</a>';
-    $a->quizurl         = $CFG->wwwroot . '/mod/gnrquiz/view.php?id=' . $cm->id;
-    $a->quizlink        = '<a href="' . $a->quizurl . '">' . format_string($quiz->name) . '</a>';
+    $a->gnrquizname        = $gnrquiz->name;
+    $a->gnrquizreporturl   = $CFG->wwwroot . '/mod/gnrquiz/report.php?id=' . $cm->id;
+    $a->gnrquizreportlink  = '<a href="' . $a->gnrquizreporturl . '">' .
+            format_string($gnrquiz->name) . ' report</a>';
+    $a->gnrquizurl         = $CFG->wwwroot . '/mod/gnrquiz/view.php?id=' . $cm->id;
+    $a->gnrquizlink        = '<a href="' . $a->gnrquizurl . '">' . format_string($gnrquiz->name) . '</a>';
     // Attempt info.
     $a->submissiontime  = userdate($attempt->timefinish);
     $a->timetaken       = format_time($attempt->timefinish - $attempt->timestart);
-    $a->quizreviewurl   = $CFG->wwwroot . '/mod/gnrquiz/review.php?attempt=' . $attempt->id;
-    $a->quizreviewlink  = '<a href="' . $a->quizreviewurl . '">' .
-            format_string($quiz->name) . ' review</a>';
-    // Student who sat the quiz info.
+    $a->gnrquizreviewurl   = $CFG->wwwroot . '/mod/gnrquiz/review.php?attempt=' . $attempt->id;
+    $a->gnrquizreviewlink  = '<a href="' . $a->gnrquizreviewurl . '">' .
+            format_string($gnrquiz->name) . ' review</a>';
+    // Student who sat the gnrquiz info.
     $a->studentidnumber = $submitter->idnumber;
     $a->studentname     = fullname($submitter);
     $a->studentusername = $submitter->username;
@@ -1636,9 +1636,9 @@ function gnrquiz_send_notification_messages($course, $quiz, $attempt, $context, 
 }
 
 /**
- * Send the notification message when a quiz attempt becomes overdue.
+ * Send the notification message when a gnrquiz attempt becomes overdue.
  *
- * @param gnrquiz_attempt $attemptobj all the data about the quiz attempt.
+ * @param gnrquiz_attempt $attemptobj all the data about the gnrquiz attempt.
  */
 function gnrquiz_send_overdue_message($attemptobj) {
     global $CFG, $DB;
@@ -1655,31 +1655,31 @@ function gnrquiz_send_overdue_message($attemptobj) {
 
     // Prepare lots of useful information that admins might want to include in
     // the email message.
-    $quizname = format_string($attemptobj->get_gnrquiz_name());
+    $gnrquizname = format_string($attemptobj->get_gnrquiz_name());
 
     $deadlines = array();
-    if ($attemptobj->get_quiz()->timelimit) {
-        $deadlines[] = $attemptobj->get_attempt()->timestart + $attemptobj->get_quiz()->timelimit;
+    if ($attemptobj->get_gnrquiz()->timelimit) {
+        $deadlines[] = $attemptobj->get_attempt()->timestart + $attemptobj->get_gnrquiz()->timelimit;
     }
-    if ($attemptobj->get_quiz()->timeclose) {
-        $deadlines[] = $attemptobj->get_quiz()->timeclose;
+    if ($attemptobj->get_gnrquiz()->timeclose) {
+        $deadlines[] = $attemptobj->get_gnrquiz()->timeclose;
     }
     $duedate = min($deadlines);
-    $graceend = $duedate + $attemptobj->get_quiz()->graceperiod;
+    $graceend = $duedate + $attemptobj->get_gnrquiz()->graceperiod;
 
     $a = new stdClass();
     // Course info.
     $a->coursename         = format_string($attemptobj->get_course()->fullname);
     $a->courseshortname    = format_string($attemptobj->get_course()->shortname);
     // Quiz info.
-    $a->quizname           = $quizname;
-    $a->quizurl            = $attemptobj->view_url();
-    $a->quizlink           = '<a href="' . $a->quizurl . '">' . $quizname . '</a>';
+    $a->gnrquizname           = $gnrquizname;
+    $a->gnrquizurl            = $attemptobj->view_url();
+    $a->gnrquizlink           = '<a href="' . $a->gnrquizurl . '">' . $gnrquizname . '</a>';
     // Attempt info.
     $a->attemptduedate     = userdate($duedate);
     $a->attemptgraceend    = userdate($graceend);
     $a->attemptsummaryurl  = $attemptobj->summary_url()->out(false);
-    $a->attemptsummarylink = '<a href="' . $a->attemptsummaryurl . '">' . $quizname . ' review</a>';
+    $a->attemptsummarylink = '<a href="' . $a->attemptsummaryurl . '">' . $gnrquizname . ' review</a>';
     // Student's info.
     $a->studentidnumber    = $submitter->idnumber;
     $a->studentname        = fullname($submitter);
@@ -1687,7 +1687,7 @@ function gnrquiz_send_overdue_message($attemptobj) {
 
     // Prepare the message.
     $eventdata = new stdClass();
-    $eventdata->component         = 'mod_quiz';
+    $eventdata->component         = 'mod_gnrquiz';
     $eventdata->name              = 'attempt_overdue';
     $eventdata->notification      = 1;
 
@@ -1699,8 +1699,8 @@ function gnrquiz_send_overdue_message($attemptobj) {
     $eventdata->fullmessagehtml   = '';
 
     $eventdata->smallmessage      = get_string('emailoverduesmall', 'gnrquiz', $a);
-    $eventdata->contexturl        = $a->quizurl;
-    $eventdata->contexturlname    = $a->quizname;
+    $eventdata->contexturl        = $a->gnrquizurl;
+    $eventdata->contexturlname    = $a->gnrquizname;
 
     // Send the message.
     return message_send($eventdata);
@@ -1718,10 +1718,10 @@ function gnrquiz_attempt_submitted_handler($event) {
 
     $course  = $DB->get_record('course', array('id' => $event->courseid));
     $attempt = $event->get_record_snapshot('gnrquiz_attempts', $event->objectid);
-    $quiz    = $event->get_record_snapshot('gnrquiz', $attempt->quiz);
+    $gnrquiz    = $event->get_record_snapshot('gnrquiz', $attempt->gnrquiz);
     $cm      = get_coursemodule_from_id('gnrquiz', $event->get_context()->instanceid, $event->courseid);
 
-    if (!($course && $quiz && $cm && $attempt)) {
+    if (!($course && $gnrquiz && $cm && $attempt)) {
         // Something has been deleted since the event was raised. Therefore, the
         // event is no longer relevant.
         return true;
@@ -1729,10 +1729,10 @@ function gnrquiz_attempt_submitted_handler($event) {
 
     // Update completion state.
     $completion = new completion_info($course);
-    if ($completion->is_enabled($cm) && ($quiz->completionattemptsexhausted || $quiz->completionpass)) {
+    if ($completion->is_enabled($cm) && ($gnrquiz->completionattemptsexhausted || $gnrquiz->completionpass)) {
         $completion->update_state($cm, COMPLETION_COMPLETE, $event->userid);
     }
-    return gnrquiz_send_notification_messages($course, $quiz, $attempt,
+    return gnrquiz_send_notification_messages($course, $gnrquiz, $attempt,
             context_module::instance($cm->id), $cm);
 }
 
@@ -1740,11 +1740,11 @@ function gnrquiz_attempt_submitted_handler($event) {
  * Handle groups_member_added event
  *
  * @param object $event the event object.
- * @deprecated since 2.6, see {@link \mod_quiz\group_observers::group_member_added()}.
+ * @deprecated since 2.6, see {@link \mod_gnrquiz\group_observers::group_member_added()}.
  */
 function gnrquiz_groups_member_added_handler($event) {
     debugging('gnrquiz_groups_member_added_handler() is deprecated, please use ' .
-        '\mod_quiz\group_observers::group_member_added() instead.', DEBUG_DEVELOPER);
+        '\mod_gnrquiz\group_observers::group_member_added() instead.', DEBUG_DEVELOPER);
     gnrquiz_update_open_attempts(array('userid'=>$event->userid, 'groupid'=>$event->groupid));
 }
 
@@ -1752,11 +1752,11 @@ function gnrquiz_groups_member_added_handler($event) {
  * Handle groups_member_removed event
  *
  * @param object $event the event object.
- * @deprecated since 2.6, see {@link \mod_quiz\group_observers::group_member_removed()}.
+ * @deprecated since 2.6, see {@link \mod_gnrquiz\group_observers::group_member_removed()}.
  */
 function gnrquiz_groups_member_removed_handler($event) {
     debugging('gnrquiz_groups_member_removed_handler() is deprecated, please use ' .
-        '\mod_quiz\group_observers::group_member_removed() instead.', DEBUG_DEVELOPER);
+        '\mod_gnrquiz\group_observers::group_member_removed() instead.', DEBUG_DEVELOPER);
     gnrquiz_update_open_attempts(array('userid'=>$event->userid, 'groupid'=>$event->groupid));
 }
 
@@ -1764,12 +1764,12 @@ function gnrquiz_groups_member_removed_handler($event) {
  * Handle groups_group_deleted event
  *
  * @param object $event the event object.
- * @deprecated since 2.6, see {@link \mod_quiz\group_observers::group_deleted()}.
+ * @deprecated since 2.6, see {@link \mod_gnrquiz\group_observers::group_deleted()}.
  */
 function gnrquiz_groups_group_deleted_handler($event) {
     global $DB;
     debugging('gnrquiz_groups_group_deleted_handler() is deprecated, please use ' .
-        '\mod_quiz\group_observers::group_deleted() instead.', DEBUG_DEVELOPER);
+        '\mod_gnrquiz\group_observers::group_deleted() instead.', DEBUG_DEVELOPER);
     gnrquiz_process_group_deleted_in_course($event->courseid);
 }
 
@@ -1783,10 +1783,10 @@ function gnrquiz_process_group_deleted_in_course($courseid) {
     global $DB;
 
     // It would be nice if we got the groupid that was deleted.
-    // Instead, we just update all quizzes with orphaned group overrides.
-    $sql = "SELECT o.id, o.quiz
+    // Instead, we just update all gnrquizzes with orphaned group overrides.
+    $sql = "SELECT o.id, o.gnrquiz
               FROM {gnrquiz_overrides} o
-              JOIN {quiz} quiz ON quiz.id = o.quiz
+              JOIN {gnrquiz} gnrquiz ON gnrquiz.id = o.gnrquiz
          LEFT JOIN {groups} grp ON grp.id = o.groupid
              WHERE gnrquiz.course = :courseid
                AND o.groupid IS NOT NULL
@@ -1804,11 +1804,11 @@ function gnrquiz_process_group_deleted_in_course($courseid) {
  * Handle groups_members_removed event
  *
  * @param object $event the event object.
- * @deprecated since 2.6, see {@link \mod_quiz\group_observers::group_member_removed()}.
+ * @deprecated since 2.6, see {@link \mod_gnrquiz\group_observers::group_member_removed()}.
  */
 function gnrquiz_groups_members_removed_handler($event) {
     debugging('gnrquiz_groups_members_removed_handler() is deprecated, please use ' .
-        '\mod_quiz\group_observers::group_member_removed() instead.', DEBUG_DEVELOPER);
+        '\mod_gnrquiz\group_observers::group_member_removed() instead.', DEBUG_DEVELOPER);
     if ($event->userid == 0) {
         gnrquiz_update_open_attempts(array('courseid'=>$event->courseid));
     } else {
@@ -1817,14 +1817,14 @@ function gnrquiz_groups_members_removed_handler($event) {
 }
 
 /**
- * Get the information about the standard quiz JavaScript module.
+ * Get the information about the standard gnrquiz JavaScript module.
  * @return array a standard jsmodule structure.
  */
 function gnrquiz_get_js_module() {
     global $PAGE;
 
     return array(
-        'name' => 'mod_quiz',
+        'name' => 'mod_gnrquiz',
         'fullpath' => '/mod/gnrquiz/module.js',
         'requires' => array('base', 'dom', 'event-delegate', 'event-key',
                 'core_question_engine', 'moodle-core-formchangechecker'),
@@ -1842,7 +1842,7 @@ function gnrquiz_get_js_module() {
 
 /**
  * An extension of question_display_options that includes the extra options used
- * by the quiz.
+ * by the gnrquiz.
  *
  * @copyright  2010 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -1850,7 +1850,7 @@ function gnrquiz_get_js_module() {
 class mod_gnrquiz_display_options extends question_display_options {
     /**#@+
      * @var integer bits used to indicate various times in relation to a
-     * quiz attempt.
+     * gnrquiz attempt.
      */
     const DURING =            0x10000;
     const IMMEDIATELY_AFTER = 0x01000;
@@ -1871,31 +1871,31 @@ class mod_gnrquiz_display_options extends question_display_options {
     public $overallfeedback = self::VISIBLE;
 
     /**
-     * Set up the various options from the quiz settings, and a time constant.
-     * @param object $quiz the quiz settings.
+     * Set up the various options from the gnrquiz settings, and a time constant.
+     * @param object $gnrquiz the gnrquiz settings.
      * @param int $one of the {@link DURING}, {@link IMMEDIATELY_AFTER},
      * {@link LATER_WHILE_OPEN} or {@link AFTER_CLOSE} constants.
      * @return mod_gnrquiz_display_options set up appropriately.
      */
-    public static function make_from_quiz($quiz, $when) {
+    public static function make_from_gnrquiz($gnrquiz, $when) {
         $options = new self();
 
-        $options->attempt = self::extract($quiz->reviewattempt, $when, true, false);
-        $options->correctness = self::extract($quiz->reviewcorrectness, $when);
-        $options->marks = self::extract($quiz->reviewmarks, $when,
+        $options->attempt = self::extract($gnrquiz->reviewattempt, $when, true, false);
+        $options->correctness = self::extract($gnrquiz->reviewcorrectness, $when);
+        $options->marks = self::extract($gnrquiz->reviewmarks, $when,
                 self::MARK_AND_MAX, self::MAX_ONLY);
-        $options->feedback = self::extract($quiz->reviewspecificfeedback, $when);
-        $options->generalfeedback = self::extract($quiz->reviewgeneralfeedback, $when);
-        $options->rightanswer = self::extract($quiz->reviewrightanswer, $when);
-        $options->overallfeedback = self::extract($quiz->reviewoverallfeedback, $when);
+        $options->feedback = self::extract($gnrquiz->reviewspecificfeedback, $when);
+        $options->generalfeedback = self::extract($gnrquiz->reviewgeneralfeedback, $when);
+        $options->rightanswer = self::extract($gnrquiz->reviewrightanswer, $when);
+        $options->overallfeedback = self::extract($gnrquiz->reviewoverallfeedback, $when);
 
         $options->numpartscorrect = $options->feedback;
         $options->manualcomment = $options->feedback;
 
-        if ($quiz->questiondecimalpoints != -1) {
-            $options->markdp = $quiz->questiondecimalpoints;
+        if ($gnrquiz->questiondecimalpoints != -1) {
+            $options->markdp = $gnrquiz->questiondecimalpoints;
         } else {
-            $options->markdp = $quiz->decimalpoints;
+            $options->markdp = $gnrquiz->decimalpoints;
         }
 
         return $options;
@@ -1914,15 +1914,15 @@ class mod_gnrquiz_display_options extends question_display_options {
 
 /**
  * A {@link qubaid_condition} for finding all the question usages belonging to
- * a particular quiz.
+ * a particular gnrquiz.
  *
  * @copyright  2010 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qubaids_for_quiz extends qubaid_join {
-    public function __construct($quizid, $includepreviews = true, $onlyfinished = false) {
-        $where = 'gnrquiza.quiz = :quizaquiz';
-        $params = array('gnrquizaquiz' => $quizid);
+class qubaids_for_gnrquiz extends qubaid_join {
+    public function __construct($gnrquizid, $includepreviews = true, $onlyfinished = false) {
+        $where = 'gnrquiza.gnrquiz = :gnrquizagnrquiz';
+        $params = array('gnrquizagnrquiz' => $gnrquizid);
 
         if (!$includepreviews) {
             $where .= ' AND preview = 0';
@@ -1933,7 +1933,7 @@ class qubaids_for_quiz extends qubaid_join {
             $params['statefinished'] = gnrquiz_attempt::FINISHED;
         }
 
-        parent::__construct('{gnrquiz_attempts} quiza', 'gnrquiza.uniqueid', $where, $params);
+        parent::__construct('{gnrquiz_attempts} gnrquiza', 'gnrquiza.uniqueid', $where, $params);
     }
 }
 
@@ -1980,17 +1980,17 @@ function gnrquiz_require_question_use($questionid) {
 
 /**
  * Verify that the question exists, and the user has permission to use it.
- * @param object $quiz the quiz settings.
- * @param int $slot which question in the quiz to test.
+ * @param object $gnrquiz the gnrquiz settings.
+ * @param int $slot which question in the gnrquiz to test.
  * @return bool whether the user can use this question.
  */
-function gnrquiz_has_question_use($quiz, $slot) {
+function gnrquiz_has_question_use($gnrquiz, $slot) {
     global $DB;
     $question = $DB->get_record_sql("
             SELECT q.*
               FROM {gnrquiz_slots} slot
               JOIN {question} q ON q.id = slot.questionid
-             WHERE slot.quizid = ? AND slot.slot = ?", array($quiz->id, $slot));
+             WHERE slot.gnrquizid = ? AND slot.slot = ?", array($gnrquiz->id, $slot));
     if (!$question) {
         return false;
     }
@@ -1998,22 +1998,22 @@ function gnrquiz_has_question_use($quiz, $slot) {
 }
 
 /**
- * Add a question to a quiz
+ * Add a question to a gnrquiz
  *
- * Adds a question to a quiz by updating $quiz as well as the
- * quiz and gnrquiz_slots tables. It also adds a page break if required.
+ * Adds a question to a gnrquiz by updating $gnrquiz as well as the
+ * gnrquiz and gnrquiz_slots tables. It also adds a page break if required.
  * @param int $questionid The id of the question to be added
- * @param object $quiz The extended quiz object as used by edit.php
+ * @param object $gnrquiz The extended gnrquiz object as used by edit.php
  *      This is updated by this function
- * @param int $page Which page in quiz to add the question on. If 0 (default),
+ * @param int $page Which page in gnrquiz to add the question on. If 0 (default),
  *      add at the end
  * @param float $maxmark The maximum mark to set for this question. (Optional,
  *      defaults to question.defaultmark.
- * @return bool false if the question was already in the quiz
+ * @return bool false if the question was already in the gnrquiz
  */
-function gnrquiz_add_gnrquiz_question($questionid, $quiz, $page = 0, $maxmark = null) {
+function gnrquiz_add_gnrquiz_question($questionid, $gnrquiz, $page = 0, $maxmark = null) {
     global $DB;
-    $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $quiz->id),
+    $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $gnrquiz->id),
             'slot', 'questionid, slot, page, id');
     if (array_key_exists($questionid, $slots)) {
         return false;
@@ -2034,7 +2034,7 @@ function gnrquiz_add_gnrquiz_question($questionid, $quiz, $page = 0, $maxmark = 
 
     // Add the new question instance.
     $slot = new stdClass();
-    $slot->quizid = $quiz->id;
+    $slot->gnrquizid = $gnrquiz->id;
     $slot->questionid = $questionid;
 
     if ($maxmark !== null) {
@@ -2062,7 +2062,7 @@ function gnrquiz_add_gnrquiz_question($questionid, $quiz, $page = 0, $maxmark = 
                    SET firstslot = firstslot + 1
                  WHERE gnrquizid = ?
                    AND firstslot > ?
-                ", array($quiz->id, max($lastslotbefore, 1)));
+                ", array($gnrquiz->id, max($lastslotbefore, 1)));
 
     } else {
         $lastslot = end($slots);
@@ -2071,7 +2071,7 @@ function gnrquiz_add_gnrquiz_question($questionid, $quiz, $page = 0, $maxmark = 
         } else {
             $slot->slot = 1;
         }
-        if ($quiz->questionsperpage && $numonlastpage >= $quiz->questionsperpage) {
+        if ($gnrquiz->questionsperpage && $numonlastpage >= $gnrquiz->questionsperpage) {
             $slot->page = $maxpage + 1;
         } else {
             $slot->page = $maxpage;
@@ -2083,14 +2083,14 @@ function gnrquiz_add_gnrquiz_question($questionid, $quiz, $page = 0, $maxmark = 
 }
 
 /**
- * Add a random question to the quiz at a given point.
- * @param object $quiz the quiz settings.
+ * Add a random question to the gnrquiz at a given point.
+ * @param object $gnrquiz the gnrquiz settings.
  * @param int $addonpage the page on which to add the question.
  * @param int $categoryid the question category to add the question from.
  * @param int $number the number of random questions to add.
  * @param bool $includesubcategories whether to include questoins from subcategories.
  */
-function gnrquiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
+function gnrquiz_add_random_questions($gnrquiz, $addonpage, $categoryid, $number,
         $includesubcategories) {
     global $DB;
 
@@ -2103,7 +2103,7 @@ function gnrquiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
     require_capability('moodle/question:useall', $catcontext);
 
     // Find existing random questions in this category that are
-    // not used by any quiz.
+    // not used by any gnrquiz.
     if ($existingquestions = $DB->get_records_sql(
             "SELECT q.id, q.qtype FROM {question} q
             WHERE qtype = 'random'
@@ -2116,7 +2116,7 @@ function gnrquiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
             ORDER BY id", array($category->id, ($includesubcategories ? '1' : '0')))) {
             // Take as many of these as needed.
         while (($existingquestion = array_shift($existingquestions)) && $number > 0) {
-            gnrquiz_add_gnrquiz_question($existingquestion->id, $quiz, $addonpage);
+            gnrquiz_add_gnrquiz_question($existingquestion->id, $gnrquiz, $addonpage);
             $number -= 1;
         }
     }
@@ -2139,28 +2139,28 @@ function gnrquiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
         if (!isset($question->id)) {
             print_error('cannotinsertrandomquestion', 'gnrquiz');
         }
-        gnrquiz_add_gnrquiz_question($question->id, $quiz, $addonpage);
+        gnrquiz_add_gnrquiz_question($question->id, $gnrquiz, $addonpage);
     }
 }
 
 /**
  * Mark the activity completed (if required) and trigger the course_module_viewed event.
  *
- * @param  stdClass $quiz       quiz object
+ * @param  stdClass $gnrquiz       gnrquiz object
  * @param  stdClass $course     course object
  * @param  stdClass $cm         course module object
  * @param  stdClass $context    context object
  * @since Moodle 3.1
  */
-function gnrquiz_view($quiz, $course, $cm, $context) {
+function gnrquiz_view($gnrquiz, $course, $cm, $context) {
 
     $params = array(
-        'objectid' => $quiz->id,
+        'objectid' => $gnrquiz->id,
         'context' => $context
     );
 
-    $event = \mod_quiz\event\course_module_viewed::create($params);
-    $event->add_record_snapshot('gnrquiz', $quiz);
+    $event = \mod_gnrquiz\event\course_module_viewed::create($params);
+    $event->add_record_snapshot('gnrquiz', $gnrquiz);
     $event->trigger();
 
     // Completion.
@@ -2171,8 +2171,8 @@ function gnrquiz_view($quiz, $course, $cm, $context) {
 /**
  * Validate permissions for creating a new attempt and start a new preview attempt if required.
  *
- * @param  quiz $quizobj quiz object
- * @param  gnrquiz_access_manager $accessmanager quiz access manager
+ * @param  gnrquiz $gnrquizobj gnrquiz object
+ * @param  gnrquiz_access_manager $accessmanager gnrquiz access manager
  * @param  bool $forcenew whether was required to start a new preview attempt
  * @param  int $page page to jump to in the attempt
  * @param  bool $redirect whether to redirect or throw exceptions (for web or ws usage)
@@ -2180,29 +2180,29 @@ function gnrquiz_view($quiz, $course, $cm, $context) {
  * @throws moodle_gnrquiz_exception
  * @since Moodle 3.1
  */
-function gnrquiz_validate_new_attempt(quiz $quizobj, gnrquiz_access_manager $accessmanager, $forcenew, $page, $redirect) {
+function gnrquiz_validate_new_attempt(gnrquiz $gnrquizobj, gnrquiz_access_manager $accessmanager, $forcenew, $page, $redirect) {
     global $DB, $USER;
     $timenow = time();
 
-    if ($quizobj->is_preview_user() && $forcenew) {
+    if ($gnrquizobj->is_preview_user() && $forcenew) {
         $accessmanager->current_attempt_finished();
     }
 
     // Check capabilities.
-    if (!$quizobj->is_preview_user()) {
-        $quizobj->require_capability('mod/gnrquiz:attempt');
+    if (!$gnrquizobj->is_preview_user()) {
+        $gnrquizobj->require_capability('mod/gnrquiz:attempt');
     }
 
     // Check to see if a new preview was requested.
-    if ($quizobj->is_preview_user() && $forcenew) {
+    if ($gnrquizobj->is_preview_user() && $forcenew) {
         // To force the creation of a new preview, we mark the current attempt (if any)
         // as finished. It will then automatically be deleted below.
         $DB->set_field('gnrquiz_attempts', 'state', gnrquiz_attempt::FINISHED,
-                array('gnrquiz' => $quizobj->get_quizid(), 'userid' => $USER->id));
+                array('gnrquiz' => $gnrquizobj->get_gnrquizid(), 'userid' => $USER->id));
     }
 
     // Look for an existing attempt.
-    $attempts = gnrquiz_get_user_attempts($quizobj->get_quizid(), $USER->id, 'all', true);
+    $attempts = gnrquiz_get_user_attempts($gnrquizobj->get_gnrquizid(), $USER->id, 'all', true);
     $lastattempt = end($attempts);
 
     $attemptnumber = null;
@@ -2213,14 +2213,14 @@ function gnrquiz_validate_new_attempt(quiz $quizobj, gnrquiz_access_manager $acc
         $messages = $accessmanager->prevent_access();
 
         // If the attempt is now overdue, deal with that.
-        $quizobj->create_attempt_object($lastattempt)->handle_if_time_expired($timenow, true);
+        $gnrquizobj->create_attempt_object($lastattempt)->handle_if_time_expired($timenow, true);
 
         // And, if the attempt is now no longer in progress, redirect to the appropriate place.
         if ($lastattempt->state == gnrquiz_attempt::ABANDONED || $lastattempt->state == gnrquiz_attempt::FINISHED) {
             if ($redirect) {
-                redirect($quizobj->review_url($lastattempt->id));
+                redirect($gnrquizobj->review_url($lastattempt->id));
             } else {
-                throw new moodle_gnrquiz_exception($quizobj, 'attemptalreadyclosed');
+                throw new moodle_gnrquiz_exception($gnrquizobj, 'attemptalreadyclosed');
             }
         }
 
@@ -2256,34 +2256,34 @@ function gnrquiz_validate_new_attempt(quiz $quizobj, gnrquiz_access_manager $acc
 /**
  * Prepare and start a new attempt deleting the previous preview attempts.
  *
- * @param  quiz $quizobj quiz object
+ * @param  gnrquiz $gnrquizobj gnrquiz object
  * @param  int $attemptnumber the attempt number
  * @param  object $lastattempt last attempt object
  * @return object the new attempt
  * @since  Moodle 3.1
  */
-function gnrquiz_prepare_and_start_new_attempt(quiz $quizobj, $attemptnumber, $lastattempt) {
+function gnrquiz_prepare_and_start_new_attempt(gnrquiz $gnrquizobj, $attemptnumber, $lastattempt) {
     global $DB, $USER;
 
     // Delete any previous preview attempts belonging to this user.
-    gnrquiz_delete_previews($quizobj->get_quiz(), $USER->id);
+    gnrquiz_delete_previews($gnrquizobj->get_gnrquiz(), $USER->id);
 
-    $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
-    $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+    $quba = question_engine::make_questions_usage_by_activity('mod_gnrquiz', $gnrquizobj->get_context());
+    $quba->set_preferred_behaviour($gnrquizobj->get_gnrquiz()->preferredbehaviour);
 
     // Create the new attempt and initialize the question sessions
     $timenow = time(); // Update time now, in case the server is running really slowly.
-    $attempt = gnrquiz_create_attempt($quizobj, $attemptnumber, $lastattempt, $timenow, $quizobj->is_preview_user());
+    $attempt = gnrquiz_create_attempt($gnrquizobj, $attemptnumber, $lastattempt, $timenow, $gnrquizobj->is_preview_user());
 
-    if (!($quizobj->get_quiz()->attemptonlast && $lastattempt)) {
-        $attempt = gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $timenow);
+    if (!($gnrquizobj->get_gnrquiz()->attemptonlast && $lastattempt)) {
+        $attempt = gnrquiz_start_new_attempt($gnrquizobj, $quba, $attempt, $attemptnumber, $timenow);
     } else {
         $attempt = gnrquiz_start_attempt_built_on_last($quba, $attempt, $lastattempt);
     }
 
     $transaction = $DB->start_delegated_transaction();
 
-    $attempt = gnrquiz_attempt_save_started($quizobj, $quba, $attempt);
+    $attempt = gnrquiz_attempt_save_started($gnrquizobj, $quba, $attempt);
 
     $transaction->allow_commit();
 

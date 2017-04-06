@@ -1,8 +1,8 @@
-@mod @mod_quiz
-Feature: Edit quiz page - adding things
-  In order to build the quiz I want my students to attempt
+@mod @mod_gnrquiz
+Feature: Edit gnrquiz page - adding things
+  In order to build the gnrquiz I want my students to attempt
   As a teacher
-  I need to be able to add questions to the quiz.
+  I need to be able to add questions to the gnrquiz.
 
   Background:
     Given the following "users" exist:
@@ -16,16 +16,16 @@ Feature: Edit quiz page - adding things
       | teacher1 | C1     | editingteacher |
     And the following "activities" exist:
       | activity   | name   | intro                           | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 for testing the Add menu | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 for testing the Add menu | C1     | gnrquiz1    |
     And I log in as "teacher1"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I navigate to "Edit quiz" node in "Quiz administration"
-    Then I should see "Editing quiz: Quiz 1"
+    And I navigate to "Edit gnrquiz" node in "Quiz administration"
+    Then I should see "Editing gnrquiz: Quiz 1"
 
   @javascript
-  Scenario: Add some new question to the quiz using '+ a new question' options of the 'Add' menu.
-    And I open the "last" add to quiz menu
+  Scenario: Add some new question to the gnrquiz using '+ a new question' options of the 'Add' menu.
+    And I open the "last" add to gnrquiz menu
     And I follow "a new question"
     And I set the field "qtype_qtype_essay" to "1"
     And I press "submitbutton"
@@ -33,10 +33,10 @@ Feature: Edit quiz page - adding things
     And I set the field "Question name" to "Essay 01 new"
     And I set the field "Question text" to "Please write 200 words about Essay 01"
     And I press "id_submitbutton"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 01 new" on quiz page "1"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 01 new" on gnrquiz page "1"
 
-    And I open the "Page 1" add to quiz menu
+    And I open the "Page 1" add to gnrquiz menu
     And I follow "a new question"
     And I set the field "qtype_qtype_essay" to "1"
     And I press "submitbutton"
@@ -44,11 +44,11 @@ Feature: Edit quiz page - adding things
     And I set the field "Question name" to "Essay 02 new"
     And I set the field "Question text" to "Please write 200 words about Essay 02"
     And I press "id_submitbutton"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 01 new" on quiz page "1"
-    And I should see "Essay 02 new" on quiz page "1"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 01 new" on gnrquiz page "1"
+    And I should see "Essay 02 new" on gnrquiz page "1"
 
-    And I open the "Page 1" add to quiz menu
+    And I open the "Page 1" add to gnrquiz menu
     And I follow "a new question"
     And I set the field "qtype_qtype_essay" to "1"
     And I press "submitbutton"
@@ -56,12 +56,12 @@ Feature: Edit quiz page - adding things
     And I set the field "Question name" to "Essay 03 new"
     And I set the field "Question text" to "Please write 300 words about Essay 03"
     And I press "id_submitbutton"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 01 new" on quiz page "1"
-    And I should see "Essay 02 new" on quiz page "1"
-    And I should see "Essay 03 new" on quiz page "1"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 01 new" on gnrquiz page "1"
+    And I should see "Essay 02 new" on gnrquiz page "1"
+    And I should see "Essay 03 new" on gnrquiz page "1"
 
-    And I open the "Page 1" add to quiz menu
+    And I open the "Page 1" add to gnrquiz menu
     And I follow "a new question"
     And I set the field "qtype_qtype_essay" to "1"
     And I press "submitbutton"
@@ -69,11 +69,11 @@ Feature: Edit quiz page - adding things
     And I set the field "Question name" to "Essay 04 new"
     And I set the field "Question text" to "Please write 300 words about Essay 04"
     And I press "id_submitbutton"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 01 new" on quiz page "1"
-    And I should see "Essay 02 new" on quiz page "1"
-    And I should see "Essay 03 new" on quiz page "1"
-    And I should see "Essay 04 new" on quiz page "1"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 01 new" on gnrquiz page "1"
+    And I should see "Essay 02 new" on gnrquiz page "1"
+    And I should see "Essay 03 new" on gnrquiz page "1"
+    And I should see "Essay 04 new" on gnrquiz page "1"
 
     # Repaginate as two questions per page.
     And I should not see "Page 2"
@@ -81,13 +81,13 @@ Feature: Edit quiz page - adding things
     Then I should see "Repaginate with"
     And I set the field "menuquestionsperpage" to "2"
     When I press "Go"
-    And I should see "Essay 01 new" on quiz page "1"
-    And I should see "Essay 02 new" on quiz page "1"
-    And I should see "Essay 03 new" on quiz page "2"
-    And I should see "Essay 04 new" on quiz page "2"
+    And I should see "Essay 01 new" on gnrquiz page "1"
+    And I should see "Essay 02 new" on gnrquiz page "1"
+    And I should see "Essay 03 new" on gnrquiz page "2"
+    And I should see "Essay 04 new" on gnrquiz page "2"
 
     # Add a question to page 2.
-    When I open the "Page 2" add to quiz menu
+    When I open the "Page 2" add to gnrquiz menu
     And I follow "a new question" in the open menu
     And I set the field "qtype_qtype_essay" to "1"
     And I press "submitbutton"
@@ -95,16 +95,16 @@ Feature: Edit quiz page - adding things
     When I set the field "Question name" to "Essay for page 2"
     And I set the field "Question text" to "Please write 200 words about Essay for page 2"
     And I press "id_submitbutton"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 01 new" on quiz page "1"
-    And I should see "Essay 02 new" on quiz page "1"
-    And I should see "Essay 03 new" on quiz page "2"
-    And I should see "Essay 04 new" on quiz page "2"
-    And I should see "Essay for page 2" on quiz page "2"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 01 new" on gnrquiz page "1"
+    And I should see "Essay 02 new" on gnrquiz page "1"
+    And I should see "Essay 03 new" on gnrquiz page "2"
+    And I should see "Essay 04 new" on gnrquiz page "2"
+    And I should see "Essay for page 2" on gnrquiz page "2"
 
   @javascript
-  Scenario: Add questions from question bank to the quiz. In order to be able to
-      add questions from question bank to the quiz, first we create some new questions
+  Scenario: Add questions from question bank to the gnrquiz. In order to be able to
+      add questions from question bank to the gnrquiz, first we create some new questions
       in various categories and add them to the question bank.
 
     # Create a couple of sub categories.
@@ -192,41 +192,41 @@ Feature: Edit quiz page - adding things
     # Add Essay 03 from question bank.
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I open the "last" add to quiz menu
+    And I follow "Edit gnrquiz"
+    And I open the "last" add to gnrquiz menu
     And I follow "from question bank"
-    And I click on "Add to quiz" "link" in the "Essay 03" "table_row"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 03" on quiz page "1"
+    And I click on "Add to gnrquiz" "link" in the "Essay 03" "table_row"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 03" on gnrquiz page "1"
 
     # Add Essay 01 from question bank.
-    And I open the "Page 1" add to quiz menu
+    And I open the "Page 1" add to gnrquiz menu
     And I follow "from question bank"
-    And I click on "Add to quiz" "link" in the "Essay 01" "table_row"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 03" on quiz page "1"
-    And I should see "Essay 01" on quiz page "1"
+    And I click on "Add to gnrquiz" "link" in the "Essay 01" "table_row"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 03" on gnrquiz page "1"
+    And I should see "Essay 01" on gnrquiz page "1"
 
     # Add Esay 02 from question bank.
-    And I open the "Page 1" add to quiz menu
+    And I open the "Page 1" add to gnrquiz menu
     And I follow "from question bank"
     And I should see "Select a category"
     And I set the field "Select a category" to "Subcat 1"
-    And I click on "Add to quiz" "link" in the "Essay 02" "table_row"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 03" on quiz page "1"
-    And I should see "Essay 01" on quiz page "1"
-    And I should see "Essay 02" on quiz page "1"
+    And I click on "Add to gnrquiz" "link" in the "Essay 02" "table_row"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 03" on gnrquiz page "1"
+    And I should see "Essay 01" on gnrquiz page "1"
+    And I should see "Essay 02" on gnrquiz page "1"
 
     # Add a random question.
-    And I open the "Page 1" add to quiz menu
+    And I open the "Page 1" add to gnrquiz menu
     And I follow "a random question"
     And I press "Add random question"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 03" on quiz page "1"
-    And I should see "Essay 01" on quiz page "1"
-    And I should see "Essay 02" on quiz page "1"
-    And I should see "Random" on quiz page "1"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 03" on gnrquiz page "1"
+    And I should see "Essay 01" on gnrquiz page "1"
+    And I should see "Essay 02" on gnrquiz page "1"
+    And I should see "Random" on gnrquiz page "1"
 
     # Repaginate as one question per page.
     And I should not see "Page 2"
@@ -234,13 +234,13 @@ Feature: Edit quiz page - adding things
     Then I should see "Repaginate with"
     And I set the field "menuquestionsperpage" to "1"
     When I press "Go"
-    And I should see "Essay 03" on quiz page "1"
-    And I should see "Essay 01" on quiz page "2"
-    And I should see "Essay 02" on quiz page "3"
-    And I should see "Random" on quiz page "4"
+    And I should see "Essay 03" on gnrquiz page "1"
+    And I should see "Essay 01" on gnrquiz page "2"
+    And I should see "Essay 02" on gnrquiz page "3"
+    And I should see "Random" on gnrquiz page "4"
 
     # Add a random question to page 4.
-    And I open the "Page 4" add to quiz menu
+    And I open the "Page 4" add to gnrquiz menu
     And I follow "a new question" in the open menu
     And I set the field "qtype_qtype_essay" to "1"
     And I press "submitbutton"
@@ -248,9 +248,9 @@ Feature: Edit quiz page - adding things
     And I set the field "Question name" to "Essay for page 4"
     And I set the field "Question text" to "Please write 200 words about Essay for page 4"
     And I press "id_submitbutton"
-    Then I should see "Editing quiz: Quiz 1"
-    And I should see "Essay 03" on quiz page "1"
-    And I should see "Essay 01" on quiz page "2"
-    And I should see "Essay 02" on quiz page "3"
-    And I should see "Random" on quiz page "4"
-    And I should see "Essay for page 4" on quiz page "4"
+    Then I should see "Editing gnrquiz: Quiz 1"
+    And I should see "Essay 03" on gnrquiz page "1"
+    And I should see "Essay 01" on gnrquiz page "2"
+    And I should see "Essay 02" on gnrquiz page "3"
+    And I should see "Random" on gnrquiz page "4"
+    And I should see "Essay for page 4" on gnrquiz page "4"

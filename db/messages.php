@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines message providers (types of message sent) for the quiz module.
+ * Defines message providers (types of message sent) for the gnrquiz module.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2010 Andrew Davis http://moodle.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,17 +25,17 @@
 defined('MOODLE_INTERNAL') || die();
 
 $messageproviders = array(
-    // Notify teacher that a student has submitted a quiz attempt.
+    // Notify teacher that a student has submitted a gnrquiz attempt.
     'submission' => array(
         'capability' => 'mod/gnrquiz:emailnotifysubmission'
     ),
 
-    // Confirm a student's quiz attempt.
+    // Confirm a student's gnrquiz attempt.
     'confirmation' => array(
         'capability' => 'mod/gnrquiz:emailconfirmsubmission'
     ),
 
-    // Warning to the student that their quiz attempt is now overdue, if the quiz
+    // Warning to the student that their gnrquiz attempt is now overdue, if the gnrquiz
     // has a grace period.
     'attempt_overdue' => array(
         'capability' => 'mod/gnrquiz:emailwarnoverdue'

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the setting form for the quiz responses report.
+ * This file defines the setting form for the gnrquiz responses report.
  *
  * @package   gnrquiz_responses
  * @copyright 2008 Jean-Michel Vedrine

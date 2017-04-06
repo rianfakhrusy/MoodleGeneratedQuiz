@@ -1,15 +1,15 @@
 /**
- * The Moodle.mod_quiz.util classes provide quiz-related utility functions.
+ * The Moodle.mod_gnrquiz.util classes provide gnrquiz-related utility functions.
  *
- * @module moodle-mod_quiz-util
+ * @module moodle-mod_gnrquiz-util
  * @main
  */
 
-Y.namespace('Moodle.mod_quiz.util');
+Y.namespace('Moodle.mod_gnrquiz.util');
 
 /**
- * A collection of general utility functions for use in quiz.
+ * A collection of general utility functions for use in gnrquiz.
  *
- * @class Moodle.mod_quiz.util
+ * @class Moodle.mod_gnrquiz.util
  * @static
  */

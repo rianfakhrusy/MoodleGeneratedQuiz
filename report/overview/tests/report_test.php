@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests for the quiz overview report.
+ * Tests for the gnrquiz overview report.
  *
  * @package   gnrquiz_overview
  * @copyright 2014 The Open University
@@ -32,7 +32,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/overview/report.php');
 
 
 /**
- * Tests for the quiz overview report.
+ * Tests for the gnrquiz overview report.
  *
  * @copyright  2014 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -44,34 +44,34 @@ class gnrquiz_overview_report_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
 
         $generator = $this->getDataGenerator();
-        $quizgenerator = $generator->get_plugin_generator('mod_quiz');
-        $quiz = $quizgenerator->create_instance(array('course' => $SITE->id,
-                'grademethod' => QUIZ_GRADEHIGHEST, 'grade' => 100.0, 'sumgrades' => 10.0,
+        $gnrquizgenerator = $generator->get_plugin_generator('mod_gnrquiz');
+        $gnrquiz = $gnrquizgenerator->create_instance(array('course' => $SITE->id,
+                'grademethod' => GNRQUIZ_GRADEHIGHEST, 'grade' => 100.0, 'sumgrades' => 10.0,
                 'attempts' => 10));
 
         $student1 = $generator->create_user();
         $student2 = $generator->create_user();
         $student3 = $generator->create_user();
 
-        $quizid = 123;
+        $gnrquizid = 123;
         $timestamp = 1234567890;
 
         // The test data.
         $fields = array('gnrquiz', 'userid', 'attempt', 'sumgrades', 'state');
         $attempts = array(
-            array($quiz->id, $student1->id, 1, 0.0,  gnrquiz_attempt::FINISHED),
-            array($quiz->id, $student1->id, 2, 5.0,  gnrquiz_attempt::FINISHED),
-            array($quiz->id, $student1->id, 3, 8.0,  gnrquiz_attempt::FINISHED),
-            array($quiz->id, $student1->id, 4, null, gnrquiz_attempt::ABANDONED),
-            array($quiz->id, $student1->id, 5, null, gnrquiz_attempt::IN_PROGRESS),
-            array($quiz->id, $student2->id, 1, null, gnrquiz_attempt::ABANDONED),
-            array($quiz->id, $student2->id, 2, null, gnrquiz_attempt::ABANDONED),
-            array($quiz->id, $student2->id, 3, 7.0,  gnrquiz_attempt::FINISHED),
-            array($quiz->id, $student2->id, 4, null, gnrquiz_attempt::ABANDONED),
-            array($quiz->id, $student2->id, 5, null, gnrquiz_attempt::ABANDONED),
+            array($gnrquiz->id, $student1->id, 1, 0.0,  gnrquiz_attempt::FINISHED),
+            array($gnrquiz->id, $student1->id, 2, 5.0,  gnrquiz_attempt::FINISHED),
+            array($gnrquiz->id, $student1->id, 3, 8.0,  gnrquiz_attempt::FINISHED),
+            array($gnrquiz->id, $student1->id, 4, null, gnrquiz_attempt::ABANDONED),
+            array($gnrquiz->id, $student1->id, 5, null, gnrquiz_attempt::IN_PROGRESS),
+            array($gnrquiz->id, $student2->id, 1, null, gnrquiz_attempt::ABANDONED),
+            array($gnrquiz->id, $student2->id, 2, null, gnrquiz_attempt::ABANDONED),
+            array($gnrquiz->id, $student2->id, 3, 7.0,  gnrquiz_attempt::FINISHED),
+            array($gnrquiz->id, $student2->id, 4, null, gnrquiz_attempt::ABANDONED),
+            array($gnrquiz->id, $student2->id, 5, null, gnrquiz_attempt::ABANDONED),
         );
 
-        // Load it in to quiz attempts table.
+        // Load it in to gnrquiz attempts table.
         $uniqueid = 1;
         foreach ($attempts as $attempt) {
             $data = array_combine($fields, $attempt);
@@ -89,19 +89,19 @@ class gnrquiz_overview_report_testcase extends advanced_testcase {
 
         // Actually getting the SQL to run is quit hard. Do a minimal set up of
         // some objects.
-        $context = context_module::instance($quiz->cmid);
-        $cm = get_coursemodule_from_id('gnrquiz', $quiz->cmid);
-        $qmsubselect = gnrquiz_report_qm_filter_select($quiz);
+        $context = context_module::instance($gnrquiz->cmid);
+        $cm = get_coursemodule_from_id('gnrquiz', $gnrquiz->cmid);
+        $qmsubselect = gnrquiz_report_qm_filter_select($gnrquiz);
         $reportstudents = array($student1->id, $student2->id, $student3->id);
 
         // Set the options.
-        $reportoptions = new gnrquiz_overview_options('overview', $quiz, $cm, null);
+        $reportoptions = new gnrquiz_overview_options('overview', $gnrquiz, $cm, null);
         $reportoptions->attempts = gnrquiz_attempts_report::ENROLLED_ALL;
         $reportoptions->onlygraded = true;
         $reportoptions->states = array(gnrquiz_attempt::IN_PROGRESS, gnrquiz_attempt::OVERDUE, gnrquiz_attempt::FINISHED);
 
         // Now do a minimal set-up of the table class.
-        $table = new gnrquiz_overview_table($quiz, $context, $qmsubselect, $reportoptions,
+        $table = new gnrquiz_overview_table($gnrquiz, $context, $qmsubselect, $reportoptions,
                 array(), $reportstudents, array(1), null);
         $table->define_columns(array('attempt'));
         $table->sortable(true, 'uniqueid');

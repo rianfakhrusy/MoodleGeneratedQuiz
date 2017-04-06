@@ -17,11 +17,11 @@
  * This class manages the confirmation pop-up (also called the pre-flight check)
  * that is sometimes shown when a use clicks the start attempt button.
  *
- * This is also responsible for opening the pop-up window, if the quiz requires to be in one.
+ * This is also responsible for opening the pop-up window, if the gnrquiz requires to be in one.
  *
- * @module    mod_quiz/preflightcheck
+ * @module    mod_gnrquiz/preflightcheck
  * @class     preflightcheck
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2016 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since     3.1
@@ -29,7 +29,7 @@
 define(['jquery', 'core/yui'], function($, Y) {
 
     /**
-     * @alias module:mod_quiz/preflightcheck
+     * @alias module:mod_gnrquiz/preflightcheck
      */
     var t = {
         confirmDialogue: null,
@@ -40,7 +40,7 @@ define(['jquery', 'core/yui'], function($, Y) {
          * @param {String} startButtonId the id of the start attempt button that we will be enhancing.
          * @param {String} confirmationTitle the title of the dialogue.
          * @param {String} confirmationForm selector for the confirmation form to show in the dialogue.
-         * @param {String} popupoptions If not null, the quiz should be launced in a pop-up.
+         * @param {String} popupoptions If not null, the gnrquiz should be launced in a pop-up.
          */
         init: function(startButton, confirmationTitle, confirmationForm, popupoptions) {
             var finalStartButton = startButton;
@@ -93,7 +93,7 @@ define(['jquery', 'core/yui'], function($, Y) {
         },
 
         /**
-         * Event handler for the quiz start attempt button.
+         * Event handler for the gnrquiz start attempt button.
          */
         launchQuizPopup: function(e, popupoptions) {
             e.halt();

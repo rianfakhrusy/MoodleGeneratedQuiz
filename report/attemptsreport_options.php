@@ -17,7 +17,7 @@
 /**
  * Base class for the options that control what is visible in an {@link gnrquiz_attempts_report}.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2012 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -39,13 +39,13 @@ class mod_gnrquiz_attempts_report_options {
     /** @var string the report mode. */
     public $mode;
 
-    /** @var object the settings for the quiz being reported on. */
-    public $quiz;
+    /** @var object the settings for the gnrquiz being reported on. */
+    public $gnrquiz;
 
-    /** @var object the course module objects for the quiz being reported on. */
+    /** @var object the course module objects for the gnrquiz being reported on. */
     public $cm;
 
-    /** @var object the course settings for the course the quiz is in. */
+    /** @var object the course settings for the course the gnrquiz is in. */
     public $course;
 
     /**
@@ -95,17 +95,17 @@ class mod_gnrquiz_attempts_report_options {
     /**
      * Constructor.
      * @param string $mode which report these options are for.
-     * @param object $quiz the settings for the quiz being reported on.
-     * @param object $cm the course module objects for the quiz being reported on.
-     * @param object $coures the course settings for the coures this quiz is in.
+     * @param object $gnrquiz the settings for the gnrquiz being reported on.
+     * @param object $cm the course module objects for the gnrquiz being reported on.
+     * @param object $coures the course settings for the coures this gnrquiz is in.
      */
-    public function __construct($mode, $quiz, $cm, $course) {
+    public function __construct($mode, $gnrquiz, $cm, $course) {
         $this->mode   = $mode;
-        $this->quiz   = $quiz;
+        $this->gnrquiz   = $gnrquiz;
         $this->cm     = $cm;
         $this->course = $course;
 
-        $this->usercanseegrades = gnrquiz_report_should_show_grades($quiz, context_module::instance($cm->id));
+        $this->usercanseegrades = gnrquiz_report_should_show_grades($gnrquiz, context_module::instance($cm->id));
     }
 
     /**
@@ -261,7 +261,7 @@ class mod_gnrquiz_attempts_report_options {
             $this->states = null;
         }
 
-        if (!gnrquiz_report_can_filter_only_graded($this->quiz)) {
+        if (!gnrquiz_report_can_filter_only_graded($this->gnrquiz)) {
             // A grading mode like 'average' has been selected, so we cannot do
             // the show the attempt that gave the final grade thing.
             $this->onlygraded = false;

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz responses table for showing first or all tries at a question.
+ * This file defines the gnrquiz responses table for showing first or all tries at a question.
  *
  * @package   gnrquiz_responses
  * @copyright 2014 The Open University
@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * This is a table subclass for displaying the quiz responses report, showing first or all tries.
+ * This is a table subclass for displaying the gnrquiz responses report, showing first or all tries.
  *
  * @package   gnrquiz_responses
  * @copyright 2014 The Open University

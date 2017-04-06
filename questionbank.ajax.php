@@ -18,7 +18,7 @@
 /**
  * Ajax script to update the contents of the question bank dialogue.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2014 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,19 +29,19 @@ require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 require_once($CFG->dirroot . '/question/editlib.php');
 
-list($thispageurl, $contexts, $cmid, $cm, $quiz, $pagevars) =
+list($thispageurl, $contexts, $cmid, $cm, $gnrquiz, $pagevars) =
         question_edit_setup('editq', '/mod/gnrquiz/edit.php', true);
 
 // Get the course object and related bits.
-$course = $DB->get_record('course', array('id' => $quiz->course), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $gnrquiz->course), '*', MUST_EXIST);
 require_capability('mod/gnrquiz:manage', $contexts->lowest());
 
-// Create quiz question bank view.
-$questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $quiz);
-$questionbank->set_gnrquiz_has_attempts(gnrquiz_has_attempts($quiz->id));
+// Create gnrquiz question bank view.
+$questionbank = new mod_gnrquiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $gnrquiz);
+$questionbank->set_gnrquiz_has_attempts(gnrquiz_has_attempts($gnrquiz->id));
 
 // Output.
-$output = $PAGE->get_renderer('mod_quiz', 'edit');
+$output = $PAGE->get_renderer('mod_gnrquiz', 'edit');
 $contents = $output->question_bank_contents($questionbank, $pagevars);
 echo json_encode(array(
     'status'   => 'OK',

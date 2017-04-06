@@ -80,7 +80,7 @@ class gnrquiz_overview_options extends mod_gnrquiz_attempts_report_options {
     public function update_user_preferences() {
         parent::update_user_preferences();
 
-        if (gnrquiz_has_grades($this->quiz)) {
+        if (gnrquiz_has_grades($this->gnrquiz)) {
             set_user_preference('gnrquiz_overview_slotmarks', $this->slotmarks);
         }
     }

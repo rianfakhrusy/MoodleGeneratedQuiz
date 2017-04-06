@@ -1,0 +1,8 @@
+{
+    "moodle-mod_gnrquiz-gnrquizbase": {
+        "requires": [
+            "base",
+            "node"
+        ]
+    }
+}

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_safebrowser plugin.
+ * Implementaton of the gnrquizaccess_safebrowser plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage safebrowser
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,15 +35,15 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
  * @copyright  2009 Oliver Rahs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_safebrowser extends gnrquiz_access_rule_base {
+class gnrquizaccess_safebrowser extends gnrquiz_access_rule_base {
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
 
-        if ($quizobj->get_quiz()->browsersecurity !== 'safebrowser') {
+        if ($gnrquizobj->get_gnrquiz()->browsersecurity !== 'safebrowser') {
             return null;
         }
 
-        return new self($quizobj, $timenow);
+        return new self($gnrquizobj, $timenow);
     }
 
     public function prevent_access() {
@@ -59,7 +59,7 @@ class quizaccess_safebrowser extends gnrquiz_access_rule_base {
     }
 
     public function setup_attempt_page($page) {
-        $page->set_title($this->quizobj->get_course()->shortname . ': ' . $page->title);
+        $page->set_title($this->gnrquizobj->get_course()->shortname . ': ' . $page->title);
         $page->set_cacheable(false);
         $page->set_popup_notification_allowed(false); // Prevent message notifications.
         $page->set_heading($page->title);
@@ -76,7 +76,7 @@ class quizaccess_safebrowser extends gnrquiz_access_rule_base {
     }
 
     /**
-     * @return array key => lang string any choices to add to the quiz Browser
+     * @return array key => lang string any choices to add to the gnrquiz Browser
      *      security settings menu.
      */
     public static function get_browser_security_choices() {

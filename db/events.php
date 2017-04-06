@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Add event handlers for the quiz
+ * Add event handlers for the gnrquiz
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   event
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,32 +28,32 @@ defined('MOODLE_INTERNAL') || die();
 
 $observers = array(
 
-    // Handle group events, so that open quiz attempts with group overrides get updated check times.
+    // Handle group events, so that open gnrquiz attempts with group overrides get updated check times.
     array(
         'eventname' => '\core\event\course_reset_started',
-        'callback' => '\mod_quiz\group_observers::course_reset_started',
+        'callback' => '\mod_gnrquiz\group_observers::course_reset_started',
     ),
     array(
         'eventname' => '\core\event\course_reset_ended',
-        'callback' => '\mod_quiz\group_observers::course_reset_ended',
+        'callback' => '\mod_gnrquiz\group_observers::course_reset_ended',
     ),
     array(
         'eventname' => '\core\event\group_deleted',
-        'callback' => '\mod_quiz\group_observers::group_deleted'
+        'callback' => '\mod_gnrquiz\group_observers::group_deleted'
     ),
     array(
         'eventname' => '\core\event\group_member_added',
-        'callback' => '\mod_quiz\group_observers::group_member_added',
+        'callback' => '\mod_gnrquiz\group_observers::group_member_added',
     ),
     array(
         'eventname' => '\core\event\group_member_removed',
-        'callback' => '\mod_quiz\group_observers::group_member_removed',
+        'callback' => '\mod_gnrquiz\group_observers::group_member_removed',
     ),
 
-    // Handle our own \mod_quiz\event\attempt_submitted event, as a way to
+    // Handle our own \mod_gnrquiz\event\attempt_submitted event, as a way to
     // send confirmation messages asynchronously.
     array(
-        'eventname' => '\mod_quiz\event\attempt_submitted',
+        'eventname' => '\mod_gnrquiz\event\attempt_submitted',
         'includefile'     => '/mod/gnrquiz/locallib.php',
         'callback' => 'gnrquiz_attempt_submitted_handler',
         'internal' => false

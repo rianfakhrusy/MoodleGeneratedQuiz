@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A {@link qubaid_condition} representing all the attempts by one user at a given quiz.
+ * A {@link qubaid_condition} representing all the attempts by one user at a given gnrquiz.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @category  question
  * @copyright 2015 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\question;
+namespace mod_gnrquiz\question;
 defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * A {@link qubaid_condition} representing all the attempts by one user at a given quiz.
+ * A {@link qubaid_condition} representing all the attempts by one user at a given gnrquiz.
  *
  * @copyright 2015 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -39,14 +39,14 @@ class qubaids_for_users_attempts extends \qubaid_join {
      *
      * This takes the same arguments as {@link gnrquiz_get_user_attempts()}.
      *
-     * @param int $quizid the quiz id.
+     * @param int $gnrquizid the gnrquiz id.
      * @param int $userid the userid.
      * @param string $status 'all', 'finished' or 'unfinished' to control
      * @param bool $includepreviews defaults to false.
      */
-    public function __construct($quizid, $userid, $status = 'finished', $includepreviews = false) {
-        $where = 'gnrquiza.quiz = :quizaquiz AND quiza.userid = :userid';
-        $params = array('gnrquizaquiz' => $quizid, 'userid' => $userid);
+    public function __construct($gnrquizid, $userid, $status = 'finished', $includepreviews = false) {
+        $where = 'gnrquiza.gnrquiz = :gnrquizagnrquiz AND gnrquiza.userid = :userid';
+        $params = array('gnrquizagnrquiz' => $gnrquizid, 'userid' => $userid);
 
         if (!$includepreviews) {
             $where .= ' AND preview = 0';
@@ -69,6 +69,6 @@ class qubaids_for_users_attempts extends \qubaid_join {
                 break;
         }
 
-        parent::__construct('{gnrquiz_attempts} quiza', 'gnrquiza.uniqueid', $where, $params);
+        parent::__construct('{gnrquiz_attempts} gnrquiza', 'gnrquiza.uniqueid', $where, $params);
     }
 }

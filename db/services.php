@@ -17,7 +17,7 @@
 /**
  * Quiz external functions and service definitions.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   external
  * @copyright  2016 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,19 +28,19 @@ defined('MOODLE_INTERNAL') || die;
 
 $functions = array(
 
-    'mod_gnrquiz_get_quizzes_by_courses' => array(
+    'mod_gnrquiz_get_gnrquizzes_by_courses' => array(
         'classname'     => 'mod_gnrquiz_external',
-        'methodname'    => 'get_quizzes_by_courses',
-        'description'   => 'Returns a list of quizzes in a provided list of courses,
-                            if no list is provided all quizzes that the user can view will be returned.',
+        'methodname'    => 'get_gnrquizzes_by_courses',
+        'description'   => 'Returns a list of gnrquizzes in a provided list of courses,
+                            if no list is provided all gnrquizzes that the user can view will be returned.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
 
-    'mod_gnrquiz_view_quiz' => array(
+    'mod_gnrquiz_view_gnrquiz' => array(
         'classname'     => 'mod_gnrquiz_external',
-        'methodname'    => 'view_quiz',
+        'methodname'    => 'view_gnrquiz',
         'description'   => 'Trigger the course module viewed event and update the module completion status.',
         'type'          => 'write',
         'capabilities'  => 'mod/gnrquiz:view',
@@ -50,7 +50,7 @@ $functions = array(
     'mod_gnrquiz_get_user_attempts' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_user_attempts',
-        'description'   => 'Return a list of attempts for the given quiz and user.',
+        'description'   => 'Return a list of attempts for the given gnrquiz and user.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -59,7 +59,7 @@ $functions = array(
     'mod_gnrquiz_get_user_best_grade' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_user_best_grade',
-        'description'   => 'Get the best current grade for the given user on a quiz.',
+        'description'   => 'Get the best current grade for the given user on a gnrquiz.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -68,7 +68,7 @@ $functions = array(
     'mod_gnrquiz_get_combined_review_options' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_combined_review_options',
-        'description'   => 'Combines the review options from a number of different quiz attempts.',
+        'description'   => 'Combines the review options from a number of different gnrquiz attempts.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -77,7 +77,7 @@ $functions = array(
     'mod_gnrquiz_start_attempt' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'start_attempt',
-        'description'   => 'Starts a new attempt at a quiz.',
+        'description'   => 'Starts a new attempt at a gnrquiz.',
         'type'          => 'write',
         'capabilities'  => 'mod/gnrquiz:attempt',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -86,7 +86,7 @@ $functions = array(
     'mod_gnrquiz_get_attempt_data' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_attempt_data',
-        'description'   => 'Returns information for the given attempt page for a quiz attempt in progress.',
+        'description'   => 'Returns information for the given attempt page for a gnrquiz attempt in progress.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:attempt',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -95,7 +95,7 @@ $functions = array(
     'mod_gnrquiz_get_attempt_summary' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_attempt_summary',
-        'description'   => 'Returns a summary of a quiz attempt before it is submitted.',
+        'description'   => 'Returns a summary of a gnrquiz attempt before it is submitted.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:attempt',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -104,8 +104,8 @@ $functions = array(
     'mod_gnrquiz_save_attempt' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'save_attempt',
-        'description'   => 'Processes save requests during the quiz.
-                            This function is intended for the quiz auto-save feature.',
+        'description'   => 'Processes save requests during the gnrquiz.
+                            This function is intended for the gnrquiz auto-save feature.',
         'type'          => 'write',
         'capabilities'  => 'mod/gnrquiz:attempt',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -114,7 +114,7 @@ $functions = array(
     'mod_gnrquiz_process_attempt' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'process_attempt',
-        'description'   => 'Process responses during an attempt at a quiz and also deals with attempts finishing.',
+        'description'   => 'Process responses during an attempt at a gnrquiz and also deals with attempts finishing.',
         'type'          => 'write',
         'capabilities'  => 'mod/gnrquiz:attempt',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -159,7 +159,7 @@ $functions = array(
     'mod_gnrquiz_get_gnrquiz_feedback_for_grade' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_gnrquiz_feedback_for_grade',
-        'description'   => 'Get the feedback text that should be show to a student who got the given grade in the given quiz.',
+        'description'   => 'Get the feedback text that should be show to a student who got the given grade in the given gnrquiz.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -168,7 +168,7 @@ $functions = array(
     'mod_gnrquiz_get_gnrquiz_access_information' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_gnrquiz_access_information',
-        'description'   => 'Return access information for a given quiz.',
+        'description'   => 'Return access information for a given gnrquiz.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -177,7 +177,7 @@ $functions = array(
     'mod_gnrquiz_get_attempt_access_information' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_attempt_access_information',
-        'description'   => 'Return access information for a given attempt in a quiz.',
+        'description'   => 'Return access information for a given attempt in a gnrquiz.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
@@ -186,7 +186,7 @@ $functions = array(
     'mod_gnrquiz_get_gnrquiz_required_qtypes' => array(
         'classname'     => 'mod_gnrquiz_external',
         'methodname'    => 'get_gnrquiz_required_qtypes',
-        'description'   => 'Return the potential question types that would be required for a given quiz.',
+        'description'   => 'Return the potential question types that would be required for a given gnrquiz.',
         'type'          => 'read',
         'capabilities'  => 'mod/gnrquiz:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)

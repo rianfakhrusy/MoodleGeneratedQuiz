@@ -1,6 +1,6 @@
-@mod @mod_quiz
-Feature: Attemp a quiz where some questions require that the previous question has been answered.
-  In order to complete a quiz where questions require previous ones to be complete
+@mod @mod_gnrquiz
+Feature: Attemp a gnrquiz where some questions require that the previous question has been answered.
+  In order to complete a gnrquiz where questions require previous ones to be complete
   As a student
   I need later questions to appear once earlier ones have been answered.
 
@@ -28,8 +28,8 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | TF1      | 1    | 0               |
       | TF2      | 1    | 1               |
@@ -37,7 +37,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
 
     Then I should see "First question"
     And I should see "This question cannot be attempted until the previous question has been completed."
@@ -62,8 +62,8 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | TF1      | 1    | 0               |
       | TF2      | 1    | 1               |
@@ -71,7 +71,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I click on "True" "radio" in the "First question" "question"
     And I press "Check"
 
@@ -82,15 +82,15 @@ Feature: Attemp a quiz where some questions require that the previous question h
     And "Question 2" "link" should exist
 
   @javascript
-  Scenario: After quiz submitted, all questions show on the review page
+  Scenario: After gnrquiz submitted, all questions show on the review page
     Given the following "questions" exist:
       | questioncategory | qtype       | name  | questiontext    |
       | Test questions   | truefalse   | TF1   | First question  |
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity | name   | intro              | course | idnumber | preferredbehaviour |
-      | quiz     | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz     | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | TF1      | 1    | 0               |
       | TF2      | 1    | 1               |
@@ -98,7 +98,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I press "Finish attempt ..."
     And I press "Submit all and finish"
     And I click on "Submit all and finish" "button" in the "Confirmation" "dialogue"
@@ -107,15 +107,15 @@ Feature: Attemp a quiz where some questions require that the previous question h
     And the state of "Second question" question is shown as "Not answered"
 
   @javascript
-  Scenario: A questions cannot be blocked in a deferred feedback quiz (despite what is set in the DB).
+  Scenario: A questions cannot be blocked in a deferred feedback gnrquiz (despite what is set in the DB).
     Given the following "questions" exist:
       | questioncategory | qtype       | name  | questiontext    |
       | Test questions   | truefalse   | TF1   | First question  |
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | deferredfeedback   |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | deferredfeedback   |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | TF1      | 1    | 0               |
       | TF2      | 1    | 1               |
@@ -123,7 +123,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
 
     Then I should see "First question"
     And I should see "Second question"
@@ -137,19 +137,19 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour | questionsperpage |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  | 2                |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  | 2                |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | TF1      | 1    | 1               |
       | TF2      | 2    | 1               |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Section 1 | 1         | 1       |
 
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
 
     Then I should see "First question"
     And I should see "Second question"
@@ -163,12 +163,12 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour | questionsperpage |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  | 2                |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  | 2                |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | TF1      | 1    | 1               |
       | TF2      | 2    | 1               |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Section 1 | 1         | 1       |
       | Section 2 | 2         | 0       |
@@ -176,22 +176,22 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I press "Next page"
 
     Then I should see "Second question"
     And I should not see "This question cannot be attempted until the previous question has been completed."
 
   @javascript
-  Scenario: A questions cannot be blocked in sequential quiz (despite what is set in the DB).
+  Scenario: A questions cannot be blocked in sequential gnrquiz (despite what is set in the DB).
     Given the following "questions" exist:
       | questioncategory | qtype       | name  | questiontext    |
       | Test questions   | truefalse   | TF1   | First question  |
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour | navmethod  |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  | sequential |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  | sequential |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | TF1      | 1    | 1               |
       | TF2      | 1    | 1               |
@@ -199,7 +199,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
 
     Then I should see "First question"
     And I should see "Second question"
@@ -213,8 +213,8 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | Story    | 1    | 0               |
       | TF2      | 1    | 1               |
@@ -222,7 +222,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
 
     Then I should see "First question"
     And I should see "Second question"
@@ -236,8 +236,8 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Test questions   | truefalse   | TF1  | First question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | requireprevious |
       | Info     | 1    | 0               |
       | TF1      | 1    | 1               |
@@ -245,7 +245,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
 
     Then I should see "Read me"
     And I should see "First question"

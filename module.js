@@ -14,28 +14,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * JavaScript library for the quiz module.
+ * JavaScript library for the gnrquiz module.
  *
  * @package    mod
- * @subpackage quiz
+ * @subpackage gnrquiz
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-M.mod_quiz = M.mod_quiz || {};
+M.mod_gnrquiz = M.mod_gnrquiz || {};
 
-M.mod_quiz.init_attempt_form = function(Y) {
+M.mod_gnrquiz.init_attempt_form = function(Y) {
     M.core_question_engine.init_form(Y, '#responseform');
-    Y.on('submit', M.mod_quiz.timer.stop, '#responseform');
+    Y.on('submit', M.mod_gnrquiz.timer.stop, '#responseform');
     M.core_formchangechecker.init({formid: 'responseform'});
 };
 
-M.mod_quiz.init_review_form = function(Y) {
+M.mod_gnrquiz.init_review_form = function(Y) {
     M.core_question_engine.init_form(Y, '.questionflagsaveform');
     Y.on('submit', function(e) { e.halt(); }, '.questionflagsaveform');
 };
 
-M.mod_quiz.init_comment_popup = function(Y) {
+M.mod_gnrquiz.init_comment_popup = function(Y) {
     // Add a close button to the window.
     var closebutton = Y.Node.create('<input type="button" />');
     closebutton.set('value', M.util.get_string('cancel', 'moodle'));
@@ -43,15 +43,15 @@ M.mod_quiz.init_comment_popup = function(Y) {
     Y.on('click', function() { window.close() }, closebutton);
 }
 
-// Code for updating the countdown timer that is used on timed quizzes.
-M.mod_quiz.timer = {
+// Code for updating the countdown timer that is used on timed gnrquizzes.
+M.mod_gnrquiz.timer = {
     // YUI object.
     Y: null,
 
     // Timestamp at which time runs out, according to the student's computer's clock.
     endtime: 0,
 
-    // Is this a quiz preview?
+    // Is this a gnrquiz preview?
     preview: 0,
 
     // This records the id of the timeout that updates the clock periodically,
@@ -61,22 +61,22 @@ M.mod_quiz.timer = {
     /**
      * @param Y the YUI object
      * @param start, the timer starting time, in seconds.
-     * @param preview, is this a quiz preview?
+     * @param preview, is this a gnrquiz preview?
      */
     init: function(Y, start, preview) {
-        M.mod_quiz.timer.Y = Y;
-        M.mod_quiz.timer.endtime = M.pageloadstarttime.getTime() + start*1000;
-        M.mod_quiz.timer.preview = preview;
-        M.mod_quiz.timer.update();
-        Y.one('#quiz-timer').setStyle('display', 'block');
+        M.mod_gnrquiz.timer.Y = Y;
+        M.mod_gnrquiz.timer.endtime = M.pageloadstarttime.getTime() + start*1000;
+        M.mod_gnrquiz.timer.preview = preview;
+        M.mod_gnrquiz.timer.update();
+        Y.one('#gnrquiz-timer').setStyle('display', 'block');
     },
 
     /**
      * Stop the timer, if it is running.
      */
     stop: function(e) {
-        if (M.mod_quiz.timer.timeoutid) {
-            clearTimeout(M.mod_quiz.timer.timeoutid);
+        if (M.mod_gnrquiz.timer.timeoutid) {
+            clearTimeout(M.mod_gnrquiz.timer.timeoutid);
         }
     },
 
@@ -91,15 +91,15 @@ M.mod_quiz.timer = {
         }
     },
 
-    // Function to update the clock with the current time left, and submit the quiz if necessary.
+    // Function to update the clock with the current time left, and submit the gnrquiz if necessary.
     update: function() {
-        var Y = M.mod_quiz.timer.Y;
-        var secondsleft = Math.floor((M.mod_quiz.timer.endtime - new Date().getTime())/1000);
+        var Y = M.mod_gnrquiz.timer.Y;
+        var secondsleft = Math.floor((M.mod_gnrquiz.timer.endtime - new Date().getTime())/1000);
 
         // If time has expired, set the hidden form field that says time has expired and submit
         if (secondsleft < 0) {
-            M.mod_quiz.timer.stop(null);
-            Y.one('#quiz-time-left').setContent(M.util.get_string('timesup', 'gnrquiz'));
+            M.mod_gnrquiz.timer.stop(null);
+            Y.one('#gnrquiz-time-left').setContent(M.util.get_string('timesup', 'gnrquiz'));
             var input = Y.one('input[name=timeup]');
             input.set('value', 1);
             var form = input.ancestor('form');
@@ -113,7 +113,7 @@ M.mod_quiz.timer = {
 
         // If time has nearly expired, change the colour.
         if (secondsleft < 100) {
-            Y.one('#quiz-timer').removeClass('timeleft' + (secondsleft + 2))
+            Y.one('#gnrquiz-timer').removeClass('timeleft' + (secondsleft + 2))
                     .removeClass('timeleft' + (secondsleft + 1))
                     .addClass('timeleft' + secondsleft);
         }
@@ -124,20 +124,20 @@ M.mod_quiz.timer = {
         var minutes = Math.floor(secondsleft/60);
         secondsleft -= minutes*60;
         var seconds = secondsleft;
-        Y.one('#quiz-time-left').setContent(hours + ':' +
-                M.mod_quiz.timer.two_digit(minutes) + ':' +
-                M.mod_quiz.timer.two_digit(seconds));
+        Y.one('#gnrquiz-time-left').setContent(hours + ':' +
+                M.mod_gnrquiz.timer.two_digit(minutes) + ':' +
+                M.mod_gnrquiz.timer.two_digit(seconds));
 
         // Arrange for this method to be called again soon.
-        M.mod_quiz.timer.timeoutid = setTimeout(M.mod_quiz.timer.update, 100);
+        M.mod_gnrquiz.timer.timeoutid = setTimeout(M.mod_gnrquiz.timer.update, 100);
     }
 };
 
-M.mod_quiz.nav = M.mod_quiz.nav || {};
+M.mod_gnrquiz.nav = M.mod_gnrquiz.nav || {};
 
-M.mod_quiz.nav.update_flag_state = function(attemptid, questionid, newstate) {
-    var Y = M.mod_quiz.nav.Y;
-    var navlink = Y.one('#quiznavbutton' + questionid);
+M.mod_gnrquiz.nav.update_flag_state = function(attemptid, questionid, newstate) {
+    var Y = M.mod_gnrquiz.nav.Y;
+    var navlink = Y.one('#gnrquiznavbutton' + questionid);
     navlink.removeClass('flagged');
     if (newstate == 1) {
         navlink.addClass('flagged');
@@ -147,10 +147,10 @@ M.mod_quiz.nav.update_flag_state = function(attemptid, questionid, newstate) {
     }
 };
 
-M.mod_quiz.nav.init = function(Y) {
-    M.mod_quiz.nav.Y = Y;
+M.mod_gnrquiz.nav.init = function(Y) {
+    M.mod_gnrquiz.nav.Y = Y;
 
-    Y.all('#quiznojswarning').remove();
+    Y.all('#gnrquiznojswarning').remove();
 
     var form = Y.one('#responseform');
     if (form) {
@@ -196,35 +196,35 @@ M.mod_quiz.nav.init = function(Y) {
     }
 
     if (M.core_question_flags) {
-        M.core_question_flags.add_listener(M.mod_quiz.nav.update_flag_state);
+        M.core_question_flags.add_listener(M.mod_gnrquiz.nav.update_flag_state);
     }
 };
 
-M.mod_quiz.secure_window = {
+M.mod_gnrquiz.secure_window = {
     init: function(Y) {
         if (window.location.href.substring(0, 4) == 'file') {
             window.location = 'about:blank';
         }
-        Y.delegate('contextmenu', M.mod_quiz.secure_window.prevent, document, '*');
-        Y.delegate('mousedown',   M.mod_quiz.secure_window.prevent_mouse, 'body', '*');
-        Y.delegate('mouseup',     M.mod_quiz.secure_window.prevent_mouse, 'body', '*');
-        Y.delegate('dragstart',   M.mod_quiz.secure_window.prevent, document, '*');
-        Y.delegate('selectstart', M.mod_quiz.secure_window.prevent_selection, document, '*');
-        Y.delegate('cut',         M.mod_quiz.secure_window.prevent, document, '*');
-        Y.delegate('copy',        M.mod_quiz.secure_window.prevent, document, '*');
-        Y.delegate('paste',       M.mod_quiz.secure_window.prevent, document, '*');
+        Y.delegate('contextmenu', M.mod_gnrquiz.secure_window.prevent, document, '*');
+        Y.delegate('mousedown',   M.mod_gnrquiz.secure_window.prevent_mouse, 'body', '*');
+        Y.delegate('mouseup',     M.mod_gnrquiz.secure_window.prevent_mouse, 'body', '*');
+        Y.delegate('dragstart',   M.mod_gnrquiz.secure_window.prevent, document, '*');
+        Y.delegate('selectstart', M.mod_gnrquiz.secure_window.prevent_selection, document, '*');
+        Y.delegate('cut',         M.mod_gnrquiz.secure_window.prevent, document, '*');
+        Y.delegate('copy',        M.mod_gnrquiz.secure_window.prevent, document, '*');
+        Y.delegate('paste',       M.mod_gnrquiz.secure_window.prevent, document, '*');
         Y.on('beforeprint', function() {
             Y.one(document.body).setStyle('display', 'none');
         }, window);
         Y.on('afterprint', function() {
             Y.one(document.body).setStyle('display', 'block');
         }, window);
-        Y.on('key', M.mod_quiz.secure_window.prevent, '*', 'press:67,86,88+ctrl');
-        Y.on('key', M.mod_quiz.secure_window.prevent, '*', 'up:67,86,88+ctrl');
-        Y.on('key', M.mod_quiz.secure_window.prevent, '*', 'down:67,86,88+ctrl');
-        Y.on('key', M.mod_quiz.secure_window.prevent, '*', 'press:67,86,88+meta');
-        Y.on('key', M.mod_quiz.secure_window.prevent, '*', 'up:67,86,88+meta');
-        Y.on('key', M.mod_quiz.secure_window.prevent, '*', 'down:67,86,88+meta');
+        Y.on('key', M.mod_gnrquiz.secure_window.prevent, '*', 'press:67,86,88+ctrl');
+        Y.on('key', M.mod_gnrquiz.secure_window.prevent, '*', 'up:67,86,88+ctrl');
+        Y.on('key', M.mod_gnrquiz.secure_window.prevent, '*', 'down:67,86,88+ctrl');
+        Y.on('key', M.mod_gnrquiz.secure_window.prevent, '*', 'press:67,86,88+meta');
+        Y.on('key', M.mod_gnrquiz.secure_window.prevent, '*', 'up:67,86,88+meta');
+        Y.on('key', M.mod_gnrquiz.secure_window.prevent, '*', 'down:67,86,88+meta');
     },
 
     is_content_editable: function(n) {
@@ -235,7 +235,7 @@ M.mod_quiz.secure_window = {
         if (n === null) {
             return false;
         }
-        return M.mod_quiz.secure_window.is_content_editable(n);
+        return M.mod_gnrquiz.secure_window.is_content_editable(n);
     },
 
     prevent_selection: function(e) {
@@ -252,7 +252,7 @@ M.mod_quiz.secure_window = {
             // Left click on a button or similar. No worries.
             return;
         }
-        if (e.button == 1 && M.mod_quiz.secure_window.is_content_editable(e.target)) {
+        if (e.button == 1 && M.mod_gnrquiz.secure_window.is_content_editable(e.target)) {
             // Left click in Atto or similar.
             return;
         }
@@ -261,7 +261,7 @@ M.mod_quiz.secure_window = {
 
     init_close_button: function(Y, url) {
         Y.on('click', function(e) {
-            M.mod_quiz.secure_window.close(url, 0)
+            M.mod_gnrquiz.secure_window.close(url, 0)
         }, '#secureclosebutton');
     },
 

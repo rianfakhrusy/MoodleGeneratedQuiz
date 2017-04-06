@@ -15,26 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_quiz attempt submitted event.
+ * The mod_gnrquiz attempt submitted event.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2013 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_quiz\event;
+namespace mod_gnrquiz\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_quiz attempt submitted event class.
+ * The mod_gnrquiz attempt submitted event class.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
  *      - int submitterid: id of submitter (null when trigged by CLI script).
- *      - int quizid: (optional) the id of the quiz.
+ *      - int gnrquizid: (optional) the id of the gnrquiz.
  * }
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @since      Moodle 2.6
  * @copyright  2013 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -57,7 +57,7 @@ class attempt_submitted extends \core\event\base {
      */
     public function get_description() {
         return "The user with id '$this->relateduserid' has submitted the attempt with id '$this->objectid' for the " .
-            "quiz with course module id '$this->contextinstanceid'.";
+            "gnrquiz with course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -66,7 +66,7 @@ class attempt_submitted extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventquizattemptsubmitted', 'mod_quiz');
+        return get_string('eventgnrquizattemptsubmitted', 'mod_gnrquiz');
     }
 
     /**
@@ -96,11 +96,11 @@ class attempt_submitted extends \core\event\base {
         $attempt = $this->get_record_snapshot('gnrquiz_attempts', $this->objectid);
 
         $legacyeventdata = new \stdClass();
-        $legacyeventdata->component = 'mod_quiz';
+        $legacyeventdata->component = 'mod_gnrquiz';
         $legacyeventdata->attemptid = $this->objectid;
         $legacyeventdata->timestamp = $attempt->timefinish;
         $legacyeventdata->userid = $this->relateduserid;
-        $legacyeventdata->quizid = $attempt->quiz;
+        $legacyeventdata->gnrquizid = $attempt->gnrquiz;
         $legacyeventdata->cmid = $this->contextinstanceid;
         $legacyeventdata->courseid = $this->courseid;
         $legacyeventdata->submitterid = $this->other['submitterid'];

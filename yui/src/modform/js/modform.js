@@ -1,7 +1,7 @@
 /**
  * The modform class has all the JavaScript specific to mod/gnrquiz/mod_form.php.
  *
- * @module moodle-mod_quiz-modform
+ * @module moodle-mod_gnrquiz-modform
  */
 
 var MODFORM = function() {
@@ -23,7 +23,7 @@ Y.extend(MODFORM, Y.Base, {
     initializer: function () {
         this.repaginateCheckbox = Y.one('#id_repaginatenow');
         if (!this.repaginateCheckbox) {
-            // The checkbox only appears when editing an existing quiz.
+            // The checkbox only appears when editing an existing gnrquiz.
             return;
         }
 
@@ -42,9 +42,9 @@ Y.extend(MODFORM, Y.Base, {
 
 });
 
-// Ensure that M.mod_quiz exists and that coursebase is initialised correctly
-M.mod_quiz = M.mod_quiz || {};
-M.mod_quiz.modform = M.mod_quiz.modform || new MODFORM();
-M.mod_quiz.modform.init = function() {
+// Ensure that M.mod_gnrquiz exists and that coursebase is initialised correctly
+M.mod_gnrquiz = M.mod_gnrquiz || {};
+M.mod_gnrquiz.modform = M.mod_gnrquiz.modform || new MODFORM();
+M.mod_gnrquiz.modform.init = function() {
     return new MODFORM();
 };

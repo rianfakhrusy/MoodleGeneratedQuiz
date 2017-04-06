@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_numattempts plugin.
+ * Implementaton of the gnrquizaccess_numattempts plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage numattempts
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,29 +35,29 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_numattempts extends gnrquiz_access_rule_base {
+class gnrquizaccess_numattempts extends gnrquiz_access_rule_base {
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
 
-        if ($quizobj->get_num_attempts_allowed() == 0) {
+        if ($gnrquizobj->get_num_attempts_allowed() == 0) {
             return null;
         }
 
-        return new self($quizobj, $timenow);
+        return new self($gnrquizobj, $timenow);
     }
 
     public function description() {
-        return get_string('attemptsallowedn', 'gnrquizaccess_numattempts', $this->quiz->attempts);
+        return get_string('attemptsallowedn', 'gnrquizaccess_numattempts', $this->gnrquiz->attempts);
     }
 
     public function prevent_new_attempt($numprevattempts, $lastattempt) {
-        if ($numprevattempts >= $this->quiz->attempts) {
+        if ($numprevattempts >= $this->gnrquiz->attempts) {
             return get_string('nomoreattempts', 'gnrquiz');
         }
         return false;
     }
 
     public function is_finished($numprevattempts, $lastattempt) {
-        return $numprevattempts >= $this->quiz->attempts;
+        return $numprevattempts >= $this->gnrquiz->attempts;
     }
 }

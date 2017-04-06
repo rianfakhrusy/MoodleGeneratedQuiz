@@ -17,7 +17,7 @@
 /**
  * Base class for the table used by a {@link gnrquiz_attempts_report}.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2010 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -49,10 +49,10 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
      */
     protected $lateststeps = null;
 
-    /** @var object the quiz settings for the quiz we are reporting on. */
-    protected $quiz;
+    /** @var object the gnrquiz settings for the gnrquiz we are reporting on. */
+    protected $gnrquiz;
 
-    /** @var context the quiz context. */
+    /** @var context the gnrquiz context. */
     protected $context;
 
     /** @var string HTML fragment to select the first/best/last attempt, if appropriate. */
@@ -67,7 +67,7 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
     /** @var object the ids of the students in the course. */
     protected $students;
 
-    /** @var object the questions that comprise this quiz.. */
+    /** @var object the questions that comprise this gnrquiz.. */
     protected $questions;
 
     /** @var bool whether to include the column with checkboxes to select each attempt. */
@@ -76,7 +76,7 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
     /**
      * Constructor
      * @param string $uniqueid
-     * @param object $quiz
+     * @param object $gnrquiz
      * @param context $context
      * @param string $qmsubselect
      * @param mod_gnrquiz_attempts_report_options $options
@@ -85,11 +85,11 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
      * @param array $questions
      * @param moodle_url $reporturl
      */
-    public function __construct($uniqueid, $quiz, $context, $qmsubselect,
+    public function __construct($uniqueid, $gnrquiz, $context, $qmsubselect,
             mod_gnrquiz_attempts_report_options $options, $groupstudents, $students,
             $questions, $reporturl) {
         parent::__construct($uniqueid);
-        $this->quiz = $quiz;
+        $this->gnrquiz = $gnrquiz;
         $this->context = $context;
         $this->qmsubselect = $qmsubselect;
         $this->groupstudents = $groupstudents;
@@ -206,8 +206,8 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
         }
 
         $feedback = gnrquiz_report_feedback_for_grade(
-                gnrquiz_rescale_grade($attempt->sumgrades, $this->quiz, false),
-                $this->quiz->id, $this->context);
+                gnrquiz_rescale_grade($attempt->sumgrades, $this->gnrquiz, false),
+                $this->gnrquiz->id, $this->context);
 
         if ($this->is_downloading()) {
             $feedback = strip_tags($feedback);
@@ -387,7 +387,7 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
     public function base_sql($reportstudents) {
         global $DB;
 
-        $fields = $DB->sql_concat('u.id', "'#'", 'COALESCE(quiza.attempt, 0)') . ' AS uniqueid,';
+        $fields = $DB->sql_concat('u.id', "'#'", 'COALESCE(gnrquiza.attempt, 0)') . ' AS uniqueid,';
 
         if ($this->qmsubselect) {
             $fields .= "\n(CASE WHEN $this->qmsubselect THEN 1 ELSE 0 END) AS gradedattempt,";
@@ -398,8 +398,8 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
                 'imagealt', 'institution', 'department', 'email'));
         $allnames = get_all_user_name_fields(true, 'u');
         $fields .= '
-                quiza.uniqueid AS usageid,
-                quiza.id AS attempt,
+                gnrquiza.uniqueid AS usageid,
+                gnrquiza.id AS attempt,
                 u.id AS userid,
                 u.idnumber, ' . $allnames . ',
                 u.picture,
@@ -407,12 +407,12 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
                 u.institution,
                 u.department,
                 u.email' . $extrafields . ',
-                quiza.state,
-                quiza.sumgrades,
-                quiza.timefinish,
-                quiza.timestart,
-                CASE WHEN quiza.timefinish = 0 THEN null
-                     WHEN quiza.timefinish > quiza.timestart THEN quiza.timefinish - quiza.timestart
+                gnrquiza.state,
+                gnrquiza.sumgrades,
+                gnrquiza.timefinish,
+                gnrquiza.timestart,
+                CASE WHEN gnrquiza.timefinish = 0 THEN null
+                     WHEN gnrquiza.timefinish > gnrquiza.timestart THEN gnrquiza.timefinish - gnrquiza.timestart
                      ELSE 0 END AS duration';
             // To explain that last bit, timefinish can be non-zero and less
             // than timestart when you have two load-balanced servers with very
@@ -420,40 +420,40 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
 
         // This part is the same for all cases. Join the users and gnrquiz_attempts tables.
         $from = "\n{user} u";
-        $from .= "\nLEFT JOIN {gnrquiz_attempts} quiza ON
-                                    quiza.userid = u.id AND quiza.quiz = :quizid";
-        $params = array('gnrquizid' => $this->quiz->id);
+        $from .= "\nLEFT JOIN {gnrquiz_attempts} gnrquiza ON
+                                    gnrquiza.userid = u.id AND gnrquiza.gnrquiz = :gnrquizid";
+        $params = array('gnrquizid' => $this->gnrquiz->id);
 
         if ($this->qmsubselect && $this->options->onlygraded) {
-            $from .= " AND (quiza.state <> :finishedstate OR $this->qmsubselect)";
+            $from .= " AND (gnrquiza.state <> :finishedstate OR $this->qmsubselect)";
             $params['finishedstate'] = gnrquiz_attempt::FINISHED;
         }
 
         switch ($this->options->attempts) {
             case gnrquiz_attempts_report::ALL_WITH:
                 // Show all attempts, including students who are no longer in the course.
-                $where = 'gnrquiza.id IS NOT NULL AND quiza.preview = 0';
+                $where = 'gnrquiza.id IS NOT NULL AND gnrquiza.preview = 0';
                 break;
             case gnrquiz_attempts_report::ENROLLED_WITH:
                 // Show only students with attempts.
                 list($usql, $uparams) = $DB->get_in_or_equal(
                         $reportstudents, SQL_PARAMS_NAMED, 'u');
                 $params += $uparams;
-                $where = "u.id $usql AND quiza.preview = 0 AND quiza.id IS NOT NULL";
+                $where = "u.id $usql AND gnrquiza.preview = 0 AND gnrquiza.id IS NOT NULL";
                 break;
             case gnrquiz_attempts_report::ENROLLED_WITHOUT:
                 // Show only students without attempts.
                 list($usql, $uparams) = $DB->get_in_or_equal(
                         $reportstudents, SQL_PARAMS_NAMED, 'u');
                 $params += $uparams;
-                $where = "u.id $usql AND quiza.id IS NULL";
+                $where = "u.id $usql AND gnrquiza.id IS NULL";
                 break;
             case gnrquiz_attempts_report::ENROLLED_ALL:
                 // Show all students with or without attempts.
                 list($usql, $uparams) = $DB->get_in_or_equal(
                         $reportstudents, SQL_PARAMS_NAMED, 'u');
                 $params += $uparams;
-                $where = "u.id $usql AND (quiza.preview = 0 OR quiza.preview IS NULL)";
+                $where = "u.id $usql AND (gnrquiza.preview = 0 OR gnrquiza.preview IS NULL)";
                 break;
         }
 
@@ -461,7 +461,7 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
             list($statesql, $stateparams) = $DB->get_in_or_equal($this->options->states,
                     SQL_PARAMS_NAMED, 'state');
             $params += $stateparams;
-            $where .= " AND (quiza.state $statesql OR quiza.state IS NULL)";
+            $where .= " AND (gnrquiza.state $statesql OR gnrquiza.state IS NULL)";
         }
 
         return array($fields, $from, $where, $params);
@@ -489,15 +489,15 @@ abstract class gnrquiz_attempts_report_table extends table_sql {
         // It is only used in a subselect to help crappy databases (see MDL-30122)
         // therefore, it is better to use a very simple join, which may include
         // too many records, than to do a super-accurate join.
-        $qubaids = new qubaid_join("{gnrquiz_attempts} {$alias}quiza", "{$alias}quiza.uniqueid",
-                "{$alias}quiza.quiz = :{$alias}quizid", array("{$alias}quizid" => $this->sql->params['gnrquizid']));
+        $qubaids = new qubaid_join("{gnrquiz_attempts} {$alias}gnrquiza", "{$alias}gnrquiza.uniqueid",
+                "{$alias}gnrquiza.gnrquiz = :{$alias}gnrquizid", array("{$alias}gnrquizid" => $this->sql->params['gnrquizid']));
 
         $dm = new question_engine_data_mapper();
         list($inlineview, $viewparams) = $dm->question_attempt_latest_state_view($alias, $qubaids);
 
         $this->sql->fields .= ",\n$fields";
         $this->sql->from .= "\nLEFT JOIN $inlineview ON " .
-                "$alias.questionusageid = quiza.uniqueid AND $alias.slot = :{$alias}slot";
+                "$alias.questionusageid = gnrquiza.uniqueid AND $alias.slot = :{$alias}slot";
         $this->sql->params[$alias . 'slot'] = $slot;
         $this->sql->params = array_merge($this->sql->params, $viewparams);
     }

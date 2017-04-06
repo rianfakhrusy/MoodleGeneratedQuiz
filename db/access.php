@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Capability definitions for the quiz module.
+ * Capability definitions for the gnrquiz module.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2006 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-    // Ability to see that the quiz exists, and the basic information
+    // Ability to see that the gnrquiz exists, and the basic information
     // about it, for example the start date and time limit.
     'mod/gnrquiz:view' => array(
         'captype' => 'read',
@@ -40,7 +40,7 @@ $capabilities = array(
         )
     ),
 
-    // Ability to add a new quiz to the course.
+    // Ability to add a new gnrquiz to the course.
     'mod/gnrquiz:addinstance' => array(
         'riskbitmask' => RISK_XSS,
 
@@ -53,7 +53,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    // Ability to do the quiz as a 'student'.
+    // Ability to do the gnrquiz as a 'student'.
     'mod/gnrquiz:attempt' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
@@ -74,7 +74,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/gnrquiz:attempt'
     ),
 
-    // Edit the quiz settings, add and remove questions.
+    // Edit the gnrquiz settings, add and remove questions.
     'mod/gnrquiz:manage' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
@@ -85,7 +85,7 @@ $capabilities = array(
         )
     ),
 
-    // Edit the quiz overrides.
+    // Edit the gnrquiz overrides.
     'mod/gnrquiz:manageoverrides' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -95,7 +95,7 @@ $capabilities = array(
         )
     ),
 
-    // Preview the quiz.
+    // Preview the gnrquiz.
     'mod/gnrquiz:preview' => array(
         'captype' => 'write', // Only just a write.
         'contextlevel' => CONTEXT_MODULE,
@@ -118,7 +118,7 @@ $capabilities = array(
         )
     ),
 
-    // Regrade quizzes.
+    // Regrade gnrquizzes.
     'mod/gnrquiz:regrade' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
@@ -131,7 +131,7 @@ $capabilities = array(
         'clonepermissionsfrom' =>  'mod/gnrquiz:grade'
     ),
 
-    // View the quiz reports.
+    // View the gnrquiz reports.
     'mod/gnrquiz:viewreports' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
@@ -161,21 +161,21 @@ $capabilities = array(
         'archetypes' => array()
     ),
 
-    // Receive a confirmation message of own quiz submission.
+    // Receive a confirmation message of own gnrquiz submission.
     'mod/gnrquiz:emailconfirmsubmission' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array()
     ),
 
-    // Receive a notification message of other peoples' quiz submissions.
+    // Receive a notification message of other peoples' gnrquiz submissions.
     'mod/gnrquiz:emailnotifysubmission' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array()
     ),
 
-    // Receive a notification message when a quiz attempt becomes overdue.
+    // Receive a notification message when a gnrquiz attempt becomes overdue.
     'mod/gnrquiz:emailwarnoverdue' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,

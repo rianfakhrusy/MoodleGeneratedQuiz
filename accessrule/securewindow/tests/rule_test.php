@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_securewindow plugin.
+ * Unit tests for the gnrquizaccess_securewindow plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage securewindow
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,22 +31,22 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/securewindow/rule.php');
 
 
 /**
- * Unit tests for the quizaccess_securewindow plugin.
+ * Unit tests for the gnrquizaccess_securewindow plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_securewindow_testcase extends basic_testcase {
+class gnrquizaccess_securewindow_testcase extends basic_testcase {
     public static $includecoverage = array('mod/gnrquiz/accessrule/securewindow/rule.php');
 
     // Nothing very testable in this class, just test that it obeys the general access rule contact.
     public function test_securewindow_access_rule() {
-        $quiz = new stdClass();
-        $quiz->browsersecurity = 'securewindow';
+        $gnrquiz = new stdClass();
+        $gnrquiz->browsersecurity = 'securewindow';
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
-        $rule = new quizaccess_securewindow($quizobj, 0);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
+        $rule = new gnrquizaccess_securewindow($gnrquizobj, 0);
         $attempt = new stdClass();
 
         $this->assertFalse($rule->prevent_access());

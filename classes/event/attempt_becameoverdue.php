@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_quiz attempt became overdue event.
+ * The mod_gnrquiz attempt became overdue event.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2013 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_quiz\event;
+namespace mod_gnrquiz\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_quiz attempt became overdue event class.
+ * The mod_gnrquiz attempt became overdue event class.
  *
  * Please note that the name of this event is not following the event naming convention.
  * Its name should not be used as a reference for other events to be created.
@@ -34,10 +34,10 @@ defined('MOODLE_INTERNAL') || die();
  *      Extra information about event.
  *
  *      - int submitterid: id of submitter (null when trigged by CLI script).
- *      - int quizid: (optional) the id of the quiz.
+ *      - int gnrquizid: (optional) the id of the gnrquiz.
  * }
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @since      Moodle 2.6
  * @copyright  2013 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -59,7 +59,7 @@ class attempt_becameoverdue extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The quiz attempt with id '$this->objectid' belonging to the quiz with course module id '$this->contextinstanceid' " .
+        return "The gnrquiz attempt with id '$this->objectid' belonging to the gnrquiz with course module id '$this->contextinstanceid' " .
             "for the user with id '$this->relateduserid' became overdue.";
     }
 
@@ -69,7 +69,7 @@ class attempt_becameoverdue extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventquizattempttimelimitexceeded', 'mod_quiz');
+        return get_string('eventgnrquizattempttimelimitexceeded', 'mod_gnrquiz');
     }
 
     /**
@@ -99,11 +99,11 @@ class attempt_becameoverdue extends \core\event\base {
         $attempt = $this->get_record_snapshot('gnrquiz_attempts', $this->objectid);
 
         $legacyeventdata = new \stdClass();
-        $legacyeventdata->component = 'mod_quiz';
+        $legacyeventdata->component = 'mod_gnrquiz';
         $legacyeventdata->attemptid = $this->objectid;
         $legacyeventdata->timestamp = $attempt->timemodified;
         $legacyeventdata->userid = $this->relateduserid;
-        $legacyeventdata->quizid = $attempt->quiz;
+        $legacyeventdata->gnrquizid = $attempt->gnrquiz;
         $legacyeventdata->cmid = $this->contextinstanceid;
         $legacyeventdata->courseid = $this->courseid;
         $legacyeventdata->submitterid = $this->other['submitterid'];

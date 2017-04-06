@@ -17,7 +17,7 @@
 /**
  * Quiz events tests.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @category  test
  * @copyright 2013 Adrian Greeve
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,7 +29,7 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/gnrquiz/attemptlib.php');
 
 /**
- * Unit tests for quiz events.
+ * Unit tests for gnrquiz events.
  *
  * @copyright  2013 Adrian Greeve
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -37,8 +37,8 @@ require_once($CFG->dirroot . '/mod/gnrquiz/attemptlib.php');
 class mod_gnrquiz_structure_testcase extends advanced_testcase {
 
     /**
-     * Create a course with an empty quiz.
-     * @return array with three elements quiz, cm and course.
+     * Create a course with an empty gnrquiz.
+     * @return array with three elements gnrquiz, cm and course.
      */
     protected function prepare_gnrquiz_data() {
 
@@ -47,19 +47,19 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
         // Create a course.
         $course = $this->getDataGenerator()->create_course();
 
-        // Make a quiz.
-        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        // Make a gnrquiz.
+        $gnrquizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_gnrquiz');
 
-        $quiz = $quizgenerator->create_instance(array('course' => $course->id, 'questionsperpage' => 0,
+        $gnrquiz = $gnrquizgenerator->create_instance(array('course' => $course->id, 'questionsperpage' => 0,
             'grade' => 100.0, 'sumgrades' => 2, 'preferredbehaviour' => 'immediatefeedback'));
 
-        $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id, $course->id);
+        $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id, $course->id);
 
-        return array($quiz, $cm, $course);
+        return array($gnrquiz, $cm, $course);
     }
 
     /**
-     * Creat a test quiz.
+     * Creat a test gnrquiz.
      *
      * $layout looks like this:
      * $layout = array(
@@ -76,10 +76,10 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
      * The elements in the question array are name, page number, and question type.
      *
      * @param array $layout as above.
-     * @return quiz the created quiz.
+     * @return gnrquiz the created gnrquiz.
      */
-    protected function create_test_quiz($layout) {
-        list($quiz, $cm, $course) = $this->prepare_gnrquiz_data();
+    protected function create_test_gnrquiz($layout) {
+        list($gnrquiz, $cm, $course) = $this->prepare_gnrquiz_data();
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
 
@@ -102,13 +102,13 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
                 $q = $questiongenerator->create_question($qtype, null,
                         array('name' => $name, 'category' => $cat->id));
 
-                gnrquiz_add_gnrquiz_question($q->id, $quiz, $page);
+                gnrquiz_add_gnrquiz_question($q->id, $gnrquiz, $page);
                 $lastpage = $page;
             }
         }
 
-        $quizobj = new quiz($quiz, $cm, $course);
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, $course);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         if (isset($headings[1])) {
             list($heading, $shuffle) = $this->parse_section_name($headings[1]);
             $sections = $structure->get_sections();
@@ -124,15 +124,15 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
             $structure->set_section_shuffle($id, $shuffle);
         }
 
-        return $quizobj;
+        return $gnrquizobj;
     }
 
     /**
      * Verify that the given layout matches that expected.
-     * @param array $expectedlayout as for $layout in {@link create_test_quiz()}.
-     * @param \mod_quiz\structure $structure the structure to test.
+     * @param array $expectedlayout as for $layout in {@link create_test_gnrquiz()}.
+     * @param \mod_gnrquiz\structure $structure the structure to test.
      */
-    protected function assert_gnrquiz_layout($expectedlayout, \mod_quiz\structure $structure) {
+    protected function assert_gnrquiz_layout($expectedlayout, \mod_gnrquiz\structure $structure) {
         $sections = $structure->get_sections();
 
         $slot = 1;
@@ -142,7 +142,7 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
                 $section = array_shift($sections);
 
                 if ($slot > 1 && $section->heading == '' && $section->firstslot == 1) {
-                    // The array $expectedlayout did not contain default first quiz section, so skip over it.
+                    // The array $expectedlayout did not contain default first gnrquiz section, so skip over it.
                     $section = array_shift($sections);
                 }
 
@@ -163,20 +163,20 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
         }
 
         if ($slot - 1 != count($structure->get_slots())) {
-            $this->fail('The quiz contains more slots than expected.');
+            $this->fail('The gnrquiz contains more slots than expected.');
         }
 
         if (!empty($sections)) {
             $section = array_shift($sections);
             if ($section->heading != '' || $section->firstslot != 1) {
-                $this->fail('Unexpected section (' . $section->heading .') found in the quiz.');
+                $this->fail('Unexpected section (' . $section->heading .') found in the gnrquiz.');
             }
         }
     }
 
     /**
      * Parse the section name, optionally followed by a * to mean shuffle, as
-     * used by create_test_quiz as assert_gnrquiz_layout.
+     * used by create_test_gnrquiz as assert_gnrquiz_layout.
      * @param string $heading the heading.
      * @return array with two elements, the heading and the shuffle setting.
      */
@@ -189,11 +189,11 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_get_gnrquiz_slots() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         // Are the correct slots returned?
         $slots = $structure->get_slots();
@@ -201,10 +201,10 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_gnrquiz_has_one_section_by_default() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $sections = $structure->get_sections();
         $this->assertCount(1, $sections);
@@ -216,13 +216,13 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_get_sections() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1*',
                 array('TF1', 1, 'truefalse'),
                 'Heading 2*',
                 array('TF2', 2, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $sections = $structure->get_sections();
         $this->assertCount(2, $sections);
@@ -239,19 +239,19 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_remove_section_heading() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 'Heading 2',
                 array('TF2', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $sections = $structure->get_sections();
         $section = end($sections);
         $structure->remove_section_heading($section->id);
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
@@ -260,11 +260,11 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_cannot_remove_first_section() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $sections = $structure->get_sections();
         $section = reset($sections);
@@ -274,18 +274,18 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_to_the_same_place_does_nothing() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(1)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '1');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
@@ -294,18 +294,18 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_end_of_one_page_to_start_of_next() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '2');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
@@ -314,19 +314,19 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_end_of_one_section_to_start_of_next() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 'Heading',
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '2');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 'Heading',
@@ -336,19 +336,19 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_start_of_one_section_to_end_of_previous() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 'Heading',
                 array('TF2', 2, 'truefalse'),
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(1)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '1');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
@@ -357,18 +357,18 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
             ), $structure);
     }
     public function test_move_slot_on_same_page() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 array('TF3', 1, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(3)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '1');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF3', 1, 'truefalse'),
@@ -377,18 +377,18 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_up_onto_previous_page() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
                 array('TF3', 2, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(3)->slotid;
         $idmoveafter = $structure->get_question_in_slot(1)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '1');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF3', 1, 'truefalse'),
@@ -397,18 +397,18 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_emptying_a_page_renumbers_pages() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
                 array('TF3', 3, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(3)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '3');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF3', 2, 'truefalse'),
@@ -417,12 +417,12 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_too_small_page_number_detected() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
                 array('TF3', 3, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(3)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
@@ -431,12 +431,12 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_too_large_page_number_detected() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
                 array('TF3', 3, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(1)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
@@ -445,20 +445,20 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_within_section() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 'Heading 2',
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(1)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '1');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF2', 1, 'truefalse'),
@@ -469,20 +469,20 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_to_new_section() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 'Heading 2',
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(3)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '2');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
@@ -493,19 +493,19 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_to_start() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 'Heading 2',
                 array('TF2', 2, 'truefalse'),
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(3)->slotid;
         $structure->move_slot($idtomove, 0, '1');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF3', 1, 'truefalse'),
@@ -516,20 +516,20 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_down_to_start_of_second_section() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 'Heading 2',
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(2)->slotid;
         $idmoveafter = $structure->get_question_in_slot(2)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '2');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
@@ -540,17 +540,17 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_first_slot_down_to_start_of_page_2() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(1)->slotid;
         $structure->move_slot($idtomove, 0, '2');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
@@ -559,17 +559,17 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_first_slot_to_same_place_on_page_1() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(1)->slotid;
         $structure->move_slot($idtomove, 0, '1');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
@@ -578,17 +578,17 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_first_slot_to_before_page_1() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(1)->slotid;
         $structure->move_slot($idtomove, 0, '');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
@@ -597,7 +597,7 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_move_slot_up_to_start_of_second_section() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
                 'Heading 2',
@@ -606,13 +606,13 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
                 array('TF3', 3, 'truefalse'),
                 array('TF4', 3, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $idtomove = $structure->get_question_in_slot(3)->slotid;
         $idmoveafter = $structure->get_question_in_slot(1)->slotid;
         $structure->move_slot($idtomove, $idmoveafter, '2');
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
@@ -625,17 +625,17 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_gnrquiz_remove_slot() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 'Heading 2',
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $structure->remove_slot(2);
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 'Heading 2',
@@ -649,19 +649,19 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $this->setAdminUser();
 
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
             ));
 
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
-        gnrquiz_add_random_questions($quizobj->get_quiz(), 1, $cat->id, 1, false);
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        gnrquiz_add_random_questions($gnrquizobj->get_gnrquiz(), 1, $cat->id, 1, false);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $randomq = $DB->get_record('question', array('qtype' => 'random'));
 
         $structure->remove_slot(2);
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
             ), $structure);
@@ -669,24 +669,24 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_cannot_remove_last_slot_in_a_section() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
                 'Heading 2',
                 array('TF3', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $this->setExpectedException('coding_exception');
         $structure->remove_slot(3);
     }
 
-    public function test_can_remove_last_question_in_a_quiz() {
-        $quizobj = $this->create_test_quiz(array(
+    public function test_can_remove_last_question_in_a_gnrquiz() {
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 'Heading 1',
                 array('TF1', 1, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $structure->remove_slot(1);
 
@@ -695,8 +695,8 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
         $q = $questiongenerator->create_question('truefalse', null,
                 array('name' => 'TF2', 'category' => $cat->id));
 
-        gnrquiz_add_gnrquiz_question($q->id, $quizobj->get_quiz(), 0);
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        gnrquiz_add_gnrquiz_question($q->id, $gnrquizobj->get_gnrquiz(), 0);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $this->assert_gnrquiz_layout(array(
                 'Heading 1',
@@ -705,21 +705,21 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_add_question_updates_headings() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 'Heading 2',
                 array('TF2', 2, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
         $q = $questiongenerator->create_question('truefalse', null,
                 array('name' => 'TF3', 'category' => $cat->id));
 
-        gnrquiz_add_gnrquiz_question($q->id, $quizobj->get_quiz(), 1);
+        gnrquiz_add_gnrquiz_question($q->id, $gnrquizobj->get_gnrquiz(), 1);
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF3', 1, 'truefalse'),
@@ -729,21 +729,21 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_add_question_at_end_does_not_update_headings() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 'Heading 2',
                 array('TF2', 2, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
         $q = $questiongenerator->create_question('truefalse', null,
                 array('name' => 'TF3', 'category' => $cat->id));
 
-        gnrquiz_add_gnrquiz_question($q->id, $quizobj->get_quiz(), 0);
+        gnrquiz_add_gnrquiz_question($q->id, $gnrquizobj->get_gnrquiz(), 0);
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 'Heading 2',
@@ -753,16 +753,16 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_remove_page_break() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
             ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $slotid = $structure->get_question_in_slot(2)->slotid;
-        $slots = $structure->update_page_break($slotid, \mod_quiz\repaginate::LINK);
+        $slots = $structure->update_page_break($slotid, \mod_gnrquiz\repaginate::LINK);
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
@@ -770,16 +770,16 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_add_page_break() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         $slotid = $structure->get_question_in_slot(2)->slotid;
-        $slots = $structure->update_page_break($slotid, \mod_quiz\repaginate::UNLINK);
+        $slots = $structure->update_page_break($slotid, \mod_gnrquiz\repaginate::UNLINK);
 
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assert_gnrquiz_layout(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 2, 'truefalse'),
@@ -787,25 +787,25 @@ class mod_gnrquiz_structure_testcase extends advanced_testcase {
     }
 
     public function test_update_question_dependency() {
-        $quizobj = $this->create_test_quiz(array(
+        $gnrquizobj = $this->create_test_gnrquiz(array(
                 array('TF1', 1, 'truefalse'),
                 array('TF2', 1, 'truefalse'),
         ));
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
 
         // Test adding a dependency.
         $slotid = $structure->get_slot_id_for_slot(2);
         $structure->update_question_dependency($slotid, true);
 
         // Having called update page break, we need to reload $structure.
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assertEquals(1, $structure->is_question_dependent_on_previous_slot(2));
 
         // Test removing a dependency.
         $structure->update_question_dependency($slotid, false);
 
         // Having called update page break, we need to reload $structure.
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $structure = \mod_gnrquiz\structure::create_for_gnrquiz($gnrquizobj);
         $this->assertEquals(0, $structure->is_question_dependent_on_previous_slot(2));
     }
 }

@@ -15,12 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of functions for the quiz module.
+ * Library of functions for the gnrquiz module.
  *
- * This contains functions that are called also from outside the quiz module
- * Functions that are only called by the quiz module itself are in {@link locallib.php}
+ * This contains functions that are called also from outside the gnrquiz module
+ * Functions that are only called by the gnrquiz module itself are in {@link locallib.php}
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -33,7 +33,7 @@ require_once($CFG->dirroot . '/calendar/lib.php');
 
 
 /**#@+
- * Option controlling what options are offered on the quiz settings form.
+ * Option controlling what options are offered on the gnrquiz settings form.
  */
 define('GNRQUIZ_MAX_ATTEMPT_OPTION', 10);
 define('GNRQUIZ_MAX_QPP_OPTION', 50);
@@ -52,13 +52,13 @@ define('GNRQUIZ_ATTEMPTLAST',  '4');
 /**#@-*/
 
 /**
- * @var int If start and end date for the quiz are more than this many seconds apart
+ * @var int If start and end date for the gnrquiz are more than this many seconds apart
  * they will be represented by two separate events in the calendar
  */
 define('GNRQUIZ_MAX_EVENT_LENGTH', 5*24*60*60); // 5 days.
 
 /**#@+
- * Options for navigation method within quizzes.
+ * Options for navigation method within gnrquizzes.
  */
 define('GNRQUIZ_NAVMETHOD_FREE', 'free');
 define('GNRQUIZ_NAVMETHOD_SEQ',  'sequential');
@@ -70,32 +70,32 @@ define('GNRQUIZ_NAVMETHOD_SEQ',  'sequential');
  * will create a new instance and return the id number
  * of the new instance.
  *
- * @param object $quiz the data that came from the form.
+ * @param object $gnrquiz the data that came from the form.
  * @return mixed the id of the new instance on success,
  *          false or a string error message on failure.
  */
-function gnrquiz_add_instance($quiz) {
+function gnrquiz_add_instance($gnrquiz) {
     global $DB;
-    $cmid = $quiz->coursemodule;
+    $cmid = $gnrquiz->coursemodule;
 
     // Process the options from the form.
-    $quiz->created = time();
-    $result = gnrquiz_process_options($quiz);
+    $gnrquiz->created = time();
+    $result = gnrquiz_process_options($gnrquiz);
     if ($result && is_string($result)) {
         return $result;
     }
 
     // Try to store it in the database.
-    $quiz->id = $DB->insert_record('gnrquiz', $quiz);
+    $gnrquiz->id = $DB->insert_record('gnrquiz', $gnrquiz);
 
-    // Create the first section for this quiz.
-    $DB->insert_record('gnrquiz_sections', array('gnrquizid' => $quiz->id,
+    // Create the first section for this gnrquiz.
+    $DB->insert_record('gnrquiz_sections', array('gnrquizid' => $gnrquiz->id,
             'firstslot' => 1, 'heading' => '', 'shufflequestions' => 0));
 
     // Do the processing required after an add or an update.
-    gnrquiz_after_add_or_update($quiz);
+    gnrquiz_after_add_or_update($gnrquiz);
 
-    return $quiz->id;
+    return $gnrquiz->id;
 }
 
 /**
@@ -103,52 +103,52 @@ function gnrquiz_add_instance($quiz) {
  * (defined by the form in mod_form.php) this function
  * will update an existing instance with new data.
  *
- * @param object $quiz the data that came from the form.
+ * @param object $gnrquiz the data that came from the form.
  * @return mixed true on success, false or a string error message on failure.
  */
-function gnrquiz_update_instance($quiz, $mform) {
+function gnrquiz_update_instance($gnrquiz, $mform) {
     global $CFG, $DB;
     require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
     // Process the options from the form.
-    $result = gnrquiz_process_options($quiz);
+    $result = gnrquiz_process_options($gnrquiz);
     if ($result && is_string($result)) {
         return $result;
     }
 
     // Get the current value, so we can see what changed.
-    $oldquiz = $DB->get_record('gnrquiz', array('id' => $quiz->instance));
+    $oldgnrquiz = $DB->get_record('gnrquiz', array('id' => $gnrquiz->instance));
 
     // We need two values from the existing DB record that are not in the form,
     // in some of the function calls below.
-    $quiz->sumgrades = $oldquiz->sumgrades;
-    $quiz->grade     = $oldquiz->grade;
+    $gnrquiz->sumgrades = $oldgnrquiz->sumgrades;
+    $gnrquiz->grade     = $oldgnrquiz->grade;
 
     // Update the database.
-    $quiz->id = $quiz->instance;
-    $DB->update_record('gnrquiz', $quiz);
+    $gnrquiz->id = $gnrquiz->instance;
+    $DB->update_record('gnrquiz', $gnrquiz);
 
     // Do the processing required after an add or an update.
-    gnrquiz_after_add_or_update($quiz);
+    gnrquiz_after_add_or_update($gnrquiz);
 
-    if ($oldquiz->grademethod != $quiz->grademethod) {
-        gnrquiz_update_all_final_grades($quiz);
-        gnrquiz_update_grades($quiz);
+    if ($oldgnrquiz->grademethod != $gnrquiz->grademethod) {
+        gnrquiz_update_all_final_grades($gnrquiz);
+        gnrquiz_update_grades($gnrquiz);
     }
 
-    $quizdateschanged = $oldquiz->timelimit   != $quiz->timelimit
-                     || $oldquiz->timeclose   != $quiz->timeclose
-                     || $oldquiz->graceperiod != $quiz->graceperiod;
-    if ($quizdateschanged) {
-        gnrquiz_update_open_attempts(array('gnrquizid' => $quiz->id));
+    $gnrquizdateschanged = $oldgnrquiz->timelimit   != $gnrquiz->timelimit
+                     || $oldgnrquiz->timeclose   != $gnrquiz->timeclose
+                     || $oldgnrquiz->graceperiod != $gnrquiz->graceperiod;
+    if ($gnrquizdateschanged) {
+        gnrquiz_update_open_attempts(array('gnrquizid' => $gnrquiz->id));
     }
 
     // Delete any previous preview attempts.
-    gnrquiz_delete_previews($quiz);
+    gnrquiz_delete_previews($gnrquiz);
 
     // Repaginate, if asked to.
-    if (!empty($quiz->repaginatenow)) {
-        gnrquiz_repaginate_questions($quiz->id, $quiz->questionsperpage);
+    if (!empty($gnrquiz->repaginatenow)) {
+        gnrquiz_repaginate_questions($gnrquiz->id, $gnrquiz->questionsperpage);
     }
 
     return true;
@@ -159,68 +159,68 @@ function gnrquiz_update_instance($quiz, $mform) {
  * this function will permanently delete the instance
  * and any data that depends on it.
  *
- * @param int $id the id of the quiz to delete.
+ * @param int $id the id of the gnrquiz to delete.
  * @return bool success or failure.
  */
 function gnrquiz_delete_instance($id) {
     global $DB;
 
-    $quiz = $DB->get_record('gnrquiz', array('id' => $id), '*', MUST_EXIST);
+    $gnrquiz = $DB->get_record('gnrquiz', array('id' => $id), '*', MUST_EXIST);
 
-    gnrquiz_delete_all_attempts($quiz);
-    gnrquiz_delete_all_overrides($quiz);
+    gnrquiz_delete_all_attempts($gnrquiz);
+    gnrquiz_delete_all_overrides($gnrquiz);
 
-    // Look for random questions that may no longer be used when this quiz is gone.
+    // Look for random questions that may no longer be used when this gnrquiz is gone.
     $sql = "SELECT q.id
               FROM {gnrquiz_slots} slot
               JOIN {question} q ON q.id = slot.questionid
-             WHERE slot.quizid = ? AND q.qtype = ?";
-    $questionids = $DB->get_fieldset_sql($sql, array($quiz->id, 'random'));
+             WHERE slot.gnrquizid = ? AND q.qtype = ?";
+    $questionids = $DB->get_fieldset_sql($sql, array($gnrquiz->id, 'random'));
 
     // We need to do this before we try and delete randoms, otherwise they would still be 'in use'.
-    $DB->delete_records('gnrquiz_slots', array('gnrquizid' => $quiz->id));
-    $DB->delete_records('gnrquiz_sections', array('gnrquizid' => $quiz->id));
+    $DB->delete_records('gnrquiz_slots', array('gnrquizid' => $gnrquiz->id));
+    $DB->delete_records('gnrquiz_sections', array('gnrquizid' => $gnrquiz->id));
 
     foreach ($questionids as $questionid) {
         question_delete_question($questionid);
     }
 
-    $DB->delete_records('gnrquiz_feedback', array('gnrquizid' => $quiz->id));
+    $DB->delete_records('gnrquiz_feedback', array('gnrquizid' => $gnrquiz->id));
 
-    gnrquiz_access_manager::delete_settings($quiz);
+    gnrquiz_access_manager::delete_settings($gnrquiz);
 
-    $events = $DB->get_records('event', array('modulename' => 'gnrquiz', 'instance' => $quiz->id));
+    $events = $DB->get_records('event', array('modulename' => 'gnrquiz', 'instance' => $gnrquiz->id));
     foreach ($events as $event) {
         $event = calendar_event::load($event);
         $event->delete();
     }
 
-    gnrquiz_grade_item_delete($quiz);
-    $DB->delete_records('gnrquiz', array('id' => $quiz->id));
+    gnrquiz_grade_item_delete($gnrquiz);
+    $DB->delete_records('gnrquiz', array('id' => $gnrquiz->id));
 
     return true;
 }
 
 /**
- * Deletes a quiz override from the database and clears any corresponding calendar events
+ * Deletes a gnrquiz override from the database and clears any corresponding calendar events
  *
- * @param object $quiz The quiz object.
+ * @param object $gnrquiz The gnrquiz object.
  * @param int $overrideid The id of the override being deleted
  * @return bool true on success
  */
-function gnrquiz_delete_override($quiz, $overrideid) {
+function gnrquiz_delete_override($gnrquiz, $overrideid) {
     global $DB;
 
-    if (!isset($quiz->cmid)) {
-        $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id, $quiz->course);
-        $quiz->cmid = $cm->id;
+    if (!isset($gnrquiz->cmid)) {
+        $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id, $gnrquiz->course);
+        $gnrquiz->cmid = $cm->id;
     }
 
     $override = $DB->get_record('gnrquiz_overrides', array('id' => $overrideid), '*', MUST_EXIST);
 
     // Delete the events.
     $events = $DB->get_records('event', array('modulename' => 'gnrquiz',
-            'instance' => $quiz->id, 'groupid' => (int)$override->groupid,
+            'instance' => $gnrquiz->id, 'groupid' => (int)$override->groupid,
             'userid' => (int)$override->userid));
     foreach ($events as $event) {
         $eventold = calendar_event::load($event);
@@ -232,18 +232,18 @@ function gnrquiz_delete_override($quiz, $overrideid) {
     // Set the common parameters for one of the events we will be triggering.
     $params = array(
         'objectid' => $override->id,
-        'context' => context_module::instance($quiz->cmid),
+        'context' => context_module::instance($gnrquiz->cmid),
         'other' => array(
-            'gnrquizid' => $override->quiz
+            'gnrquizid' => $override->gnrquiz
         )
     );
     // Determine which override deleted event to fire.
     if (!empty($override->userid)) {
         $params['relateduserid'] = $override->userid;
-        $event = \mod_quiz\event\user_override_deleted::create($params);
+        $event = \mod_gnrquiz\event\user_override_deleted::create($params);
     } else {
         $params['other']['groupid'] = $override->groupid;
-        $event = \mod_quiz\event\group_override_deleted::create($params);
+        $event = \mod_gnrquiz\event\group_override_deleted::create($params);
     }
 
     // Trigger the override deleted event.
@@ -254,39 +254,39 @@ function gnrquiz_delete_override($quiz, $overrideid) {
 }
 
 /**
- * Deletes all quiz overrides from the database and clears any corresponding calendar events
+ * Deletes all gnrquiz overrides from the database and clears any corresponding calendar events
  *
- * @param object $quiz The quiz object.
+ * @param object $gnrquiz The gnrquiz object.
  */
-function gnrquiz_delete_all_overrides($quiz) {
+function gnrquiz_delete_all_overrides($gnrquiz) {
     global $DB;
 
-    $overrides = $DB->get_records('gnrquiz_overrides', array('gnrquiz' => $quiz->id), 'id');
+    $overrides = $DB->get_records('gnrquiz_overrides', array('gnrquiz' => $gnrquiz->id), 'id');
     foreach ($overrides as $override) {
-        gnrquiz_delete_override($quiz, $override->id);
+        gnrquiz_delete_override($gnrquiz, $override->id);
     }
 }
 
 /**
- * Updates a quiz object with override information for a user.
+ * Updates a gnrquiz object with override information for a user.
  *
- * Algorithm:  For each quiz setting, if there is a matching user-specific override,
+ * Algorithm:  For each gnrquiz setting, if there is a matching user-specific override,
  *   then use that otherwise, if there are group-specific overrides, return the most
- *   lenient combination of them.  If neither applies, leave the quiz setting unchanged.
+ *   lenient combination of them.  If neither applies, leave the gnrquiz setting unchanged.
  *
  *   Special case: if there is more than one password that applies to the user, then
- *   quiz->extrapasswords will contain an array of strings giving the remaining
+ *   gnrquiz->extrapasswords will contain an array of strings giving the remaining
  *   passwords.
  *
- * @param object $quiz The quiz object.
+ * @param object $gnrquiz The gnrquiz object.
  * @param int $userid The userid.
- * @return object $quiz The updated quiz object.
+ * @return object $gnrquiz The updated gnrquiz object.
  */
-function gnrquiz_update_effective_access($quiz, $userid) {
+function gnrquiz_update_effective_access($gnrquiz, $userid) {
     global $DB;
 
     // Check for user override.
-    $override = $DB->get_record('gnrquiz_overrides', array('gnrquiz' => $quiz->id, 'userid' => $userid));
+    $override = $DB->get_record('gnrquiz_overrides', array('gnrquiz' => $gnrquiz->id, 'userid' => $userid));
 
     if (!$override) {
         $override = new stdClass();
@@ -298,14 +298,14 @@ function gnrquiz_update_effective_access($quiz, $userid) {
     }
 
     // Check for group overrides.
-    $groupings = groups_get_user_groups($quiz->course, $userid);
+    $groupings = groups_get_user_groups($gnrquiz->course, $userid);
 
     if (!empty($groupings[0])) {
         // Select all overrides that apply to the User's groups.
         list($extra, $params) = $DB->get_in_or_equal(array_values($groupings[0]));
         $sql = "SELECT * FROM {gnrquiz_overrides}
-                WHERE groupid $extra AND quiz = ?";
-        $params[] = $quiz->id;
+                WHERE groupid $extra AND gnrquiz = ?";
+        $params[] = $gnrquiz->id;
         $records = $DB->get_records_sql($sql, $params);
 
         // Combine the overrides.
@@ -366,42 +366,42 @@ function gnrquiz_update_effective_access($quiz, $userid) {
 
     }
 
-    // Merge with quiz defaults.
+    // Merge with gnrquiz defaults.
     $keys = array('timeopen', 'timeclose', 'timelimit', 'attempts', 'password', 'extrapasswords');
     foreach ($keys as $key) {
         if (isset($override->{$key})) {
-            $quiz->{$key} = $override->{$key};
+            $gnrquiz->{$key} = $override->{$key};
         }
     }
 
-    return $quiz;
+    return $gnrquiz;
 }
 
 /**
- * Delete all the attempts belonging to a quiz.
+ * Delete all the attempts belonging to a gnrquiz.
  *
- * @param object $quiz The quiz object.
+ * @param object $gnrquiz The gnrquiz object.
  */
-function gnrquiz_delete_all_attempts($quiz) {
+function gnrquiz_delete_all_attempts($gnrquiz) {
     global $CFG, $DB;
     require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
-    question_engine::delete_questions_usage_by_activities(new qubaids_for_quiz($quiz->id));
-    $DB->delete_records('gnrquiz_attempts', array('gnrquiz' => $quiz->id));
-    $DB->delete_records('gnrquiz_grades', array('gnrquiz' => $quiz->id));
+    question_engine::delete_questions_usage_by_activities(new qubaids_for_gnrquiz($gnrquiz->id));
+    $DB->delete_records('gnrquiz_attempts', array('gnrquiz' => $gnrquiz->id));
+    $DB->delete_records('gnrquiz_grades', array('gnrquiz' => $gnrquiz->id));
 }
 
 /**
- * Get the best current grade for a particular user in a quiz.
+ * Get the best current grade for a particular user in a gnrquiz.
  *
- * @param object $quiz the quiz settings.
+ * @param object $gnrquiz the gnrquiz settings.
  * @param int $userid the id of the user.
- * @return float the user's current grade for this quiz, or null if this user does
- * not have a grade on this quiz.
+ * @return float the user's current grade for this gnrquiz, or null if this user does
+ * not have a grade on this gnrquiz.
  */
-function gnrquiz_get_best_grade($quiz, $userid) {
+function gnrquiz_get_best_grade($gnrquiz, $userid) {
     global $DB;
     $grade = $DB->get_field('gnrquiz_grades', 'grade',
-            array('gnrquiz' => $quiz->id, 'userid' => $userid));
+            array('gnrquiz' => $gnrquiz->id, 'userid' => $userid));
 
     // Need to detect errors/no result, without catching 0 grades.
     if ($grade === false) {
@@ -412,24 +412,24 @@ function gnrquiz_get_best_grade($quiz, $userid) {
 }
 
 /**
- * Is this a graded quiz? If this method returns true, you can assume that
- * $quiz->grade and $quiz->sumgrades are non-zero (for example, if you want to
+ * Is this a graded gnrquiz? If this method returns true, you can assume that
+ * $gnrquiz->grade and $gnrquiz->sumgrades are non-zero (for example, if you want to
  * divide by them).
  *
- * @param object $quiz a row from the quiz table.
- * @return bool whether this is a graded quiz.
+ * @param object $gnrquiz a row from the gnrquiz table.
+ * @return bool whether this is a graded gnrquiz.
  */
-function gnrquiz_has_grades($quiz) {
-    return $quiz->grade >= 0.000005 && $quiz->sumgrades >= 0.000005;
+function gnrquiz_has_grades($gnrquiz) {
+    return $gnrquiz->grade >= 0.000005 && $gnrquiz->sumgrades >= 0.000005;
 }
 
 /**
- * Does this quiz allow multiple tries?
+ * Does this gnrquiz allow multiple tries?
  *
  * @return bool
  */
-function gnrquiz_allows_multiple_tries($quiz) {
-    $bt = question_engine::get_behaviour_type($quiz->preferredbehaviour);
+function gnrquiz_allows_multiple_tries($gnrquiz) {
+    $bt = question_engine::get_behaviour_type($gnrquiz->preferredbehaviour);
     return $bt->allows_multiple_submitted_responses();
 }
 
@@ -443,13 +443,13 @@ function gnrquiz_allows_multiple_tries($quiz) {
  * @param object $course
  * @param object $user
  * @param object $mod
- * @param object $quiz
+ * @param object $gnrquiz
  * @return object|null
  */
-function gnrquiz_user_outline($course, $user, $mod, $quiz) {
+function gnrquiz_user_outline($course, $user, $mod, $gnrquiz) {
     global $DB, $CFG;
     require_once($CFG->libdir . '/gradelib.php');
-    $grades = grade_get_grades($course->id, 'mod', 'gnrquiz', $quiz->id, $user->id);
+    $grades = grade_get_grades($course->id, 'mod', 'gnrquiz', $gnrquiz->id, $user->id);
 
     if (empty($grades->items[0]->grades)) {
         return null;
@@ -486,15 +486,15 @@ function gnrquiz_user_outline($course, $user, $mod, $quiz) {
  * @param object $course
  * @param object $user
  * @param object $mod
- * @param object $quiz
+ * @param object $gnrquiz
  * @return bool
  */
-function gnrquiz_user_complete($course, $user, $mod, $quiz) {
+function gnrquiz_user_complete($course, $user, $mod, $gnrquiz) {
     global $DB, $CFG, $OUTPUT;
     require_once($CFG->libdir . '/gradelib.php');
     require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
-    $grades = grade_get_grades($course->id, 'mod', 'gnrquiz', $quiz->id, $user->id);
+    $grades = grade_get_grades($course->id, 'mod', 'gnrquiz', $gnrquiz->id, $user->id);
     if (!empty($grades->items[0]->grades)) {
         $grade = reset($grades->items[0]->grades);
         // If the user can't see hidden grades, don't return that information.
@@ -513,7 +513,7 @@ function gnrquiz_user_complete($course, $user, $mod, $quiz) {
     }
 
     if ($attempts = $DB->get_records('gnrquiz_attempts',
-            array('userid' => $user->id, 'gnrquiz' => $quiz->id), 'attempt')) {
+            array('userid' => $user->id, 'gnrquiz' => $gnrquiz->id), 'attempt')) {
         foreach ($attempts as $attempt) {
             echo get_string('attempt', 'gnrquiz', $attempt->attempt) . ': ';
             if ($attempt->state != gnrquiz_attempt::FINISHED) {
@@ -528,7 +528,7 @@ function gnrquiz_user_complete($course, $user, $mod, $quiz) {
                     }
                 }
                 if (!$gitem->hidden || has_capability('moodle/grade:viewhidden', context_course::instance($course->id))) {
-                    echo gnrquiz_format_grade($quiz, $attempt->sumgrades) . '/' . gnrquiz_format_grade($quiz, $quiz->sumgrades);
+                    echo gnrquiz_format_grade($gnrquiz, $attempt->sumgrades) . '/' . gnrquiz_format_grade($gnrquiz, $gnrquiz->sumgrades);
                 } else {
                     echo get_string('hidden', 'grades');
                 }
@@ -554,13 +554,13 @@ function gnrquiz_cron() {
     $timenow = time();
     $overduehander = new mod_gnrquiz_overdue_attempt_updater();
 
-    $processto = $timenow - get_config('gnrquiz', 'graceperiodmin');
+    $processto = $timenow - get_config('quiz', 'graceperiodmin');
 
-    mtrace('  Looking for quiz overdue quiz attempts...');
+    mtrace('  Looking for gnrquiz overdue gnrquiz attempts...');
 
-    list($count, $quizcount) = $overduehander->update_overdue_attempts($timenow, $processto);
+    list($count, $gnrquizcount) = $overduehander->update_overdue_attempts($timenow, $processto);
 
-    mtrace('  Considered ' . $count . ' attempts in ' . $quizcount . ' quizzes.');
+    mtrace('  Considered ' . $count . ' attempts in ' . $gnrquizcount . ' gnrquizzes.');
 
     // Run cron for our sub-plugin types.
     cron_execute_plugin_type('gnrquiz', 'gnrquiz reports');
@@ -570,14 +570,14 @@ function gnrquiz_cron() {
 }
 
 /**
- * @param int|array $quizids A quiz ID, or an array of quiz IDs.
+ * @param int|array $gnrquizids A gnrquiz ID, or an array of gnrquiz IDs.
  * @param int $userid the userid.
  * @param string $status 'all', 'finished' or 'unfinished' to control
  * @param bool $includepreviews
- * @return an array of all the user's attempts at this quiz. Returns an empty
+ * @return an array of all the user's attempts at this gnrquiz. Returns an empty
  *      array if there are none.
  */
-function gnrquiz_get_user_attempts($quizids, $userid, $status = 'finished', $includepreviews = false) {
+function gnrquiz_get_user_attempts($gnrquizids, $userid, $status = 'finished', $includepreviews = false) {
     global $DB, $CFG;
     // TODO MDL-33071 it is very annoying to have to included all of locallib.php
     // just to get the gnrquiz_attempt::FINISHED constants, but I will try to sort
@@ -604,8 +604,8 @@ function gnrquiz_get_user_attempts($quizids, $userid, $status = 'finished', $inc
             break;
     }
 
-    $quizids = (array) $quizids;
-    list($insql, $inparams) = $DB->get_in_or_equal($quizids, SQL_PARAMS_NAMED);
+    $gnrquizids = (array) $gnrquizids;
+    list($insql, $inparams) = $DB->get_in_or_equal($gnrquizids, SQL_PARAMS_NAMED);
     $params += $inparams;
     $params['userid'] = $userid;
 
@@ -615,22 +615,22 @@ function gnrquiz_get_user_attempts($quizids, $userid, $status = 'finished', $inc
     }
 
     return $DB->get_records_select('gnrquiz_attempts',
-            "quiz $insql AND userid = :userid" . $previewclause . $statuscondition,
+            "gnrquiz $insql AND userid = :userid" . $previewclause . $statuscondition,
             $params, 'gnrquiz, attempt ASC');
 }
 
 /**
  * Return grade for given user or all users.
  *
- * @param int $quizid id of quiz
+ * @param int $gnrquizid id of gnrquiz
  * @param int $userid optional user id, 0 means all users
  * @return array array of grades, false if none. These are raw grades. They should
  * be processed with gnrquiz_format_grade for display.
  */
-function gnrquiz_get_user_grades($quiz, $userid = 0) {
+function gnrquiz_get_user_grades($gnrquiz, $userid = 0) {
     global $CFG, $DB;
 
-    $params = array($quiz->id);
+    $params = array($gnrquiz->id);
     $usertest = '';
     if ($userid) {
         $params[] = $userid;
@@ -646,9 +646,9 @@ function gnrquiz_get_user_grades($quiz, $userid = 0) {
 
             FROM {user} u
             JOIN {gnrquiz_grades} qg ON u.id = qg.userid
-            JOIN {gnrquiz_attempts} qa ON qa.quiz = qg.quiz AND qa.userid = u.id
+            JOIN {gnrquiz_attempts} qa ON qa.gnrquiz = qg.gnrquiz AND qa.userid = u.id
 
-            WHERE qg.quiz = ?
+            WHERE qg.gnrquiz = ?
             $usertest
             GROUP BY u.id, qg.grade, qg.timemodified", $params);
 }
@@ -656,97 +656,97 @@ function gnrquiz_get_user_grades($quiz, $userid = 0) {
 /**
  * Round a grade to to the correct number of decimal places, and format it for display.
  *
- * @param object $quiz The quiz table row, only $quiz->decimalpoints is used.
+ * @param object $gnrquiz The gnrquiz table row, only $gnrquiz->decimalpoints is used.
  * @param float $grade The grade to round.
  * @return float
  */
-function gnrquiz_format_grade($quiz, $grade) {
+function gnrquiz_format_grade($gnrquiz, $grade) {
     if (is_null($grade)) {
         return get_string('notyetgraded', 'gnrquiz');
     }
-    return format_float($grade, $quiz->decimalpoints);
+    return format_float($grade, $gnrquiz->decimalpoints);
 }
 
 /**
  * Determine the correct number of decimal places required to format a grade.
  *
- * @param object $quiz The quiz table row, only $quiz->decimalpoints is used.
+ * @param object $gnrquiz The gnrquiz table row, only $gnrquiz->decimalpoints is used.
  * @return integer
  */
-function gnrquiz_get_grade_format($quiz) {
-    if (empty($quiz->questiondecimalpoints)) {
-        $quiz->questiondecimalpoints = -1;
+function gnrquiz_get_grade_format($gnrquiz) {
+    if (empty($gnrquiz->questiondecimalpoints)) {
+        $gnrquiz->questiondecimalpoints = -1;
     }
 
-    if ($quiz->questiondecimalpoints == -1) {
-        return $quiz->decimalpoints;
+    if ($gnrquiz->questiondecimalpoints == -1) {
+        return $gnrquiz->decimalpoints;
     }
 
-    return $quiz->questiondecimalpoints;
+    return $gnrquiz->questiondecimalpoints;
 }
 
 /**
  * Round a grade to the correct number of decimal places, and format it for display.
  *
- * @param object $quiz The quiz table row, only $quiz->decimalpoints is used.
+ * @param object $gnrquiz The gnrquiz table row, only $gnrquiz->decimalpoints is used.
  * @param float $grade The grade to round.
  * @return float
  */
-function gnrquiz_format_question_grade($quiz, $grade) {
-    return format_float($grade, gnrquiz_get_grade_format($quiz));
+function gnrquiz_format_question_grade($gnrquiz, $grade) {
+    return format_float($grade, gnrquiz_get_grade_format($gnrquiz));
 }
 
 /**
  * Update grades in central gradebook
  *
  * @category grade
- * @param object $quiz the quiz settings.
+ * @param object $gnrquiz the gnrquiz settings.
  * @param int $userid specific user only, 0 means all users.
  * @param bool $nullifnone If a single user is specified and $nullifnone is true a grade item with a null rawgrade will be inserted
  */
-function gnrquiz_update_grades($quiz, $userid = 0, $nullifnone = true) {
+function gnrquiz_update_grades($gnrquiz, $userid = 0, $nullifnone = true) {
     global $CFG, $DB;
     require_once($CFG->libdir . '/gradelib.php');
 
-    if ($quiz->grade == 0) {
-        gnrquiz_grade_item_update($quiz);
+    if ($gnrquiz->grade == 0) {
+        gnrquiz_grade_item_update($gnrquiz);
 
-    } else if ($grades = gnrquiz_get_user_grades($quiz, $userid)) {
-        gnrquiz_grade_item_update($quiz, $grades);
+    } else if ($grades = gnrquiz_get_user_grades($gnrquiz, $userid)) {
+        gnrquiz_grade_item_update($gnrquiz, $grades);
 
     } else if ($userid && $nullifnone) {
         $grade = new stdClass();
         $grade->userid = $userid;
         $grade->rawgrade = null;
-        gnrquiz_grade_item_update($quiz, $grade);
+        gnrquiz_grade_item_update($gnrquiz, $grade);
 
     } else {
-        gnrquiz_grade_item_update($quiz);
+        gnrquiz_grade_item_update($gnrquiz);
     }
 }
 
 /**
- * Create or update the grade item for given quiz
+ * Create or update the grade item for given gnrquiz
  *
  * @category grade
- * @param object $quiz object with extra cmidnumber
+ * @param object $gnrquiz object with extra cmidnumber
  * @param mixed $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function gnrquiz_grade_item_update($quiz, $grades = null) {
+function gnrquiz_grade_item_update($gnrquiz, $grades = null) {
     global $CFG, $OUTPUT;
     require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
     require_once($CFG->libdir . '/gradelib.php');
 
-    if (array_key_exists('cmidnumber', $quiz)) { // May not be always present.
-        $params = array('itemname' => $quiz->name, 'idnumber' => $quiz->cmidnumber);
+    if (array_key_exists('cmidnumber', $gnrquiz)) { // May not be always present.
+        $params = array('itemname' => $gnrquiz->name, 'idnumber' => $gnrquiz->cmidnumber);
     } else {
-        $params = array('itemname' => $quiz->name);
+        $params = array('itemname' => $gnrquiz->name);
     }
 
-    if ($quiz->grade > 0) {
+    if ($gnrquiz->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
-        $params['grademax']  = $quiz->grade;
+        $params['grademax']  = $gnrquiz->grade;
         $params['grademin']  = 0;
 
     } else {
@@ -754,15 +754,15 @@ function gnrquiz_grade_item_update($quiz, $grades = null) {
     }
 
     // What this is trying to do:
-    // 1. If the quiz is set to not show grades while the quiz is still open,
-    //    and is set to show grades after the quiz is closed, then create the
-    //    grade_item with a show-after date that is the quiz close date.
-    // 2. If the quiz is set to not show grades at either of those times,
+    // 1. If the gnrquiz is set to not show grades while the gnrquiz is still open,
+    //    and is set to show grades after the gnrquiz is closed, then create the
+    //    grade_item with a show-after date that is the gnrquiz close date.
+    // 2. If the gnrquiz is set to not show grades at either of those times,
     //    create the grade_item as hidden.
-    // 3. If the quiz is set to show grades, create the grade_item visible.
-    $openreviewoptions = mod_gnrquiz_display_options::make_from_quiz($quiz,
+    // 3. If the gnrquiz is set to show grades, create the grade_item visible.
+    $openreviewoptions = mod_gnrquiz_display_options::make_from_gnrquiz($gnrquiz,
             mod_gnrquiz_display_options::LATER_WHILE_OPEN);
-    $closedreviewoptions = mod_gnrquiz_display_options::make_from_quiz($quiz,
+    $closedreviewoptions = mod_gnrquiz_display_options::make_from_gnrquiz($gnrquiz,
             mod_gnrquiz_display_options::AFTER_CLOSE);
     if ($openreviewoptions->marks < question_display_options::MARK_AND_MAX &&
             $closedreviewoptions->marks < question_display_options::MARK_AND_MAX) {
@@ -770,8 +770,8 @@ function gnrquiz_grade_item_update($quiz, $grades = null) {
 
     } else if ($openreviewoptions->marks < question_display_options::MARK_AND_MAX &&
             $closedreviewoptions->marks >= question_display_options::MARK_AND_MAX) {
-        if ($quiz->timeclose) {
-            $params['hidden'] = $quiz->timeclose;
+        if ($gnrquiz->timeclose) {
+            $params['hidden'] = $gnrquiz->timeclose;
         } else {
             $params['hidden'] = 1;
         }
@@ -785,13 +785,13 @@ function gnrquiz_grade_item_update($quiz, $grades = null) {
     }
 
     if (!$params['hidden']) {
-        // If the grade item is not hidden by the quiz logic, then we need to
-        // hide it if the quiz is hidden from students.
-        if (property_exists($quiz, 'visible')) {
-            // Saving the quiz form, and cm not yet updated in the database.
-            $params['hidden'] = !$quiz->visible;
+        // If the grade item is not hidden by the gnrquiz logic, then we need to
+        // hide it if the gnrquiz is hidden from students.
+        if (property_exists($gnrquiz, 'visible')) {
+            // Saving the gnrquiz form, and cm not yet updated in the database.
+            $params['hidden'] = !$gnrquiz->visible;
         } else {
-            $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id);
+            $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id);
             $params['hidden'] = !$cm->visible;
         }
     }
@@ -801,7 +801,7 @@ function gnrquiz_grade_item_update($quiz, $grades = null) {
         $grades = null;
     }
 
-    $gradebook_grades = grade_get_grades($quiz->course, 'mod', 'gnrquiz', $quiz->id);
+    $gradebook_grades = grade_get_grades($gnrquiz->course, 'mod', 'gnrquiz', $gnrquiz->id);
     if (!empty($gradebook_grades->items)) {
         $grade_item = $gradebook_grades->items[0];
         if ($grade_item->locked) {
@@ -810,7 +810,7 @@ function gnrquiz_grade_item_update($quiz, $grades = null) {
             if (!$confirm_regrade) {
                 if (!AJAX_SCRIPT) {
                     $message = get_string('gradeitemislocked', 'grades');
-                    $back_link = $CFG->wwwroot . '/mod/gnrquiz/report.php?q=' . $quiz->id .
+                    $back_link = $CFG->wwwroot . '/mod/gnrquiz/report.php?q=' . $gnrquiz->id .
                             '&amp;mode=overview';
                     $regrade_link = qualified_me() . '&amp;confirm_regrade=1';
                     echo $OUTPUT->box_start('generalbox', 'notice');
@@ -826,29 +826,29 @@ function gnrquiz_grade_item_update($quiz, $grades = null) {
         }
     }
 
-    return grade_update('mod/gnrquiz', $quiz->course, 'mod', 'gnrquiz', $quiz->id, 0, $grades, $params);
+    return grade_update('mod/gnrquiz', $gnrquiz->course, 'mod', 'gnrquiz', $gnrquiz->id, 0, $grades, $params);
 }
 
 /**
- * Delete grade item for given quiz
+ * Delete grade item for given gnrquiz
  *
  * @category grade
- * @param object $quiz object
- * @return object quiz
+ * @param object $gnrquiz object
+ * @return object gnrquiz
  */
-function gnrquiz_grade_item_delete($quiz) {
+function gnrquiz_grade_item_delete($gnrquiz) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/gnrquiz', $quiz->course, 'mod', 'gnrquiz', $quiz->id, 0,
+    return grade_update('mod/gnrquiz', $gnrquiz->course, 'mod', 'gnrquiz', $gnrquiz->id, 0,
             null, array('deleted' => 1));
 }
 
 /**
  * This standard function will check all instances of this module
  * and make sure there are up-to-date events created for each of them.
- * If courseid = 0, then every quiz event in the site is checked, else
- * only quiz events belonging to the course specified are checked.
+ * If courseid = 0, then every gnrquiz event in the site is checked, else
+ * only gnrquiz events belonging to the course specified are checked.
  * This function is used, in its new format, by restore_refresh_events()
  *
  * @param int $courseid
@@ -858,24 +858,24 @@ function gnrquiz_refresh_events($courseid = 0) {
     global $DB;
 
     if ($courseid == 0) {
-        if (!$quizzes = $DB->get_records('gnrquiz')) {
+        if (!$gnrquizzes = $DB->get_records('gnrquiz')) {
             return true;
         }
     } else {
-        if (!$quizzes = $DB->get_records('gnrquiz', array('course' => $courseid))) {
+        if (!$gnrquizzes = $DB->get_records('gnrquiz', array('course' => $courseid))) {
             return true;
         }
     }
 
-    foreach ($quizzes as $quiz) {
-        gnrquiz_update_events($quiz);
+    foreach ($gnrquizzes as $gnrquiz) {
+        gnrquiz_update_events($gnrquiz);
     }
 
     return true;
 }
 
 /**
- * Returns all quiz graded users since a given time for specified quiz
+ * Returns all gnrquiz graded users since a given time for specified gnrquiz
  */
 function gnrquiz_get_recent_mod_activity(&$activities, &$index, $timestart,
         $courseid, $cmid, $userid = 0, $groupid = 0) {
@@ -886,7 +886,7 @@ function gnrquiz_get_recent_mod_activity(&$activities, &$index, $timestart,
     $modinfo = get_fast_modinfo($course);
 
     $cm = $modinfo->cms[$cmid];
-    $quiz = $DB->get_record('gnrquiz', array('id' => $cm->instance));
+    $gnrquiz = $DB->get_record('gnrquiz', array('id' => $cm->instance));
 
     if ($userid) {
         $userselect = "AND u.id = :userid";
@@ -905,7 +905,7 @@ function gnrquiz_get_recent_mod_activity(&$activities, &$index, $timestart,
     }
 
     $params['timestart'] = $timestart;
-    $params['gnrquizid'] = $quiz->id;
+    $params['gnrquizid'] = $gnrquiz->id;
 
     $ufields = user_picture::fields('u', null, 'useridagain');
     if (!$attempts = $DB->get_records_sql("
@@ -915,7 +915,7 @@ function gnrquiz_get_recent_mod_activity(&$activities, &$index, $timestart,
                      JOIN {user} u ON u.id = qa.userid
                      $groupjoin
                WHERE qa.timefinish > :timestart
-                 AND qa.quiz = :quizid
+                 AND qa.gnrquiz = :gnrquizid
                  AND qa.preview = 0
                      $userselect
                      $groupselect
@@ -948,7 +948,7 @@ function gnrquiz_get_recent_mod_activity(&$activities, &$index, $timestart,
             }
         }
 
-        $options = gnrquiz_get_review_options($quiz, $attempt, $context);
+        $options = gnrquiz_get_review_options($gnrquiz, $attempt, $context);
 
         $tmpactivity = new stdClass();
 
@@ -961,9 +961,9 @@ function gnrquiz_get_recent_mod_activity(&$activities, &$index, $timestart,
         $tmpactivity->content = new stdClass();
         $tmpactivity->content->attemptid = $attempt->id;
         $tmpactivity->content->attempt   = $attempt->attempt;
-        if (gnrquiz_has_grades($quiz) && $options->marks >= question_display_options::MARK_AND_MAX) {
-            $tmpactivity->content->sumgrades = gnrquiz_format_grade($quiz, $attempt->sumgrades);
-            $tmpactivity->content->maxgrade  = gnrquiz_format_grade($quiz, $quiz->sumgrades);
+        if (gnrquiz_has_grades($gnrquiz) && $options->marks >= question_display_options::MARK_AND_MAX) {
+            $tmpactivity->content->sumgrades = gnrquiz_format_grade($gnrquiz, $attempt->sumgrades);
+            $tmpactivity->content->maxgrade  = gnrquiz_format_grade($gnrquiz, $gnrquiz->sumgrades);
         } else {
             $tmpactivity->content->sumgrades = null;
             $tmpactivity->content->maxgrade  = null;
@@ -1016,97 +1016,97 @@ function gnrquiz_print_recent_mod_activity($activity, $courseid, $detail, $modna
 }
 
 /**
- * Pre-process the quiz options form data, making any necessary adjustments.
+ * Pre-process the gnrquiz options form data, making any necessary adjustments.
  * Called by add/update instance in this file.
  *
- * @param object $quiz The variables set on the form.
+ * @param object $gnrquiz The variables set on the form.
  */
-function gnrquiz_process_options($quiz) {
+function gnrquiz_process_options($gnrquiz) {
     global $CFG;
     require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
     require_once($CFG->libdir . '/questionlib.php');
 
-    $quiz->timemodified = time();
+    $gnrquiz->timemodified = time();
 
     // Quiz name.
-    if (!empty($quiz->name)) {
-        $quiz->name = trim($quiz->name);
+    if (!empty($gnrquiz->name)) {
+        $gnrquiz->name = trim($gnrquiz->name);
     }
 
     // Password field - different in form to stop browsers that remember passwords
     // getting confused.
-    $quiz->password = $quiz->gnrquizpassword;
-    unset($quiz->gnrquizpassword);
+    $gnrquiz->password = $gnrquiz->gnrquizpassword;
+    unset($gnrquiz->gnrquizpassword);
 
     // Quiz feedback.
-    if (isset($quiz->feedbacktext)) {
+    if (isset($gnrquiz->feedbacktext)) {
         // Clean up the boundary text.
-        for ($i = 0; $i < count($quiz->feedbacktext); $i += 1) {
-            if (empty($quiz->feedbacktext[$i]['text'])) {
-                $quiz->feedbacktext[$i]['text'] = '';
+        for ($i = 0; $i < count($gnrquiz->feedbacktext); $i += 1) {
+            if (empty($gnrquiz->feedbacktext[$i]['text'])) {
+                $gnrquiz->feedbacktext[$i]['text'] = '';
             } else {
-                $quiz->feedbacktext[$i]['text'] = trim($quiz->feedbacktext[$i]['text']);
+                $gnrquiz->feedbacktext[$i]['text'] = trim($gnrquiz->feedbacktext[$i]['text']);
             }
         }
 
         // Check the boundary value is a number or a percentage, and in range.
         $i = 0;
-        while (!empty($quiz->feedbackboundaries[$i])) {
-            $boundary = trim($quiz->feedbackboundaries[$i]);
+        while (!empty($gnrquiz->feedbackboundaries[$i])) {
+            $boundary = trim($gnrquiz->feedbackboundaries[$i]);
             if (!is_numeric($boundary)) {
                 if (strlen($boundary) > 0 && $boundary[strlen($boundary) - 1] == '%') {
                     $boundary = trim(substr($boundary, 0, -1));
                     if (is_numeric($boundary)) {
-                        $boundary = $boundary * $quiz->grade / 100.0;
+                        $boundary = $boundary * $gnrquiz->grade / 100.0;
                     } else {
                         return get_string('feedbackerrorboundaryformat', 'gnrquiz', $i + 1);
                     }
                 }
             }
-            if ($boundary <= 0 || $boundary >= $quiz->grade) {
+            if ($boundary <= 0 || $boundary >= $gnrquiz->grade) {
                 return get_string('feedbackerrorboundaryoutofrange', 'gnrquiz', $i + 1);
             }
-            if ($i > 0 && $boundary >= $quiz->feedbackboundaries[$i - 1]) {
+            if ($i > 0 && $boundary >= $gnrquiz->feedbackboundaries[$i - 1]) {
                 return get_string('feedbackerrororder', 'gnrquiz', $i + 1);
             }
-            $quiz->feedbackboundaries[$i] = $boundary;
+            $gnrquiz->feedbackboundaries[$i] = $boundary;
             $i += 1;
         }
         $numboundaries = $i;
 
         // Check there is nothing in the remaining unused fields.
-        if (!empty($quiz->feedbackboundaries)) {
-            for ($i = $numboundaries; $i < count($quiz->feedbackboundaries); $i += 1) {
-                if (!empty($quiz->feedbackboundaries[$i]) &&
-                        trim($quiz->feedbackboundaries[$i]) != '') {
+        if (!empty($gnrquiz->feedbackboundaries)) {
+            for ($i = $numboundaries; $i < count($gnrquiz->feedbackboundaries); $i += 1) {
+                if (!empty($gnrquiz->feedbackboundaries[$i]) &&
+                        trim($gnrquiz->feedbackboundaries[$i]) != '') {
                     return get_string('feedbackerrorjunkinboundary', 'gnrquiz', $i + 1);
                 }
             }
         }
-        for ($i = $numboundaries + 1; $i < count($quiz->feedbacktext); $i += 1) {
-            if (!empty($quiz->feedbacktext[$i]['text']) &&
-                    trim($quiz->feedbacktext[$i]['text']) != '') {
+        for ($i = $numboundaries + 1; $i < count($gnrquiz->feedbacktext); $i += 1) {
+            if (!empty($gnrquiz->feedbacktext[$i]['text']) &&
+                    trim($gnrquiz->feedbacktext[$i]['text']) != '') {
                 return get_string('feedbackerrorjunkinfeedback', 'gnrquiz', $i + 1);
             }
         }
-        // Needs to be bigger than $quiz->grade because of '<' test in gnrquiz_feedback_for_grade().
-        $quiz->feedbackboundaries[-1] = $quiz->grade + 1;
-        $quiz->feedbackboundaries[$numboundaries] = 0;
-        $quiz->feedbackboundarycount = $numboundaries;
+        // Needs to be bigger than $gnrquiz->grade because of '<' test in gnrquiz_feedback_for_grade().
+        $gnrquiz->feedbackboundaries[-1] = $gnrquiz->grade + 1;
+        $gnrquiz->feedbackboundaries[$numboundaries] = 0;
+        $gnrquiz->feedbackboundarycount = $numboundaries;
     } else {
-        $quiz->feedbackboundarycount = -1;
+        $gnrquiz->feedbackboundarycount = -1;
     }
 
     // Combing the individual settings into the review columns.
-    $quiz->reviewattempt = gnrquiz_review_option_form_to_db($quiz, 'attempt');
-    $quiz->reviewcorrectness = gnrquiz_review_option_form_to_db($quiz, 'correctness');
-    $quiz->reviewmarks = gnrquiz_review_option_form_to_db($quiz, 'marks');
-    $quiz->reviewspecificfeedback = gnrquiz_review_option_form_to_db($quiz, 'specificfeedback');
-    $quiz->reviewgeneralfeedback = gnrquiz_review_option_form_to_db($quiz, 'generalfeedback');
-    $quiz->reviewrightanswer = gnrquiz_review_option_form_to_db($quiz, 'rightanswer');
-    $quiz->reviewoverallfeedback = gnrquiz_review_option_form_to_db($quiz, 'overallfeedback');
-    $quiz->reviewattempt |= mod_gnrquiz_display_options::DURING;
-    $quiz->reviewoverallfeedback &= ~mod_gnrquiz_display_options::DURING;
+    $gnrquiz->reviewattempt = gnrquiz_review_option_form_to_db($gnrquiz, 'attempt');
+    $gnrquiz->reviewcorrectness = gnrquiz_review_option_form_to_db($gnrquiz, 'correctness');
+    $gnrquiz->reviewmarks = gnrquiz_review_option_form_to_db($gnrquiz, 'marks');
+    $gnrquiz->reviewspecificfeedback = gnrquiz_review_option_form_to_db($gnrquiz, 'specificfeedback');
+    $gnrquiz->reviewgeneralfeedback = gnrquiz_review_option_form_to_db($gnrquiz, 'generalfeedback');
+    $gnrquiz->reviewrightanswer = gnrquiz_review_option_form_to_db($gnrquiz, 'rightanswer');
+    $gnrquiz->reviewoverallfeedback = gnrquiz_review_option_form_to_db($gnrquiz, 'overallfeedback');
+    $gnrquiz->reviewattempt |= mod_gnrquiz_display_options::DURING;
+    $gnrquiz->reviewoverallfeedback &= ~mod_gnrquiz_display_options::DURING;
 }
 
 /**
@@ -1138,60 +1138,60 @@ function gnrquiz_review_option_form_to_db($fromform, $field) {
  * This function is called at the end of gnrquiz_add_instance
  * and gnrquiz_update_instance, to do the common processing.
  *
- * @param object $quiz the quiz object.
+ * @param object $gnrquiz the gnrquiz object.
  */
-function gnrquiz_after_add_or_update($quiz) {
+function gnrquiz_after_add_or_update($gnrquiz) {
     global $DB;
-    $cmid = $quiz->coursemodule;
+    $cmid = $gnrquiz->coursemodule;
 
     // We need to use context now, so we need to make sure all needed info is already in db.
-    $DB->set_field('course_modules', 'instance', $quiz->id, array('id'=>$cmid));
+    $DB->set_field('course_modules', 'instance', $gnrquiz->id, array('id'=>$cmid));
     $context = context_module::instance($cmid);
 
     // Save the feedback.
-    $DB->delete_records('gnrquiz_feedback', array('gnrquizid' => $quiz->id));
+    $DB->delete_records('gnrquiz_feedback', array('gnrquizid' => $gnrquiz->id));
 
-    for ($i = 0; $i <= $quiz->feedbackboundarycount; $i++) {
+    for ($i = 0; $i <= $gnrquiz->feedbackboundarycount; $i++) {
         $feedback = new stdClass();
-        $feedback->quizid = $quiz->id;
-        $feedback->feedbacktext = $quiz->feedbacktext[$i]['text'];
-        $feedback->feedbacktextformat = $quiz->feedbacktext[$i]['format'];
-        $feedback->mingrade = $quiz->feedbackboundaries[$i];
-        $feedback->maxgrade = $quiz->feedbackboundaries[$i - 1];
+        $feedback->gnrquizid = $gnrquiz->id;
+        $feedback->feedbacktext = $gnrquiz->feedbacktext[$i]['text'];
+        $feedback->feedbacktextformat = $gnrquiz->feedbacktext[$i]['format'];
+        $feedback->mingrade = $gnrquiz->feedbackboundaries[$i];
+        $feedback->maxgrade = $gnrquiz->feedbackboundaries[$i - 1];
         $feedback->id = $DB->insert_record('gnrquiz_feedback', $feedback);
-        $feedbacktext = file_save_draft_area_files((int)$quiz->feedbacktext[$i]['itemid'],
-                $context->id, 'mod_quiz', 'feedback', $feedback->id,
+        $feedbacktext = file_save_draft_area_files((int)$gnrquiz->feedbacktext[$i]['itemid'],
+                $context->id, 'mod_gnrquiz', 'feedback', $feedback->id,
                 array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
-                $quiz->feedbacktext[$i]['text']);
+                $gnrquiz->feedbacktext[$i]['text']);
         $DB->set_field('gnrquiz_feedback', 'feedbacktext', $feedbacktext,
                 array('id' => $feedback->id));
     }
 
     // Store any settings belonging to the access rules.
-    gnrquiz_access_manager::save_settings($quiz);
+    gnrquiz_access_manager::save_settings($gnrquiz);
 
-    // Update the events relating to this quiz.
-    gnrquiz_update_events($quiz);
+    // Update the events relating to this gnrquiz.
+    gnrquiz_update_events($gnrquiz);
 
     // Update related grade item.
-    gnrquiz_grade_item_update($quiz);
+    gnrquiz_grade_item_update($gnrquiz);
 }
 
 /**
- * This function updates the events associated to the quiz.
+ * This function updates the events associated to the gnrquiz.
  * If $override is non-zero, then it updates only the events
  * associated with the specified override.
  *
- * @uses QUIZ_MAX_EVENT_LENGTH
- * @param object $quiz the quiz object.
+ * @uses GNRQUIZ_MAX_EVENT_LENGTH
+ * @param object $gnrquiz the gnrquiz object.
  * @param object optional $override limit to a specific override
  */
-function gnrquiz_update_events($quiz, $override = null) {
+function gnrquiz_update_events($gnrquiz, $override = null) {
     global $DB;
 
-    // Load the old events relating to this quiz.
+    // Load the old events relating to this gnrquiz.
     $conds = array('modulename'=>'gnrquiz',
-                   'instance'=>$quiz->id);
+                   'instance'=>$gnrquiz->id);
     if (!empty($override)) {
         // Only load events for this override.
         if (isset($override->userid)) {
@@ -1204,10 +1204,10 @@ function gnrquiz_update_events($quiz, $override = null) {
 
     // Now make a todo list of all that needs to be updated.
     if (empty($override)) {
-        // We are updating the primary settings for the quiz, so we
+        // We are updating the primary settings for the gnrquiz, so we
         // need to add all the overrides.
-        $overrides = $DB->get_records('gnrquiz_overrides', array('gnrquiz' => $quiz->id));
-        // As well as the original quiz (empty override).
+        $overrides = $DB->get_records('gnrquiz_overrides', array('gnrquiz' => $gnrquiz->id));
+        // As well as the original gnrquiz (empty override).
         $overrides[] = new stdClass();
     } else {
         // Just do the one override.
@@ -1217,36 +1217,36 @@ function gnrquiz_update_events($quiz, $override = null) {
     foreach ($overrides as $current) {
         $groupid   = isset($current->groupid)?  $current->groupid : 0;
         $userid    = isset($current->userid)? $current->userid : 0;
-        $timeopen  = isset($current->timeopen)?  $current->timeopen : $quiz->timeopen;
-        $timeclose = isset($current->timeclose)? $current->timeclose : $quiz->timeclose;
+        $timeopen  = isset($current->timeopen)?  $current->timeopen : $gnrquiz->timeopen;
+        $timeclose = isset($current->timeclose)? $current->timeclose : $gnrquiz->timeclose;
 
-        // Only add open/close events for an override if they differ from the quiz default.
+        // Only add open/close events for an override if they differ from the gnrquiz default.
         $addopen  = empty($current->id) || !empty($current->timeopen);
         $addclose = empty($current->id) || !empty($current->timeclose);
 
-        if (!empty($quiz->coursemodule)) {
-            $cmid = $quiz->coursemodule;
+        if (!empty($gnrquiz->coursemodule)) {
+            $cmid = $gnrquiz->coursemodule;
         } else {
-            $cmid = get_coursemodule_from_instance('gnrquiz', $quiz->id, $quiz->course)->id;
+            $cmid = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id, $gnrquiz->course)->id;
         }
 
         $event = new stdClass();
-        $event->description = format_module_intro('gnrquiz', $quiz, $cmid);
+        $event->description = format_module_intro('gnrquiz', $gnrquiz, $cmid);
         // Events module won't show user events when the courseid is nonzero.
-        $event->courseid    = ($userid) ? 0 : $quiz->course;
+        $event->courseid    = ($userid) ? 0 : $gnrquiz->course;
         $event->groupid     = $groupid;
         $event->userid      = $userid;
         $event->modulename  = 'gnrquiz';
-        $event->instance    = $quiz->id;
+        $event->instance    = $gnrquiz->id;
         $event->timestart   = $timeopen;
         $event->timeduration = max($timeclose - $timeopen, 0);
-        $event->visible     = instance_is_visible('gnrquiz', $quiz);
+        $event->visible     = instance_is_visible('gnrquiz', $gnrquiz);
         $event->eventtype   = 'open';
 
         // Determine the event name.
         if ($groupid) {
             $params = new stdClass();
-            $params->quiz = $quiz->name;
+            $params->gnrquiz = $gnrquiz->name;
             $params->group = groups_get_group_name($groupid);
             if ($params->group === false) {
                 // Group doesn't exist, just skip it.
@@ -1255,14 +1255,14 @@ function gnrquiz_update_events($quiz, $override = null) {
             $eventname = get_string('overridegroupeventname', 'gnrquiz', $params);
         } else if ($userid) {
             $params = new stdClass();
-            $params->quiz = $quiz->name;
+            $params->gnrquiz = $gnrquiz->name;
             $eventname = get_string('overrideusereventname', 'gnrquiz', $params);
         } else {
-            $eventname = $quiz->name;
+            $eventname = $gnrquiz->name;
         }
         if ($addopen or $addclose) {
             if ($timeclose and $timeopen and $event->timeduration <= GNRQUIZ_MAX_EVENT_LENGTH) {
-                // Single event for the whole quiz.
+                // Single event for the whole gnrquiz.
                 if ($oldevent = array_shift($oldevents)) {
                     $event->id = $oldevent->id;
                 } else {
@@ -1345,20 +1345,20 @@ function gnrquiz_questions_in_use($questionids) {
     list($test, $params) = $DB->get_in_or_equal($questionids);
     return $DB->record_exists_select('gnrquiz_slots',
             'questionid ' . $test, $params) || question_engine::questions_in_use(
-            $questionids, new qubaid_join('{gnrquiz_attempts} quiza',
+            $questionids, new qubaid_join('{gnrquiz_attempts} gnrquiza',
             'gnrquiza.uniqueid', 'gnrquiza.preview = 0'));
 }
 
 /**
  * Implementation of the function for printing the form elements that control
- * whether the course reset functionality affects the quiz.
+ * whether the course reset functionality affects the gnrquiz.
  *
  * @param $mform the course reset form that is being built.
  */
 function gnrquiz_reset_course_form_definition($mform) {
     $mform->addElement('header', 'gnrquizheader', get_string('modulenameplural', 'gnrquiz'));
     $mform->addElement('advcheckbox', 'reset_gnrquiz_attempts',
-            get_string('removeallquizattempts', 'gnrquiz'));
+            get_string('removeallgnrquizattempts', 'gnrquiz'));
     $mform->addElement('advcheckbox', 'reset_gnrquiz_user_overrides',
             get_string('removealluseroverrides', 'gnrquiz'));
     $mform->addElement('advcheckbox', 'reset_gnrquiz_group_overrides',
@@ -1384,24 +1384,24 @@ function gnrquiz_reset_course_form_defaults($course) {
 function gnrquiz_reset_gradebook($courseid, $type='') {
     global $CFG, $DB;
 
-    $quizzes = $DB->get_records_sql("
+    $gnrquizzes = $DB->get_records_sql("
             SELECT q.*, cm.idnumber as cmidnumber, q.course as courseid
             FROM {modules} m
             JOIN {course_modules} cm ON m.id = cm.module
-            JOIN {quiz} q ON cm.instance = q.id
+            JOIN {gnrquiz} q ON cm.instance = q.id
             WHERE m.name = 'gnrquiz' AND cm.course = ?", array($courseid));
 
-    foreach ($quizzes as $quiz) {
-        gnrquiz_grade_item_update($quiz, 'reset');
+    foreach ($gnrquizzes as $gnrquiz) {
+        gnrquiz_grade_item_update($gnrquiz, 'reset');
     }
 }
 
 /**
  * Actual implementation of the reset course functionality, delete all the
- * quiz attempts for course $data->courseid, if $data->reset_gnrquiz_attempts is
+ * gnrquiz attempts for course $data->courseid, if $data->reset_gnrquiz_attempts is
  * set and true.
  *
- * Also, move the quiz open and close dates, if the course start date is changing.
+ * Also, move the gnrquiz open and close dates, if the course start date is changing.
  *
  * @param object $data the data submitted from the reset course.
  * @return array status array
@@ -1416,12 +1416,12 @@ function gnrquiz_reset_userdata($data) {
     // Delete attempts.
     if (!empty($data->reset_gnrquiz_attempts)) {
         question_engine::delete_questions_usage_by_activities(new qubaid_join(
-                '{gnrquiz_attempts} quiza JOIN {quiz} quiz ON quiza.quiz = quiz.id',
-                'gnrquiza.uniqueid', 'gnrquiz.course = :quizcourseid',
+                '{gnrquiz_attempts} gnrquiza JOIN {gnrquiz} gnrquiz ON gnrquiza.gnrquiz = gnrquiz.id',
+                'gnrquiza.uniqueid', 'gnrquiz.course = :gnrquizcourseid',
                 array('gnrquizcourseid' => $data->courseid)));
 
         $DB->delete_records_select('gnrquiz_attempts',
-                'gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?)', array($data->courseid));
+                'gnrquiz IN (SELECT id FROM {gnrquiz} WHERE course = ?)', array($data->courseid));
         $status[] = array(
             'component' => $componentstr,
             'item' => get_string('attemptsdeleted', 'gnrquiz'),
@@ -1429,7 +1429,7 @@ function gnrquiz_reset_userdata($data) {
 
         // Remove all grades from gradebook.
         $DB->delete_records_select('gnrquiz_grades',
-                'gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?)', array($data->courseid));
+                'gnrquiz IN (SELECT id FROM {gnrquiz} WHERE course = ?)', array($data->courseid));
         if (empty($data->reset_gradebook_grades)) {
             gnrquiz_reset_gradebook($data->courseid);
         }
@@ -1442,7 +1442,7 @@ function gnrquiz_reset_userdata($data) {
     // Remove user overrides.
     if (!empty($data->reset_gnrquiz_user_overrides)) {
         $DB->delete_records_select('gnrquiz_overrides',
-                'gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?) AND userid IS NOT NULL', array($data->courseid));
+                'gnrquiz IN (SELECT id FROM {gnrquiz} WHERE course = ?) AND userid IS NOT NULL', array($data->courseid));
         $status[] = array(
             'component' => $componentstr,
             'item' => get_string('useroverridesdeleted', 'gnrquiz'),
@@ -1451,7 +1451,7 @@ function gnrquiz_reset_userdata($data) {
     // Remove group overrides.
     if (!empty($data->reset_gnrquiz_group_overrides)) {
         $DB->delete_records_select('gnrquiz_overrides',
-                'gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?) AND groupid IS NOT NULL', array($data->courseid));
+                'gnrquiz IN (SELECT id FROM {gnrquiz} WHERE course = ?) AND groupid IS NOT NULL', array($data->courseid));
         $status[] = array(
             'component' => $componentstr,
             'item' => get_string('groupoverridesdeleted', 'gnrquiz'),
@@ -1462,11 +1462,11 @@ function gnrquiz_reset_userdata($data) {
     if ($data->timeshift) {
         $DB->execute("UPDATE {gnrquiz_overrides}
                          SET timeopen = timeopen + ?
-                       WHERE gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?)
+                       WHERE gnrquiz IN (SELECT id FROM {gnrquiz} WHERE course = ?)
                          AND timeopen <> 0", array($data->timeshift, $data->courseid));
         $DB->execute("UPDATE {gnrquiz_overrides}
                          SET timeclose = timeclose + ?
-                       WHERE gnrquiz IN (SELECT id FROM {quiz} WHERE course = ?)
+                       WHERE gnrquiz IN (SELECT id FROM {gnrquiz} WHERE course = ?)
                          AND timeclose <> 0", array($data->timeshift, $data->courseid));
 
         shift_course_mod_dates('gnrquiz', array('timeopen', 'timeclose'),
@@ -1482,7 +1482,7 @@ function gnrquiz_reset_userdata($data) {
 }
 
 /**
- * Prints quiz summaries on MyMoodle Page
+ * Prints gnrquiz summaries on MyMoodle Page
  * @param arry $courses
  * @param array $htmlarray
  */
@@ -1493,55 +1493,55 @@ function gnrquiz_print_overview($courses, &$htmlarray) {
         return array();
     }
 
-    if (!$quizzes = get_all_instances_in_courses('gnrquiz', $courses)) {
+    if (!$gnrquizzes = get_all_instances_in_courses('gnrquiz', $courses)) {
         return;
     }
 
-    // Get the quizzes attempts.
+    // Get the gnrquizzes attempts.
     $attemptsinfo = [];
-    $quizids = [];
-    foreach ($quizzes as $quiz) {
-        $quizids[] = $quiz->id;
-        $attemptsinfo[$quiz->id] = ['count' => 0, 'hasfinished' => false];
+    $gnrquizids = [];
+    foreach ($gnrquizzes as $gnrquiz) {
+        $gnrquizids[] = $gnrquiz->id;
+        $attemptsinfo[$gnrquiz->id] = ['count' => 0, 'hasfinished' => false];
     }
-    $attempts = gnrquiz_get_user_attempts($quizids, $USER->id);
+    $attempts = gnrquiz_get_user_attempts($gnrquizids, $USER->id);
     foreach ($attempts as $attempt) {
-        $attemptsinfo[$attempt->quiz]['count']++;
-        $attemptsinfo[$attempt->quiz]['hasfinished'] = true;
+        $attemptsinfo[$attempt->gnrquiz]['count']++;
+        $attemptsinfo[$attempt->gnrquiz]['hasfinished'] = true;
     }
     unset($attempts);
 
     // Fetch some language strings outside the main loop.
-    $strquiz = get_string('modulename', 'gnrquiz');
+    $strgnrquiz = get_string('modulename', 'gnrquiz');
     $strnoattempts = get_string('noattempts', 'gnrquiz');
 
-    // We want to list quizzes that are currently available, and which have a close date.
+    // We want to list gnrquizzes that are currently available, and which have a close date.
     // This is the same as what the lesson does, and the dabate is in MDL-10568.
     $now = time();
-    foreach ($quizzes as $quiz) {
-        if ($quiz->timeclose >= $now && $quiz->timeopen < $now) {
+    foreach ($gnrquizzes as $gnrquiz) {
+        if ($gnrquiz->timeclose >= $now && $gnrquiz->timeopen < $now) {
             $str = '';
 
             // Now provide more information depending on the uers's role.
-            $context = context_module::instance($quiz->coursemodule);
+            $context = context_module::instance($gnrquiz->coursemodule);
             if (has_capability('mod/gnrquiz:viewreports', $context)) {
                 // For teacher-like people, show a summary of the number of student attempts.
-                // The $quiz objects returned by get_all_instances_in_course have the necessary $cm
+                // The $gnrquiz objects returned by get_all_instances_in_course have the necessary $cm
                 // fields set to make the following call work.
-                $str .= '<div class="info">' . gnrquiz_num_attempt_summary($quiz, $quiz, true) . '</div>';
+                $str .= '<div class="info">' . gnrquiz_num_attempt_summary($gnrquiz, $gnrquiz, true) . '</div>';
 
             } else if (has_any_capability(array('mod/gnrquiz:reviewmyattempts', 'mod/gnrquiz:attempt'), $context)) { // Student
                 // For student-like people, tell them how many attempts they have made.
 
                 if (isset($USER->id)) {
-                    if ($attemptsinfo[$quiz->id]['hasfinished']) {
+                    if ($attemptsinfo[$gnrquiz->id]['hasfinished']) {
                         // The student's last attempt is finished.
                         continue;
                     }
 
-                    if ($attemptsinfo[$quiz->id]['count'] > 0) {
+                    if ($attemptsinfo[$gnrquiz->id]['count'] > 0) {
                         $str .= '<div class="info">' .
-                            get_string('numattemptsmade', 'gnrquiz', $attemptsinfo[$quiz->id]['count']) . '</div>';
+                            get_string('numattemptsmade', 'gnrquiz', $attemptsinfo[$gnrquiz->id]['count']) . '</div>';
                     } else {
                         $str .= '<div class="info">' . $strnoattempts . '</div>';
                     }
@@ -1551,35 +1551,35 @@ function gnrquiz_print_overview($courses, &$htmlarray) {
                 }
 
             } else {
-                // For ayone else, there is no point listing this quiz, so stop processing.
+                // For ayone else, there is no point listing this gnrquiz, so stop processing.
                 continue;
             }
 
-            // Give a link to the quiz, and the deadline.
-            $html = '<div class="quiz overview">' .
-                    '<div class="name">' . $strquiz . ': <a ' .
-                    ($quiz->visible ? '' : ' class="dimmed"') .
+            // Give a link to the gnrquiz, and the deadline.
+            $html = '<div class="gnrquiz overview">' .
+                    '<div class="name">' . $strgnrquiz . ': <a ' .
+                    ($gnrquiz->visible ? '' : ' class="dimmed"') .
                     ' href="' . $CFG->wwwroot . '/mod/gnrquiz/view.php?id=' .
-                    $quiz->coursemodule . '">' .
-                    $quiz->name . '</a></div>';
+                    $gnrquiz->coursemodule . '">' .
+                    $gnrquiz->name . '</a></div>';
             $html .= '<div class="info">' . get_string('gnrquizcloseson', 'gnrquiz',
-                    userdate($quiz->timeclose)) . '</div>';
+                    userdate($gnrquiz->timeclose)) . '</div>';
             $html .= $str;
             $html .= '</div>';
-            if (empty($htmlarray[$quiz->course]['gnrquiz'])) {
-                $htmlarray[$quiz->course]['gnrquiz'] = $html;
+            if (empty($htmlarray[$gnrquiz->course]['gnrquiz'])) {
+                $htmlarray[$gnrquiz->course]['gnrquiz'] = $html;
             } else {
-                $htmlarray[$quiz->course]['gnrquiz'] .= $html;
+                $htmlarray[$gnrquiz->course]['gnrquiz'] .= $html;
             }
         }
     }
 }
 
 /**
- * Return a textual summary of the number of attempts that have been made at a particular quiz,
+ * Return a textual summary of the number of attempts that have been made at a particular gnrquiz,
  * returns '' if no attempts have been made yet, unless $returnzero is passed as true.
  *
- * @param object $quiz the quiz object. Only $quiz->id is used at the moment.
+ * @param object $gnrquiz the gnrquiz object. Only $gnrquiz->id is used at the moment.
  * @param object $cm the cm object. Only $cm->course, $cm->groupmode and
  *      $cm->groupingid fields are used at the moment.
  * @param bool $returnzero if false (default), when no attempts have been
@@ -1589,9 +1589,9 @@ function gnrquiz_print_overview($courses, &$htmlarray) {
  * @return string a string like "Attempts: 123", "Attemtps 123 (45 from your groups)" or
  *          "Attemtps 123 (45 from this group)".
  */
-function gnrquiz_num_attempt_summary($quiz, $cm, $returnzero = false, $currentgroup = 0) {
+function gnrquiz_num_attempt_summary($gnrquiz, $cm, $returnzero = false, $currentgroup = 0) {
     global $DB, $USER;
-    $numattempts = $DB->count_records('gnrquiz_attempts', array('gnrquiz'=> $quiz->id, 'preview'=>0));
+    $numattempts = $DB->count_records('gnrquiz_attempts', array('gnrquiz'=> $gnrquiz->id, 'preview'=>0));
     if ($numattempts || $returnzero) {
         if (groups_get_activity_groupmode($cm)) {
             $a = new stdClass();
@@ -1601,7 +1601,7 @@ function gnrquiz_num_attempt_summary($quiz, $cm, $returnzero = false, $currentgr
                         '{gnrquiz_attempts} qa JOIN ' .
                         '{groups_members} gm ON qa.userid = gm.userid ' .
                         'WHERE gnrquiz = ? AND preview = 0 AND groupid = ?',
-                        array($quiz->id, $currentgroup));
+                        array($gnrquiz->id, $currentgroup));
                 return get_string('attemptsnumthisgroup', 'gnrquiz', $a);
             } else if ($groups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid)) {
                 list($usql, $params) = $DB->get_in_or_equal(array_keys($groups));
@@ -1609,7 +1609,7 @@ function gnrquiz_num_attempt_summary($quiz, $cm, $returnzero = false, $currentgr
                         '{gnrquiz_attempts} qa JOIN ' .
                         '{groups_members} gm ON qa.userid = gm.userid ' .
                         'WHERE gnrquiz = ? AND preview = 0 AND ' .
-                        "groupid $usql", array_merge(array($quiz->id), $params));
+                        "groupid $usql", array_merge(array($gnrquiz->id), $params));
                 return get_string('attemptsnumyourgroups', 'gnrquiz', $a);
             }
         }
@@ -1620,22 +1620,22 @@ function gnrquiz_num_attempt_summary($quiz, $cm, $returnzero = false, $currentgr
 
 /**
  * Returns the same as {@link gnrquiz_num_attempt_summary()} but wrapped in a link
- * to the quiz reports.
+ * to the gnrquiz reports.
  *
- * @param object $quiz the quiz object. Only $quiz->id is used at the moment.
+ * @param object $gnrquiz the gnrquiz object. Only $gnrquiz->id is used at the moment.
  * @param object $cm the cm object. Only $cm->course, $cm->groupmode and
  *      $cm->groupingid fields are used at the moment.
- * @param object $context the quiz context.
+ * @param object $context the gnrquiz context.
  * @param bool $returnzero if false (default), when no attempts have been made
  *      '' is returned instead of 'Attempts: 0'.
  * @param int $currentgroup if there is a concept of current group where this method is being called
  *         (e.g. a report) pass it in here. Default 0 which means no current group.
  * @return string HTML fragment for the link.
  */
-function gnrquiz_attempt_summary_link_to_reports($quiz, $cm, $context, $returnzero = false,
+function gnrquiz_attempt_summary_link_to_reports($gnrquiz, $cm, $context, $returnzero = false,
         $currentgroup = 0) {
     global $CFG;
-    $summary = gnrquiz_num_attempt_summary($quiz, $cm, $returnzero, $currentgroup);
+    $summary = gnrquiz_num_attempt_summary($gnrquiz, $cm, $returnzero, $currentgroup);
     if (!$summary) {
         return '';
     }
@@ -1648,7 +1648,7 @@ function gnrquiz_attempt_summary_link_to_reports($quiz, $cm, $context, $returnze
 
 /**
  * @param string $feature FEATURE_xx constant for requested feature
- * @return bool True if quiz supports feature
+ * @return bool True if gnrquiz supports feature
  */
 function gnrquiz_supports($feature) {
     switch($feature) {
@@ -1686,10 +1686,10 @@ function gnrquiz_get_extra_capabilities() {
  * context when this is called
  *
  * @param settings_navigation $settings
- * @param navigation_node $quiznode
+ * @param navigation_node $gnrquiznode
  * @return void
  */
-function gnrquiz_extend_settings_navigation($settings, $quiznode) {
+function gnrquiz_extend_settings_navigation($settings, $gnrquiznode) {
     global $PAGE, $CFG;
 
     // Require {@link questionlib.php}
@@ -1698,7 +1698,7 @@ function gnrquiz_extend_settings_navigation($settings, $quiznode) {
 
     // We want to add these new nodes after the Edit settings node, and before the
     // Locally assigned roles node. Of course, both of those are controlled by capabilities.
-    $keys = $quiznode->get_children_key_list();
+    $keys = $gnrquiznode->get_children_key_list();
     $beforekey = null;
     $i = array_search('modedit', $keys);
     if ($i === false and array_key_exists(0, $keys)) {
@@ -1712,20 +1712,20 @@ function gnrquiz_extend_settings_navigation($settings, $quiznode) {
         $node = navigation_node::create(get_string('groupoverrides', 'gnrquiz'),
                 new moodle_url($url, array('mode'=>'group')),
                 navigation_node::TYPE_SETTING, null, 'mod_gnrquiz_groupoverrides');
-        $quiznode->add_node($node, $beforekey);
+        $gnrquiznode->add_node($node, $beforekey);
 
         $node = navigation_node::create(get_string('useroverrides', 'gnrquiz'),
                 new moodle_url($url, array('mode'=>'user')),
                 navigation_node::TYPE_SETTING, null, 'mod_gnrquiz_useroverrides');
-        $quiznode->add_node($node, $beforekey);
+        $gnrquiznode->add_node($node, $beforekey);
     }
 
     if (has_capability('mod/gnrquiz:manage', $PAGE->cm->context)) {
-        $node = navigation_node::create(get_string('editquiz', 'gnrquiz'),
+        $node = navigation_node::create(get_string('editgnrquiz', 'gnrquiz'),
                 new moodle_url('/mod/gnrquiz/edit.php', array('cmid'=>$PAGE->cm->id)),
                 navigation_node::TYPE_SETTING, null, 'mod_gnrquiz_edit',
                 new pix_icon('t/edit', ''));
-        $quiznode->add_node($node, $beforekey);
+        $gnrquiznode->add_node($node, $beforekey);
     }
 
     if (has_capability('mod/gnrquiz:preview', $PAGE->cm->context)) {
@@ -1734,7 +1734,7 @@ function gnrquiz_extend_settings_navigation($settings, $quiznode) {
         $node = navigation_node::create(get_string('preview', 'gnrquiz'), $url,
                 navigation_node::TYPE_SETTING, null, 'mod_gnrquiz_preview',
                 new pix_icon('i/preview', ''));
-        $quiznode->add_node($node, $beforekey);
+        $gnrquiznode->add_node($node, $beforekey);
     }
 
     if (has_any_capability(array('mod/gnrquiz:viewreports', 'mod/gnrquiz:grade'), $PAGE->cm->context)) {
@@ -1743,7 +1743,7 @@ function gnrquiz_extend_settings_navigation($settings, $quiznode) {
 
         $url = new moodle_url('/mod/gnrquiz/report.php',
                 array('id' => $PAGE->cm->id, 'mode' => reset($reportlist)));
-        $reportnode = $quiznode->add_node(navigation_node::create(get_string('results', 'gnrquiz'), $url,
+        $reportnode = $gnrquiznode->add_node(navigation_node::create(get_string('results', 'gnrquiz'), $url,
                 navigation_node::TYPE_SETTING,
                 null, null, new pix_icon('i/report', '')), $beforekey);
 
@@ -1756,13 +1756,13 @@ function gnrquiz_extend_settings_navigation($settings, $quiznode) {
         }
     }
 
-    question_extend_settings_navigation($quiznode, $PAGE->cm->context)->trim_if_empty();
+    question_extend_settings_navigation($gnrquiznode, $PAGE->cm->context)->trim_if_empty();
 }
 
 /**
- * Serves the quiz files.
+ * Serves the gnrquiz files.
  *
- * @package  mod_quiz
+ * @package  mod_gnrquiz
  * @category files
  * @param stdClass $course course object
  * @param stdClass $cm course module object
@@ -1782,7 +1782,7 @@ function gnrquiz_pluginfile($course, $cm, $context, $filearea, $args, $forcedown
 
     require_login($course, false, $cm);
 
-    if (!$quiz = $DB->get_record('gnrquiz', array('id'=>$cm->instance))) {
+    if (!$gnrquiz = $DB->get_record('gnrquiz', array('id'=>$cm->instance))) {
         return false;
     }
 
@@ -1799,7 +1799,7 @@ function gnrquiz_pluginfile($course, $cm, $context, $filearea, $args, $forcedown
 
     $fs = get_file_storage();
     $relativepath = implode('/', $args);
-    $fullpath = "/$context->id/mod_quiz/$filearea/$feedbackid/$relativepath";
+    $fullpath = "/$context->id/mod_gnrquiz/$filearea/$feedbackid/$relativepath";
     if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
         return false;
     }
@@ -1808,16 +1808,16 @@ function gnrquiz_pluginfile($course, $cm, $context, $filearea, $args, $forcedown
 
 /**
  * Called via pluginfile.php -> question_pluginfile to serve files belonging to
- * a question in a question_attempt when that attempt is a quiz attempt.
+ * a question in a question_attempt when that attempt is a gnrquiz attempt.
  *
- * @package  mod_quiz
+ * @package  mod_gnrquiz
  * @category files
  * @param stdClass $course course settings object
  * @param stdClass $context context object
  * @param string $component the name of the component we are serving files for.
  * @param string $filearea the name of the file area.
  * @param int $qubaid the attempt usage id.
- * @param int $slot the id of a question in this quiz attempt.
+ * @param int $slot the id of a question in this gnrquiz attempt.
  * @param array $args the remaining bits of the file path.
  * @param bool $forcedownload whether the user must be forced to download the file.
  * @param array $options additional options affecting the file serving
@@ -1867,19 +1867,19 @@ function gnrquiz_question_pluginfile($course, $context, $component,
  */
 function gnrquiz_page_type_list($pagetype, $parentcontext, $currentcontext) {
     $module_pagetype = array(
-        'mod-quiz-*'       => get_string('page-mod-quiz-x', 'gnrquiz'),
-        'mod-quiz-view'    => get_string('page-mod-quiz-view', 'gnrquiz'),
-        'mod-quiz-attempt' => get_string('page-mod-quiz-attempt', 'gnrquiz'),
-        'mod-quiz-summary' => get_string('page-mod-quiz-summary', 'gnrquiz'),
-        'mod-quiz-review'  => get_string('page-mod-quiz-review', 'gnrquiz'),
-        'mod-quiz-edit'    => get_string('page-mod-quiz-edit', 'gnrquiz'),
-        'mod-quiz-report'  => get_string('page-mod-quiz-report', 'gnrquiz'),
+        'mod-gnrquiz-*'       => get_string('page-mod-gnrquiz-x', 'gnrquiz'),
+        'mod-gnrquiz-view'    => get_string('page-mod-gnrquiz-view', 'gnrquiz'),
+        'mod-gnrquiz-attempt' => get_string('page-mod-gnrquiz-attempt', 'gnrquiz'),
+        'mod-gnrquiz-summary' => get_string('page-mod-gnrquiz-summary', 'gnrquiz'),
+        'mod-gnrquiz-review'  => get_string('page-mod-gnrquiz-review', 'gnrquiz'),
+        'mod-gnrquiz-edit'    => get_string('page-mod-gnrquiz-edit', 'gnrquiz'),
+        'mod-gnrquiz-report'  => get_string('page-mod-gnrquiz-report', 'gnrquiz'),
     );
     return $module_pagetype;
 }
 
 /**
- * @return the options for quiz navigation.
+ * @return the options for gnrquiz navigation.
  */
 function gnrquiz_get_navigation_options() {
     return array(
@@ -1889,8 +1889,8 @@ function gnrquiz_get_navigation_options() {
 }
 
 /**
- * Obtains the automatic completion state for this quiz on any conditions
- * in quiz settings, such as if all attempts are used or a certain grade is achieved.
+ * Obtains the automatic completion state for this gnrquiz on any conditions
+ * in gnrquiz settings, such as if all attempts are used or a certain grade is achieved.
  *
  * @param object $course Course
  * @param object $cm Course-module
@@ -1903,19 +1903,19 @@ function gnrquiz_get_completion_state($course, $cm, $userid, $type) {
     global $DB;
     global $CFG;
 
-    $quiz = $DB->get_record('gnrquiz', array('id' => $cm->instance), '*', MUST_EXIST);
-    if (!$quiz->completionattemptsexhausted && !$quiz->completionpass) {
+    $gnrquiz = $DB->get_record('gnrquiz', array('id' => $cm->instance), '*', MUST_EXIST);
+    if (!$gnrquiz->completionattemptsexhausted && !$gnrquiz->completionpass) {
         return $type;
     }
 
     // Check if the user has used up all attempts.
-    if ($quiz->completionattemptsexhausted) {
-        $attempts = gnrquiz_get_user_attempts($quiz->id, $userid, 'finished', true);
+    if ($gnrquiz->completionattemptsexhausted) {
+        $attempts = gnrquiz_get_user_attempts($gnrquiz->id, $userid, 'finished', true);
         if ($attempts) {
             $lastfinishedattempt = end($attempts);
             $context = context_module::instance($cm->id);
-            $quizobj = quiz::create($quiz->id, $userid);
-            $accessmanager = new gnrquiz_access_manager($quizobj, time(),
+            $gnrquizobj = gnrquiz::create($gnrquiz->id, $userid);
+            $accessmanager = new gnrquiz_access_manager($gnrquizobj, time(),
                     has_capability('mod/gnrquiz:ignoretimelimits', $context, $userid, false));
             if ($accessmanager->is_finished(count($attempts), $lastfinishedattempt)) {
                 return true;
@@ -1924,7 +1924,7 @@ function gnrquiz_get_completion_state($course, $cm, $userid, $type) {
     }
 
     // Check for passing grade.
-    if ($quiz->completionpass) {
+    if ($gnrquiz->completionpass) {
         require_once($CFG->libdir . '/gradelib.php');
         $item = grade_item::fetch(array('courseid' => $course->id, 'itemtype' => 'mod',
                 'itemmodule' => 'gnrquiz', 'iteminstance' => $cm->instance, 'outcomeid' => null));

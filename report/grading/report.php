@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz manual grading report class.
+ * This file defines the gnrquiz manual grading report class.
  *
  * @package   gnrquiz_grading
  * @copyright 2006 Gustav Delius
@@ -45,13 +45,13 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
     protected $viewoptions = array();
     protected $questions;
     protected $cm;
-    protected $quiz;
+    protected $gnrquiz;
     protected $context;
 
-    public function display($quiz, $cm, $course) {
+    public function display($gnrquiz, $cm, $course) {
         global $CFG, $DB, $PAGE;
 
-        $this->quiz = $quiz;
+        $this->gnrquiz = $gnrquiz;
         $this->cm = $cm;
         $this->course = $course;
 
@@ -100,8 +100,8 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
             $page = 0;
         }
 
-        // Get the list of questions in this quiz.
-        $this->questions = gnrquiz_report_get_significant_questions($quiz);
+        // Get the list of questions in this gnrquiz.
+        $this->questions = gnrquiz_report_get_significant_questions($gnrquiz);
         if ($slot && !array_key_exists($slot, $this->questions)) {
             throw new moodle_exception('unknownquestion', 'gnrquiz_grading');
         }
@@ -123,7 +123,7 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
                     $this->currentgroup, '', false);
         }
 
-        $hasquestions = gnrquiz_has_questions($quiz->id);
+        $hasquestions = gnrquiz_has_questions($gnrquiz->id);
         $counts = null;
         if ($slot && $hasquestions) {
             // Make sure there is something to do.
@@ -141,11 +141,11 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
         }
 
         // Start output.
-        $this->print_header_and_tabs($cm, $course, $quiz, 'grading');
+        $this->print_header_and_tabs($cm, $course, $gnrquiz, 'grading');
 
         // What sort of page to display?
         if (!$hasquestions) {
-            echo gnrquiz_no_questions_message($quiz, $cm, $this->context);
+            echo gnrquiz_no_questions_message($gnrquiz, $cm, $this->context);
 
         } else if (!$slot) {
             $this->display_index($includeauto);
@@ -160,10 +160,10 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
     protected function get_qubaids_condition() {
         global $DB;
 
-        $where = "quiza.quiz = :mangrquizid AND
-                quiza.preview = 0 AND
-                quiza.state = :statefinished";
-        $params = array('mangrquizid' => $this->cm->instance, 'statefinished' => gnrquiz_attempt::FINISHED);
+        $where = "gnrquiza.gnrquiz = :mangrgnrquizid AND
+                gnrquiza.preview = 0 AND
+                gnrquiza.state = :statefinished";
+        $params = array('mangrgnrquizid' => $this->cm->instance, 'statefinished' => gnrquiz_attempt::FINISHED);
 
         $currentgroup = groups_get_activity_group($this->cm, true);
         if ($currentgroup) {
@@ -171,16 +171,16 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
                     array('mod/gnrquiz:reviewmyattempts', 'mod/gnrquiz:attempt'), 'u.id, u.id', '', '', '',
                     $currentgroup, '', false);
             if (empty($users)) {
-                $where .= ' AND quiza.userid = 0';
+                $where .= ' AND gnrquiza.userid = 0';
             } else {
                 list($usql, $uparam) = $DB->get_in_or_equal(array_keys($users),
                         SQL_PARAMS_NAMED, 'mangru');
-                $where .= ' AND quiza.userid ' . $usql;
+                $where .= ' AND gnrquiza.userid ' . $usql;
                 $params += $uparam;
             }
         }
 
-        return new qubaid_join('{gnrquiz_attempts} quiza', 'gnrquiza.uniqueid', $where, $params);
+        return new qubaid_join('{gnrquiz_attempts} gnrquiza', 'gnrquiza.uniqueid', $where, $params);
     }
 
     protected function load_attempts_by_usage_ids($qubaids) {
@@ -188,15 +188,15 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
 
         list($asql, $params) = $DB->get_in_or_equal($qubaids);
         $params[] = gnrquiz_attempt::FINISHED;
-        $params[] = $this->quiz->id;
+        $params[] = $this->gnrquiz->id;
 
         $fields = 'gnrquiza.*, u.idnumber, ';
         $fields .= get_all_user_name_fields(true, 'u');
         $attemptsbyid = $DB->get_records_sql("
                 SELECT $fields
-                FROM {gnrquiz_attempts} quiza
-                JOIN {user} u ON u.id = quiza.userid
-                WHERE gnrquiza.uniqueid $asql AND quiza.state = ? AND quiza.quiz = ?",
+                FROM {gnrquiz_attempts} gnrquiza
+                JOIN {user} u ON u.id = gnrquiza.userid
+                WHERE gnrquiza.uniqueid $asql AND gnrquiza.state = ? AND gnrquiza.gnrquiz = ?",
                 $params);
 
         $attempts = array();
@@ -407,7 +407,7 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
         foreach ($qubaids as $qubaid) {
             $attempt = $attempts[$qubaid];
             $quba = question_engine::load_questions_usage_by_activity($qubaid);
-            $displayoptions = gnrquiz_get_review_options($this->quiz, $attempt, $this->context);
+            $displayoptions = gnrquiz_get_review_options($this->gnrquiz, $attempt, $this->context);
             $displayoptions->hide_all_feedback();
             $displayoptions->rightanswer = question_display_options::VISIBLE;
             $displayoptions->history = question_display_options::HIDDEN;
@@ -489,7 +489,7 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
         $transaction = $DB->start_delegated_transaction();
         foreach ($qubaids as $qubaid) {
             $attempt = $attempts[$qubaid];
-            $attemptobj = new gnrquiz_attempt($attempt, $this->quiz, $this->cm, $this->course);
+            $attemptobj = new gnrquiz_attempt($attempt, $this->gnrquiz, $this->cm, $this->course);
             $attemptobj->process_submitted_actions(time());
 
             // Add the event we will trigger later.
@@ -498,12 +498,12 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
                 'courseid' => $attemptobj->get_courseid(),
                 'context' => context_module::instance($attemptobj->get_cmid()),
                 'other' => array(
-                    'gnrquizid' => $attemptobj->get_quizid(),
+                    'gnrquizid' => $attemptobj->get_gnrquizid(),
                     'attemptid' => $attemptobj->get_attemptid(),
                     'slot' => $assumedslotforevents
                 )
             );
-            $events[] = \mod_quiz\event\question_manually_graded::create($params);
+            $events[] = \mod_gnrquiz\event\question_manually_graded::create($params);
         }
         $transaction->allow_commit();
 
@@ -571,7 +571,7 @@ class gnrquiz_grading_report extends gnrquiz_default_report {
                         AND sortqas.state $statetest
                     )";
         } else if ($orderby == 'studentfirstname' || $orderby == 'studentlastname' || $orderby == 'idnumber') {
-            $qubaids->from .= " JOIN {user} u ON quiza.userid = u.id ";
+            $qubaids->from .= " JOIN {user} u ON gnrquiza.userid = u.id ";
             // For name sorting, map orderby form value to
             // actual column names; 'idnumber' maps naturally
             switch ($orderby) {

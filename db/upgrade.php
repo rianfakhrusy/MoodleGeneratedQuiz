@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Upgrade script for the quiz module.
+ * Upgrade script for the gnrquiz module.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2006 Eloy Lafuente (stronk7)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,7 +35,7 @@ function xmldb_gnrquiz_upgrade($oldversion) {
 
     if ($oldversion < 2014052800) {
 
-        // Define field completionattemptsexhausted to be added to quiz.
+        // Define field completionattemptsexhausted to be added to gnrquiz.
         $table = new xmldb_table('gnrquiz');
         $field = new xmldb_field('completionattemptsexhausted', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'showblocks');
 
@@ -48,7 +48,7 @@ function xmldb_gnrquiz_upgrade($oldversion) {
     }
 
     if ($oldversion < 2014052801) {
-        // Define field completionpass to be added to quiz.
+        // Define field completionpass to be added to gnrquiz.
         $table = new xmldb_table('gnrquiz');
         $field = new xmldb_field('completionpass', XMLDB_TYPE_INTEGER, '1', null, null, null, 0, 'completionattemptsexhausted');
 
@@ -79,7 +79,7 @@ function xmldb_gnrquiz_upgrade($oldversion) {
     }
 
     if ($oldversion < 2015030900) {
-        // Define field canredoquestions to be added to quiz.
+        // Define field canredoquestions to be added to gnrquiz.
         $table = new xmldb_table('gnrquiz');
         $field = new xmldb_field('canredoquestions', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, 0, 'preferredbehaviour');
 
@@ -122,12 +122,12 @@ function xmldb_gnrquiz_upgrade($oldversion) {
 
     if ($oldversion < 2015032301) {
 
-        // Create a section for each quiz.
+        // Create a section for each gnrquiz.
         $DB->execute("
                 INSERT INTO {gnrquiz_sections}
-                            (quizid, firstslot, heading, shufflequestions)
+                            (gnrquizid, firstslot, heading, shufflequestions)
                      SELECT  id,     1,         ?,       shufflequestions
-                       FROM {quiz}
+                       FROM {gnrquiz}
                 ", array(''));
 
         // Quiz savepoint reached.
@@ -136,7 +136,7 @@ function xmldb_gnrquiz_upgrade($oldversion) {
 
     if ($oldversion < 2015032302) {
 
-        // Define field shufflequestions to be dropped from quiz.
+        // Define field shufflequestions to be dropped from gnrquiz.
         $table = new xmldb_table('gnrquiz');
         $field = new xmldb_field('shufflequestions');
 
@@ -166,23 +166,23 @@ function xmldb_gnrquiz_upgrade($oldversion) {
     // Put any upgrade step following this.
 
     if ($oldversion < 2016032600) {
-        // Update gnrquiz_sections to repair quizzes what were broken by MDL-53507.
-        $problemquizzes = $DB->get_records_sql("
-                SELECT quizid, MIN(firstslot) AS firstsectionfirstslot
+        // Update gnrquiz_sections to repair gnrquizzes what were broken by MDL-53507.
+        $problemgnrquizzes = $DB->get_records_sql("
+                SELECT gnrquizid, MIN(firstslot) AS firstsectionfirstslot
                 FROM {gnrquiz_sections}
-                GROUP BY quizid
+                GROUP BY gnrquizid
                 HAVING MIN(firstslot) > 1");
 
-        if ($problemquizzes) {
-            $pbar = new progress_bar('upgradequizfirstsection', 500, true);
-            $total = count($problemquizzes);
+        if ($problemgnrquizzes) {
+            $pbar = new progress_bar('upgradegnrquizfirstsection', 500, true);
+            $total = count($problemgnrquizzes);
             $done = 0;
-            foreach ($problemquizzes as $problemquiz) {
+            foreach ($problemgnrquizzes as $problemgnrquiz) {
                 $DB->set_field('gnrquiz_sections', 'firstslot', 1,
-                        array('gnrquizid' => $problemquiz->quizid,
-                        'firstslot' => $problemquiz->firstsectionfirstslot));
+                        array('gnrquizid' => $problemgnrquiz->gnrquizid,
+                        'firstslot' => $problemgnrquiz->firstsectionfirstslot));
                 $done += 1;
-                $pbar->update($done, $total, "Fixing quiz layouts - {$done}/{$total}.");
+                $pbar->update($done, $total, "Fixing gnrquiz layouts - {$done}/{$total}.");
             }
         }
 
@@ -194,10 +194,10 @@ function xmldb_gnrquiz_upgrade($oldversion) {
     // Put any upgrade step following this.
 
     if ($oldversion < 2016052301) {
-        // Find quizzes with the combination of require passing grade and grade to pass 0.
+        // Find gnrquizzes with the combination of require passing grade and grade to pass 0.
         $gradeitems = $DB->get_records_sql("
             SELECT gi.id, gi.itemnumber, cm.id AS cmid
-              FROM {quiz} q
+              FROM {gnrquiz} q
         INNER JOIN {course_modules} cm ON q.id = cm.instance
         INNER JOIN {grade_items} gi ON q.id = gi.iteminstance
         INNER JOIN {modules} m ON m.id = cm.module

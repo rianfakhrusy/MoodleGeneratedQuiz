@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Definition of log events for the quiz module.
+ * Definition of log events for the gnrquiz module.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   log
  * @copyright  2010 Petr Skoda (http://skodak.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

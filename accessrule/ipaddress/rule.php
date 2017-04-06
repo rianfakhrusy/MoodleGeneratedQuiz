@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_ipaddress plugin.
+ * Implementaton of the gnrquizaccess_ipaddress plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage ipaddress
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,18 +35,18 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_ipaddress extends gnrquiz_access_rule_base {
+class gnrquizaccess_ipaddress extends gnrquiz_access_rule_base {
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
-        if (empty($quizobj->get_quiz()->subnet)) {
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
+        if (empty($gnrquizobj->get_gnrquiz()->subnet)) {
             return null;
         }
 
-        return new self($quizobj, $timenow);
+        return new self($gnrquizobj, $timenow);
     }
 
     public function prevent_access() {
-        if (address_in_subnet(getremoteaddr(), $this->quiz->subnet)) {
+        if (address_in_subnet(getremoteaddr(), $this->gnrquiz->subnet)) {
             return false;
         } else {
             return get_string('subnetwrong', 'gnrquizaccess_ipaddress');

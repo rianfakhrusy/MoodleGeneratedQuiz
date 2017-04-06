@@ -17,13 +17,13 @@
 /**
  * A column type for the name followed by the start of the question text.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @category  question
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\question\bank;
+namespace mod_gnrquiz\question\bank;
 defined('MOODLE_INTERNAL') || die();
 
 

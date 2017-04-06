@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_password plugin.
+ * Unit tests for the gnrquizaccess_password plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage password
  * @category   phpunit
  * @copyright  2008 The Open University
@@ -32,19 +32,19 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/password/rule.php');
 
 
 /**
- * Unit tests for the quizaccess_password plugin.
+ * Unit tests for the gnrquizaccess_password plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_password_testcase extends basic_testcase {
+class gnrquizaccess_password_testcase extends basic_testcase {
     public function test_password_access_rule() {
-        $quiz = new stdClass();
-        $quiz->password = 'frog';
+        $gnrquiz = new stdClass();
+        $gnrquiz->password = 'frog';
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
-        $rule = new quizaccess_password($quizobj, 0);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
+        $rule = new gnrquizaccess_password($gnrquizobj, 0);
         $attempt = new stdClass();
 
         $this->assertFalse($rule->prevent_access());

@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the quiz repaginate class.
+ * Defines the gnrquiz repaginate class.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2014 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz;
+namespace mod_gnrquiz;
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * The repaginate class will rearrange questions in pages.
  *
- * The quiz setting allows users to write quizzes with one question per page,
+ * The gnrquiz setting allows users to write gnrquizzes with one question per page,
  * n questions per page, or all questions on one page.
  *
  * @copyright 2014 The Open University
@@ -41,24 +41,24 @@ class repaginate {
     /** @var int means split pages. */
     const UNLINK = 2;
 
-    /** @var int the id of the quiz being manipulated. */
-    private $quizid;
-    /** @var array the gnrquiz_slots for that quiz. */
+    /** @var int the id of the gnrquiz being manipulated. */
+    private $gnrquizid;
+    /** @var array the gnrquiz_slots for that gnrquiz. */
     private $slots;
 
     /**
      * Constructor.
-     * @param int $quizid the id of the quiz being manipulated.
-     * @param stdClass[] $slots the gnrquiz_slots for that quiz.
+     * @param int $gnrquizid the id of the gnrquiz being manipulated.
+     * @param stdClass[] $slots the gnrquiz_slots for that gnrquiz.
      */
-    public function __construct($quizid = 0, $slots = null) {
+    public function __construct($gnrquizid = 0, $slots = null) {
         global $DB;
-        $this->quizid = $quizid;
-        if (!$this->quizid) {
+        $this->gnrquizid = $gnrquizid;
+        if (!$this->gnrquizid) {
             $this->slots = array();
         }
         if (!$slots) {
-            $this->slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->quizid), 'slot');
+            $this->slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->gnrquizid), 'slot');
         } else {
             $this->slots = $slots;
         }
@@ -130,7 +130,7 @@ class repaginate {
      */
     public function repaginate_slots($nextslotnumber, $type) {
         global $DB;
-        $this->slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->quizid), 'slot');
+        $this->slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->gnrquizid), 'slot');
         $nextslot = null;
         $newslots = array();
         foreach ($this->slots as $slot) {
@@ -199,19 +199,19 @@ class repaginate {
 
     /**
      * Repaginate the rest.
-     * @param stdClass[] $quizslots
+     * @param stdClass[] $gnrquizslots
      * @param int $slotfrom
      * @param int $type
      * @param bool $dbupdate
      * @return stdClass[]
      */
-    public function repaginate_the_rest($quizslots, $slotfrom, $type, $dbupdate = true) {
+    public function repaginate_the_rest($gnrquizslots, $slotfrom, $type, $dbupdate = true) {
         global $DB;
-        if (!$quizslots) {
+        if (!$gnrquizslots) {
             return null;
         }
         $newslots = array();
-        foreach ($quizslots as $slot) {
+        foreach ($gnrquizslots as $slot) {
             if ($type == self::LINK) {
                 if ($slot->slot <= $slotfrom) {
                     continue;

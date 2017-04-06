@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_password plugin.
+ * Implementaton of the gnrquizaccess_password plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage password
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,14 +35,14 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_password extends gnrquiz_access_rule_base {
+class gnrquizaccess_password extends gnrquiz_access_rule_base {
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
-        if (empty($quizobj->get_quiz()->password)) {
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
+        if (empty($gnrquizobj->get_gnrquiz()->password)) {
             return null;
         }
 
-        return new self($quizobj, $timenow);
+        return new self($gnrquizobj, $timenow);
     }
 
     public function description() {
@@ -51,10 +51,10 @@ class quizaccess_password extends gnrquiz_access_rule_base {
 
     public function is_preflight_check_required($attemptid) {
         global $SESSION;
-        return empty($SESSION->passwordcheckedquizzes[$this->quiz->id]);
+        return empty($SESSION->passwordcheckedgnrquizzes[$this->gnrquiz->id]);
     }
 
-    public function add_preflight_check_form_fields(mod_gnrquiz_preflight_check_form $quizform,
+    public function add_preflight_check_form_fields(mod_gnrquiz_preflight_check_form $gnrquizform,
             MoodleQuickForm $mform, $attemptid) {
 
         $mform->addElement('header', 'passwordheader', get_string('password'));
@@ -70,12 +70,12 @@ class quizaccess_password extends gnrquiz_access_rule_base {
     public function validate_preflight_check($data, $files, $errors, $attemptid) {
 
         $enteredpassword = $data['gnrquizpassword'];
-        if (strcmp($this->quiz->password, $enteredpassword) === 0) {
+        if (strcmp($this->gnrquiz->password, $enteredpassword) === 0) {
             return $errors; // Password is OK.
 
-        } else if (isset($this->quiz->extrapasswords)) {
+        } else if (isset($this->gnrquiz->extrapasswords)) {
             // Group overrides may have additional passwords.
-            foreach ($this->quiz->extrapasswords as $password) {
+            foreach ($this->gnrquiz->extrapasswords as $password) {
                 if (strcmp($password, $enteredpassword) === 0) {
                     return $errors; // Password is OK.
                 }
@@ -88,15 +88,15 @@ class quizaccess_password extends gnrquiz_access_rule_base {
 
     public function notify_preflight_check_passed($attemptid) {
         global $SESSION;
-        $SESSION->passwordcheckedquizzes[$this->quiz->id] = true;
+        $SESSION->passwordcheckedgnrquizzes[$this->gnrquiz->id] = true;
     }
 
     public function current_attempt_finished() {
         global $SESSION;
         // Clear the flag in the session that says that the user has already
-        // entered the password for this quiz.
-        if (!empty($SESSION->passwordcheckedquizzes[$this->quiz->id])) {
-            unset($SESSION->passwordcheckedquizzes[$this->quiz->id]);
+        // entered the password for this gnrquiz.
+        if (!empty($SESSION->passwordcheckedgnrquizzes[$this->gnrquiz->id])) {
+            unset($SESSION->passwordcheckedgnrquizzes[$this->gnrquiz->id]);
         }
     }
 }

@@ -18,7 +18,7 @@
  * This page allows the teacher to enter a manual grade for a particular question.
  * This page is expected to only be used in a popup window.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright gustav delius 2006
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -49,7 +49,7 @@ $PAGE->set_title(get_string('manualgradequestion', 'gnrquiz', array(
         'question' => format_string($attemptobj->get_question_name($slot)),
         'gnrquiz' => format_string($attemptobj->get_gnrquiz_name()), 'user' => fullname($student))));
 $PAGE->set_heading($attemptobj->get_course()->fullname);
-$output = $PAGE->get_renderer('mod_quiz');
+$output = $PAGE->get_renderer('mod_gnrquiz');
 echo $output->header();
 
 // Prepare summary information about this question attempt.
@@ -90,12 +90,12 @@ if (data_submitted() && confirm_sesskey()) {
             'courseid' => $attemptobj->get_courseid(),
             'context' => context_module::instance($attemptobj->get_cmid()),
             'other' => array(
-                'gnrquizid' => $attemptobj->get_quizid(),
+                'gnrquizid' => $attemptobj->get_gnrquizid(),
                 'attemptid' => $attemptobj->get_attemptid(),
                 'slot' => $slot
             )
         );
-        $event = \mod_quiz\event\question_manually_graded::create($params);
+        $event = \mod_gnrquiz\event\question_manually_graded::create($params);
         $event->trigger();
 
         echo $output->notification(get_string('changessaved'), 'notifysuccess');
@@ -104,7 +104,7 @@ if (data_submitted() && confirm_sesskey()) {
     }
 }
 
-// Print quiz information.
+// Print gnrquiz information.
 echo $output->review_summary_table($summarydata, 0);
 
 // Print the comment form.
@@ -130,7 +130,7 @@ echo $attemptobj->render_question_for_commenting($slot);
 </fieldset>
 <?php
 echo '</form>';
-$PAGE->requires->js_init_call('M.mod_quiz.init_comment_popup', null, false, gnrquiz_get_js_module());
+$PAGE->requires->js_init_call('M.mod_gnrquiz.init_comment_popup', null, false, gnrquiz_get_js_module());
 
 // End of the page.
 echo $output->footer();

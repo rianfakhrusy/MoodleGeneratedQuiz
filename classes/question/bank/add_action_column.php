@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A column type for the add this question to the quiz action.
+ * A column type for the add this question to the gnrquiz action.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @category  question
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\question\bank;
+namespace mod_gnrquiz\question\bank;
 defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * A column type for the add this question to the quiz action.
+ * A column type for the add this question to the gnrquiz action.
  *
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -39,11 +39,11 @@ class add_action_column extends \core_question\bank\action_column_base {
 
     public function init() {
         parent::init();
-        $this->stradd = get_string('addtoquiz', 'gnrquiz');
+        $this->stradd = get_string('addtognrquiz', 'gnrquiz');
     }
 
     public function get_name() {
-        return 'addtoquizaction';
+        return 'addtognrquizaction';
     }
 
     protected function display_content($question, $rowclasses) {

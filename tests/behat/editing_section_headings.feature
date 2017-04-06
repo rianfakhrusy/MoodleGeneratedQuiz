@@ -1,6 +1,6 @@
-@mod @mod_quiz
-Feature: Edit quiz page - section headings
-  In order to build a quiz laid out in sections the way I want
+@mod @mod_gnrquiz
+Feature: Edit gnrquiz page - section headings
+  In order to build a gnrquiz laid out in sections the way I want
   As a teacher
   I need to be able to add, edit and remove section headings as well as shuffle
   questions within a section.
@@ -21,41 +21,41 @@ Feature: Edit quiz page - section headings
     And I log in as "teacher1"
 
   @javascript
-  Scenario: We have a quiz with one default section
+  Scenario: We have a gnrquiz with one default section
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
       | Test questions   | truefalse   | TF3  | This is question 03 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
       | TF3      | 3    |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
+    And I follow "Edit gnrquiz"
     Then I should see "Shuffle"
 
   @javascript
   Scenario: Modify the default section headings
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I change quiz section heading "" to "This is section one"
+    And I follow "Edit gnrquiz"
+    And I change gnrquiz section heading "" to "This is section one"
     Then I should see "This is section one"
 
  @javascript
   Scenario: Modify section headings
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
@@ -63,22 +63,22 @@ Feature: Edit quiz page - section headings
       | Test questions   | truefalse   | TF3  | This is question 03 |
       | Test questions   | truefalse   | TF4  | This is question 04 |
       | Test questions   | truefalse   | TF5  | This is question 05 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
       | TF3      | 3    |
       | TF4      | 3    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       |           | 1         | 0       |
       | Heading 2 | 2         | 0       |
       | Heading 3 | 3         | 1       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I change quiz section heading "" to "This is section one"
-    And I change quiz section heading "Heading 2" to "This is section two"
+    And I follow "Edit gnrquiz"
+    And I change gnrquiz section heading "" to "This is section one"
+    And I change gnrquiz section heading "Heading 2" to "This is section two"
     Then I should see "This is section one"
     And I should see "This is section two"
 
@@ -86,7 +86,7 @@ Feature: Edit quiz page - section headings
   Scenario: Set section headings to blanks
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
@@ -94,31 +94,31 @@ Feature: Edit quiz page - section headings
       | Test questions   | truefalse   | TF3  | This is question 03 |
       | Test questions   | truefalse   | TF4  | This is question 04 |
       | Test questions   | truefalse   | TF5  | This is question 05 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
       | TF3      | 3    |
       | TF4      | 3    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 0       |
       | Heading 2 | 2         | 0       |
       | Heading 3 | 3         | 1       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    When I change quiz section heading "Heading 1" to ""
+    And I follow "Edit gnrquiz"
+    When I change gnrquiz section heading "Heading 1" to ""
     Then I should not see "Heading 1"
     And I should see "Heading 2"
     And I should see "Heading 3"
 
-    And I change quiz section heading "Heading 2" to ""
+    And I change gnrquiz section heading "Heading 2" to ""
     And I should not see "Heading 1"
     And I should not see "Heading 2"
     And I should see "Heading 3"
 
-    And I change quiz section heading "Heading 3" to ""
+    And I change gnrquiz section heading "Heading 3" to ""
     And I should not see "Heading 1"
     And I should not see "Heading 2"
     And I should not see "Heading 3"
@@ -127,25 +127,25 @@ Feature: Edit quiz page - section headings
   Scenario: Remove a section
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
       | Test questions   | truefalse   | TF3  | This is question 03 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
       | TF3      | 3    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 0       |
       | Heading 2 | 2         | 0       |
       | Heading 3 | 3         | 1       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
+    And I follow "Edit gnrquiz"
     And I follow "Remove heading 'Heading 2'"
     And I should see "Are you sure you want to remove the 'Heading 2' section heading?"
     And I click on "Yes" "button" in the "Confirm" "dialogue"
@@ -159,23 +159,23 @@ Feature: Edit quiz page - section headings
   Scenario: The edit-icon tool-tips are updated when a section is edited
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 0       |
       | Heading 2 | 2         | 0       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I change quiz section heading "Heading 2" to "Edited heading"
+    And I follow "Edit gnrquiz"
+    And I change gnrquiz section heading "Heading 2" to "Edited heading"
     Then I should see "Edited heading"
     And "Edit heading 'Edited heading'" "link" should be visible
     And "Remove heading 'Edited heading'" "link" should be visible
@@ -184,7 +184,7 @@ Feature: Edit quiz page - section headings
   Scenario: Moving a question up from section 3 to the first section.
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
@@ -193,7 +193,7 @@ Feature: Edit quiz page - section headings
       | Test questions   | truefalse   | TF4  | This is question 04 |
       | Test questions   | truefalse   | TF5  | This is question 05 |
       | Test questions   | truefalse   | TF6  | This is question 06 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
@@ -201,22 +201,22 @@ Feature: Edit quiz page - section headings
       | TF4      | 4    |
       | TF5      | 5    |
       | TF6      | 6    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 0       |
       | Heading 2 | 3         | 0       |
       | Heading 3 | 5         | 1       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I move "TF5" to "After Question 2" in the quiz by clicking the move icon
-    Then I should see "TF5" on quiz page "2"
+    And I follow "Edit gnrquiz"
+    And I move "TF5" to "After Question 2" in the gnrquiz by clicking the move icon
+    Then I should see "TF5" on gnrquiz page "2"
 
   @javascript
   Scenario: moving a question down from the first section to the second section.
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
@@ -225,7 +225,7 @@ Feature: Edit quiz page - section headings
       | Test questions   | truefalse   | TF4  | This is question 04 |
       | Test questions   | truefalse   | TF5  | This is question 05 |
       | Test questions   | truefalse   | TF6  | This is question 06 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
@@ -233,40 +233,40 @@ Feature: Edit quiz page - section headings
       | TF4      | 4    |
       | TF5      | 5    |
       | TF6      | 6    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 0       |
       | Heading 2 | 3         | 0       |
       | Heading 3 | 5         | 1       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I move "TF1" to "After Question 3" in the quiz by clicking the move icon
-    Then I should see "TF1" on quiz page "2"
+    And I follow "Edit gnrquiz"
+    And I move "TF1" to "After Question 3" in the gnrquiz by clicking the move icon
+    Then I should see "TF1" on gnrquiz page "2"
 
   @javascript
-  Scenario: I should not see a delete icon for the first section in the quiz.
+  Scenario: I should not see a delete icon for the first section in the gnrquiz.
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
       | Test questions   | truefalse   | TF3  | This is question 03 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
       | TF3      | 3    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 0       |
       | Heading 2 | 2         | 0       |
       | Heading 3 | 3         | 1       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
+    And I follow "Edit gnrquiz"
     Then "Remove heading 'Heading 1'" "link" should not exist
     And "Remove heading 'Heading 2'" "link" should exist
     And "Remove heading 'Heading 3'" "link" should exist
@@ -275,79 +275,79 @@ Feature: Edit quiz page - section headings
   Scenario: Turn shuffling on for a section
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
       | Test questions   | truefalse   | TF3  | This is question 03 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
       | TF3      | 3    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 0       |
       | Heading 2 | 2         | 0       |
       | Heading 3 | 3         | 0       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I click on shuffle for section "Heading 1" on the quiz edit page
-    And I click on shuffle for section "Heading 2" on the quiz edit page
-    Then shuffle for section "Heading 1" should be "On" on the quiz edit page
-    And shuffle for section "Heading 2" should be "On" on the quiz edit page
+    And I follow "Edit gnrquiz"
+    And I click on shuffle for section "Heading 1" on the gnrquiz edit page
+    And I click on shuffle for section "Heading 2" on the gnrquiz edit page
+    Then shuffle for section "Heading 1" should be "On" on the gnrquiz edit page
+    And shuffle for section "Heading 2" should be "On" on the gnrquiz edit page
 
   @javascript
   Scenario: Turn shuffling off for a section
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
       | Test questions   | truefalse   | TF3  | This is question 03 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
       | TF3      | 3    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Heading 1 | 1         | 1       |
       | Heading 2 | 2         | 1       |
       | Heading 3 | 3         | 1       |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
-    And I click on shuffle for section "Heading 1" on the quiz edit page
-    And I click on shuffle for section "Heading 2" on the quiz edit page
-    Then shuffle for section "Heading 1" should be "Off" on the quiz edit page
-    And shuffle for section "Heading 2" should be "Off" on the quiz edit page
+    And I follow "Edit gnrquiz"
+    And I click on shuffle for section "Heading 1" on the gnrquiz edit page
+    And I click on shuffle for section "Heading 2" on the gnrquiz edit page
+    Then shuffle for section "Heading 1" should be "Off" on the gnrquiz edit page
+    And shuffle for section "Heading 2" should be "Off" on the gnrquiz edit page
     And I reload the page
-    And shuffle for section "Heading 1" should be "Off" on the quiz edit page
-    And shuffle for section "Heading 2" should be "Off" on the quiz edit page
+    And shuffle for section "Heading 1" should be "Off" on the gnrquiz edit page
+    And shuffle for section "Heading 2" should be "Off" on the gnrquiz edit page
 
   @javascript
   Scenario: Add section heading option only appears for pages that are not the first in their section.
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
       | Test questions   | truefalse   | TF3  | This is question 03 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 1    |
       | TF3      | 2    |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
+    And I follow "Edit gnrquiz"
     And I click on the "Add" page break icon after question "TF1"
     And I click on "Add" "link" in the "Page 1" "list_item"
     Then "a new section heading" "list_item" in the "Page 1" "list_item" should not be visible
@@ -366,14 +366,14 @@ Feature: Edit quiz page - section headings
   Scenario: Verify sections are added in the right place afte ajax changes
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext    |
       | Test questions   | truefalse   | TF1  | This is question 01 |
       | Test questions   | truefalse   | TF2  | This is question 02 |
       | Test questions   | truefalse   | TF3  | This is question 03 |
       | Test questions   | truefalse   | TF4  | This is question 04 |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
@@ -382,9 +382,9 @@ Feature: Edit quiz page - section headings
 
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I follow "Edit quiz"
+    And I follow "Edit gnrquiz"
     And I click on the "Remove" page break icon after question "TF1"
-    And I open the "Page 2" add to quiz menu
+    And I open the "Page 2" add to gnrquiz menu
     And I follow "a new section heading" in the open menu
     Then "TF3" "list_item" should exist in the "Section heading ..." "list_item"
 
@@ -392,7 +392,7 @@ Feature: Edit quiz page - section headings
   Scenario: Add section works after removing a page break with more than 10 pages
     Given the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name | questiontext |
       | Test questions   | truefalse   | TF1  | Question 1   |
@@ -406,7 +406,7 @@ Feature: Edit quiz page - section headings
       | Test questions   | truefalse   | TF9  | Question 9   |
       | Test questions   | truefalse   | TF10 | Question 10  |
       | Test questions   | truefalse   | TF11 | Question 11  |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
@@ -421,8 +421,8 @@ Feature: Edit quiz page - section headings
       | TF11     | 11   |
     When I follow "Course 1"
     And I follow "Quiz 1"
-    And I click on "Edit quiz" "link" in the "Administration" "block"
+    And I click on "Edit gnrquiz" "link" in the "Administration" "block"
     And I click on the "Remove" page break icon after question "TF10"
-    And I open the "Page 10" add to quiz menu
+    And I open the "Page 10" add to gnrquiz menu
     And I follow "a new section heading" in the open menu
     Then "TF10" "list_item" should exist in the "Section heading ..." "list_item"

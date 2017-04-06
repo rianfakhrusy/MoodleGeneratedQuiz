@@ -18,7 +18,7 @@
  * Fallback page of /mod/gnrquiz/edit.php add random question dialog,
  * for users who do not use javascript.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2008 Olli Savolainen
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/addrandomform.php');
 require_once($CFG->dirroot . '/question/editlib.php');
 require_once($CFG->dirroot . '/question/category_class.php');
 
-list($thispageurl, $contexts, $cmid, $cm, $quiz, $pagevars) =
+list($thispageurl, $contexts, $cmid, $cm, $gnrquiz, $pagevars) =
         question_edit_setup('editq', '/mod/gnrquiz/addrandom.php', true);
 
 // These params are only passed from page request to request while we stay on
@@ -41,7 +41,7 @@ $category = optional_param('category', 0, PARAM_INT);
 $scrollpos = optional_param('scrollpos', 0, PARAM_INT);
 
 // Get the course object and related bits.
-if (!$course = $DB->get_record('course', array('id' => $quiz->course))) {
+if (!$course = $DB->get_record('course', array('id' => $gnrquiz->course))) {
     print_error('invalidcourseid');
 }
 // You need mod/gnrquiz:manage in addition to question capabilities to access this page.
@@ -98,9 +98,9 @@ if ($data = $mform->get_data()) {
                 'It seems a form was submitted without any button being pressed???');
     }
 
-    gnrquiz_add_random_questions($quiz, $addonpage, $categoryid, $data->numbertoadd, $includesubcategories);
-    gnrquiz_delete_previews($quiz);
-    gnrquiz_update_sumgrades($quiz);
+    gnrquiz_add_random_questions($gnrquiz, $addonpage, $categoryid, $data->numbertoadd, $includesubcategories);
+    gnrquiz_delete_previews($gnrquiz);
+    gnrquiz_update_sumgrades($gnrquiz);
     redirect($returnurl);
 }
 
@@ -112,17 +112,17 @@ $mform->set_data(array(
 ));
 
 // Setup $PAGE.
-$streditingquiz = get_string('editinga', 'moodle', get_string('modulename', 'gnrquiz'));
-$PAGE->navbar->add($streditingquiz);
-$PAGE->set_title($streditingquiz);
+$streditinggnrquiz = get_string('editinga', 'moodle', get_string('modulename', 'gnrquiz'));
+$PAGE->navbar->add($streditinggnrquiz);
+$PAGE->set_title($streditinggnrquiz);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
-if (!$quizname = $DB->get_field($cm->modname, 'name', array('id' => $cm->instance))) {
+if (!$gnrquizname = $DB->get_field($cm->modname, 'name', array('id' => $cm->instance))) {
             print_error('invalidcoursemodule');
 }
 
-echo $OUTPUT->heading(get_string('addrandomquestiontoquiz', 'gnrquiz', $quizname), 2);
+echo $OUTPUT->heading(get_string('addrandomquestiontognrquiz', 'gnrquiz', $gnrquizname), 2);
 $mform->display();
 echo $OUTPUT->footer();
 

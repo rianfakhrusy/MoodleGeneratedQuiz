@@ -15,26 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_quiz user override created event.
+ * The mod_gnrquiz user override created event.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_quiz\event;
+namespace mod_gnrquiz\event;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_quiz user override created event class.
+ * The mod_gnrquiz user override created event class.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int quizid: the id of the quiz.
+ *      - int gnrquizid: the id of the gnrquiz.
  * }
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @since      Moodle 2.7
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -56,7 +56,7 @@ class user_override_created extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventoverridecreated', 'mod_quiz');
+        return get_string('eventoverridecreated', 'mod_gnrquiz');
     }
 
     /**
@@ -65,7 +65,7 @@ class user_override_created extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' created the override with id '$this->objectid' for the quiz with " .
+        return "The user with id '$this->userid' created the override with id '$this->objectid' for the gnrquiz with " .
             "course module id '$this->contextinstanceid' for the user with id '{$this->relateduserid}'.";
     }
 

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_ipaddress plugin.
+ * Unit tests for the gnrquizaccess_ipaddress plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage ipaddress
  * @category   phpunit
  * @copyright  2008 The Open University
@@ -32,24 +32,24 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/ipaddress/rule.php');
 
 
 /**
- * Unit tests for the quizaccess_ipaddress plugin.
+ * Unit tests for the gnrquizaccess_ipaddress plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_ipaddress_testcase extends basic_testcase {
+class gnrquizaccess_ipaddress_testcase extends basic_testcase {
     public function test_ipaddress_access_rule() {
-        $quiz = new stdClass();
+        $gnrquiz = new stdClass();
         $attempt = new stdClass();
         $cm = new stdClass();
         $cm->id = 0;
 
         // Test the allowed case by getting the user's IP address. However, this
         // does not always work, for example using the mac install package on my laptop.
-        $quiz->subnet = getremoteaddr(null);
-        if (!empty($quiz->subnet)) {
-            $quizobj = new quiz($quiz, $cm, null);
-            $rule = new quizaccess_ipaddress($quizobj, 0);
+        $gnrquiz->subnet = getremoteaddr(null);
+        if (!empty($gnrquiz->subnet)) {
+            $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
+            $rule = new gnrquizaccess_ipaddress($gnrquizobj, 0);
 
             $this->assertFalse($rule->prevent_access());
             $this->assertFalse($rule->description());
@@ -59,9 +59,9 @@ class quizaccess_ipaddress_testcase extends basic_testcase {
             $this->assertFalse($rule->time_left_display($attempt, 0));
         }
 
-        $quiz->subnet = '0.0.0.0';
-        $quizobj = new quiz($quiz, $cm, null);
-        $rule = new quizaccess_ipaddress($quizobj, 0);
+        $gnrquiz->subnet = '0.0.0.0';
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
+        $rule = new gnrquizaccess_ipaddress($gnrquizobj, 0);
 
         $this->assertNotEmpty($rule->prevent_access());
         $this->assertEmpty($rule->description());

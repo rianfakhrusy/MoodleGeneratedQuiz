@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_delaybetweenattempts plugin.
+ * Implementaton of the gnrquizaccess_delaybetweenattempts plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage delaybetweenattempts
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,28 +35,28 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_delaybetweenattempts extends gnrquiz_access_rule_base {
+class gnrquizaccess_delaybetweenattempts extends gnrquiz_access_rule_base {
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
-        if (empty($quizobj->get_quiz()->delay1) && empty($quizobj->get_quiz()->delay2)) {
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
+        if (empty($gnrquizobj->get_gnrquiz()->delay1) && empty($gnrquizobj->get_gnrquiz()->delay2)) {
             return null;
         }
 
-        return new self($quizobj, $timenow);
+        return new self($gnrquizobj, $timenow);
     }
 
     public function prevent_new_attempt($numprevattempts, $lastattempt) {
-        if ($this->quiz->attempts > 0 && $numprevattempts >= $this->quiz->attempts) {
+        if ($this->gnrquiz->attempts > 0 && $numprevattempts >= $this->gnrquiz->attempts) {
             // No more attempts allowed anyway.
             return false;
         }
-        if ($this->quiz->timeclose != 0 && $this->timenow > $this->quiz->timeclose) {
+        if ($this->gnrquiz->timeclose != 0 && $this->timenow > $this->gnrquiz->timeclose) {
             // No more attempts allowed anyway.
             return false;
         }
         $nextstarttime = $this->compute_next_start_time($numprevattempts, $lastattempt);
         if ($this->timenow < $nextstarttime) {
-            if ($this->quiz->timeclose == 0 || $nextstarttime <= $this->quiz->timeclose) {
+            if ($this->gnrquiz->timeclose == 0 || $nextstarttime <= $this->gnrquiz->timeclose) {
                 return get_string('youmustwait', 'gnrquizaccess_delaybetweenattempts',
                         userdate($nextstarttime));
             } else {
@@ -79,15 +79,15 @@ class quizaccess_delaybetweenattempts extends gnrquiz_access_rule_base {
         }
 
         $lastattemptfinish = $lastattempt->timefinish;
-        if ($this->quiz->timelimit > 0) {
+        if ($this->gnrquiz->timelimit > 0) {
             $lastattemptfinish = min($lastattemptfinish,
-                    $lastattempt->timestart + $this->quiz->timelimit);
+                    $lastattempt->timestart + $this->gnrquiz->timelimit);
         }
 
-        if ($numprevattempts == 1 && $this->quiz->delay1) {
-            return $lastattemptfinish + $this->quiz->delay1;
-        } else if ($numprevattempts > 1 && $this->quiz->delay2) {
-            return $lastattemptfinish + $this->quiz->delay2;
+        if ($numprevattempts == 1 && $this->gnrquiz->delay1) {
+            return $lastattemptfinish + $this->gnrquiz->delay1;
+        } else if ($numprevattempts > 1 && $this->gnrquiz->delay2) {
+            return $lastattemptfinish + $this->gnrquiz->delay2;
         }
         return 0;
     }
@@ -95,6 +95,6 @@ class quizaccess_delaybetweenattempts extends gnrquiz_access_rule_base {
     public function is_finished($numprevattempts, $lastattempt) {
         $nextstarttime = $this->compute_next_start_time($numprevattempts, $lastattempt);
         return $this->timenow <= $nextstarttime &&
-        $this->quiz->timeclose != 0 && $nextstarttime >= $this->quiz->timeclose;
+        $this->gnrquiz->timeclose != 0 && $nextstarttime >= $this->gnrquiz->timeclose;
     }
 }

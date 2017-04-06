@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page is the entry page into the quiz UI. Displays information about the
- * quiz to students and teachers, and lets students see their previous attempts.
+ * This page is the entry page into the gnrquiz UI. Displays information about the
+ * gnrquiz to students and teachers, and lets students see their previous attempts.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,13 +41,13 @@ if ($id) {
         print_error('coursemisconf');
     }
 } else {
-    if (!$quiz = $DB->get_record('gnrquiz', array('id' => $q))) {
-        print_error('invalidquizid', 'gnrquiz');
+    if (!$gnrquiz = $DB->get_record('gnrquiz', array('id' => $q))) {
+        print_error('invalidgnrquizid', 'gnrquiz');
     }
-    if (!$course = $DB->get_record('course', array('id' => $quiz->course))) {
+    if (!$course = $DB->get_record('course', array('id' => $gnrquiz->course))) {
         print_error('invalidcourseid');
     }
-    if (!$cm = get_coursemodule_from_instance("quiz", $quiz->id, $course->id)) {
+    if (!$cm = get_coursemodule_from_instance("gnrquiz", $gnrquiz->id, $course->id)) {
         print_error('invalidcoursemodule');
     }
 }
@@ -64,13 +64,13 @@ $canpreview = has_capability('mod/gnrquiz:preview', $context);
 
 // Create an object to manage all the other (non-roles) access rules.
 $timenow = time();
-$quizobj = quiz::create($cm->instance, $USER->id);
-$accessmanager = new gnrquiz_access_manager($quizobj, $timenow,
+$gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
+$accessmanager = new gnrquiz_access_manager($gnrquizobj, $timenow,
         has_capability('mod/gnrquiz:ignoretimelimits', $context, null, false));
-$quiz = $quizobj->get_quiz();
+$gnrquiz = $gnrquizobj->get_gnrquiz();
 
 // Trigger course_module_viewed event and completion.
-gnrquiz_view($quiz, $course, $cm, $context);
+gnrquiz_view($gnrquiz, $course, $cm, $context);
 
 // Initialize $PAGE, compute blocks.
 $PAGE->set_url('/mod/gnrquiz/view.php', array('id' => $cm->id));
@@ -81,16 +81,16 @@ $viewobj->accessmanager = $accessmanager;
 $viewobj->canreviewmine = $canreviewmine || $canpreview;
 
 // Get this user's attempts.
-$attempts = gnrquiz_get_user_attempts($quiz->id, $USER->id, 'finished', true);
+$attempts = gnrquiz_get_user_attempts($gnrquiz->id, $USER->id, 'finished', true);
 $lastfinishedattempt = end($attempts);
 $unfinished = false;
 $unfinishedattemptid = null;
-if ($unfinishedattempt = gnrquiz_get_user_attempt_unfinished($quiz->id, $USER->id)) {
+if ($unfinishedattempt = gnrquiz_get_user_attempt_unfinished($gnrquiz->id, $USER->id)) {
     $attempts[] = $unfinishedattempt;
 
     // If the attempt is now overdue, deal with that - and pass isonline = false.
     // We want the student notified in this case.
-    $quizobj->create_attempt_object($unfinishedattempt)->handle_if_time_expired(time(), false);
+    $gnrquizobj->create_attempt_object($unfinishedattempt)->handle_if_time_expired(time(), false);
 
     $unfinished = $unfinishedattempt->state == gnrquiz_attempt::IN_PROGRESS ||
             $unfinishedattempt->state == gnrquiz_attempt::OVERDUE;
@@ -105,16 +105,16 @@ $numattempts = count($attempts);
 $viewobj->attempts = $attempts;
 $viewobj->attemptobjs = array();
 foreach ($attempts as $attempt) {
-    $viewobj->attemptobjs[] = new gnrquiz_attempt($attempt, $quiz, $cm, $course, false);
+    $viewobj->attemptobjs[] = new gnrquiz_attempt($attempt, $gnrquiz, $cm, $course, false);
 }
 
 // Work out the final grade, checking whether it was overridden in the gradebook.
 if (!$canpreview) {
-    $mygrade = gnrquiz_get_best_grade($quiz, $USER->id);
+    $mygrade = gnrquiz_get_best_grade($gnrquiz, $USER->id);
 } else if ($lastfinishedattempt) {
-    // Users who can preview the quiz don't get a proper grade, so work out a
+    // Users who can preview the gnrquiz don't get a proper grade, so work out a
     // plausible value to display instead, so the page looks right.
-    $mygrade = gnrquiz_rescale_grade($lastfinishedattempt->sumgrades, $quiz, false);
+    $mygrade = gnrquiz_rescale_grade($lastfinishedattempt->sumgrades, $gnrquiz, false);
 } else {
     $mygrade = null;
 }
@@ -122,7 +122,7 @@ if (!$canpreview) {
 $mygradeoverridden = false;
 $gradebookfeedback = '';
 
-$grading_info = grade_get_grades($course->id, 'mod', 'gnrquiz', $quiz->id, $USER->id);
+$grading_info = grade_get_grades($course->id, 'mod', 'gnrquiz', $gnrquiz->id, $USER->id);
 if (!empty($grading_info->items)) {
     $item = $grading_info->items[0];
     if (isset($item->grades[$USER->id])) {
@@ -138,24 +138,24 @@ if (!empty($grading_info->items)) {
     }
 }
 
-$title = $course->shortname . ': ' . format_string($quiz->name);
+$title = $course->shortname . ': ' . format_string($gnrquiz->name);
 $PAGE->set_title($title);
 $PAGE->set_heading($course->fullname);
-$output = $PAGE->get_renderer('mod_quiz');
+$output = $PAGE->get_renderer('mod_gnrquiz');
 
 // Print table with existing attempts.
 if ($attempts) {
     // Work out which columns we need, taking account what data is available in each attempt.
-    list($someoptions, $alloptions) = gnrquiz_get_combined_reviewoptions($quiz, $attempts);
+    list($someoptions, $alloptions) = gnrquiz_get_combined_reviewoptions($gnrquiz, $attempts);
 
-    $viewobj->attemptcolumn  = $quiz->attempts != 1;
+    $viewobj->attemptcolumn  = $gnrquiz->attempts != 1;
 
     $viewobj->gradecolumn    = $someoptions->marks >= question_display_options::MARK_AND_MAX &&
-            gnrquiz_has_grades($quiz);
-    $viewobj->markcolumn     = $viewobj->gradecolumn && ($quiz->grade != $quiz->sumgrades);
+            gnrquiz_has_grades($gnrquiz);
+    $viewobj->markcolumn     = $viewobj->gradecolumn && ($gnrquiz->grade != $gnrquiz->sumgrades);
     $viewobj->overallstats   = $lastfinishedattempt && $alloptions->marks >= question_display_options::MARK_AND_MAX;
 
-    $viewobj->feedbackcolumn = gnrquiz_has_feedback($quiz) && $alloptions->overallfeedback;
+    $viewobj->feedbackcolumn = gnrquiz_has_feedback($gnrquiz) && $alloptions->overallfeedback;
 }
 
 $viewobj->timenow = $timenow;
@@ -169,7 +169,7 @@ $viewobj->lastfinishedattempt = $lastfinishedattempt;
 $viewobj->canedit = has_capability('mod/gnrquiz:manage', $context);
 $viewobj->editurl = new moodle_url('/mod/gnrquiz/edit.php', array('cmid' => $cm->id));
 $viewobj->backtocourseurl = new moodle_url('/course/view.php', array('id' => $course->id));
-$viewobj->startattempturl = $quizobj->start_attempt_url();
+$viewobj->startattempturl = $gnrquizobj->start_attempt_url();
 
 if ($accessmanager->is_preflight_check_required($unfinishedattemptid)) {
     $viewobj->preflightcheckform = $accessmanager->get_preflight_check_form(
@@ -178,23 +178,23 @@ if ($accessmanager->is_preflight_check_required($unfinishedattemptid)) {
 $viewobj->popuprequired = $accessmanager->attempt_must_be_in_popup();
 $viewobj->popupoptions = $accessmanager->get_popup_options();
 
-// Display information about this quiz.
+// Display information about this gnrquiz.
 $viewobj->infomessages = $viewobj->accessmanager->describe_rules();
-if ($quiz->attempts != 1) {
+if ($gnrquiz->attempts != 1) {
     $viewobj->infomessages[] = get_string('gradingmethod', 'gnrquiz',
-            gnrquiz_get_grading_option_name($quiz->grademethod));
+            gnrquiz_get_grading_option_name($gnrquiz->grademethod));
 }
 
 // Determine wheter a start attempt button should be displayed.
-$viewobj->quizhasquestions = $quizobj->has_questions();
+$viewobj->gnrquizhasquestions = $gnrquizobj->has_questions();
 $viewobj->preventmessages = array();
-if (!$viewobj->quizhasquestions) {
+if (!$viewobj->gnrquizhasquestions) {
     $viewobj->buttontext = '';
 
 } else {
     if ($unfinished) {
         if ($canattempt) {
-            $viewobj->buttontext = get_string('continueattemptquiz', 'gnrquiz');
+            $viewobj->buttontext = get_string('continueattemptgnrquiz', 'gnrquiz');
         } else if ($canpreview) {
             $viewobj->buttontext = get_string('continuepreview', 'gnrquiz');
         }
@@ -206,13 +206,13 @@ if (!$viewobj->quizhasquestions) {
             if ($viewobj->preventmessages) {
                 $viewobj->buttontext = '';
             } else if ($viewobj->numattempts == 0) {
-                $viewobj->buttontext = get_string('attemptquiznow', 'gnrquiz');
+                $viewobj->buttontext = get_string('attemptgnrquiznow', 'gnrquiz');
             } else {
-                $viewobj->buttontext = get_string('reattemptquiz', 'gnrquiz');
+                $viewobj->buttontext = get_string('reattemptgnrquiz', 'gnrquiz');
             }
 
         } else if ($canpreview) {
-            $viewobj->buttontext = get_string('previewquiznow', 'gnrquiz');
+            $viewobj->buttontext = get_string('previewgnrquiznow', 'gnrquiz');
         }
     }
 
@@ -234,14 +234,19 @@ $viewobj->showbacktocourse = ($viewobj->buttontext === '' &&
 echo $OUTPUT->header();
 
 if (isguestuser()) {
-    // Guests can't do a quiz, so offer them a choice of logging in or going back.
-    echo $output->view_page_guest($course, $quiz, $cm, $context, $viewobj->infomessages);
+    // Guests can't do a gnrquiz, so offer them a choice of logging in or going back.
+    echo $output->view_page_guest($course, $gnrquiz, $cm, $context, $viewobj->infomessages);
 } else if (!isguestuser() && !($canattempt || $canpreview
           || $viewobj->canreviewmine)) {
     // If they are not enrolled in this course in a good enough role, tell them to enrol.
-    echo $output->view_page_notenrolled($course, $quiz, $cm, $context, $viewobj->infomessages);
+    echo $output->view_page_notenrolled($course, $gnrquiz, $cm, $context, $viewobj->infomessages);
 } else {
-    echo $output->view_page($course, $quiz, $cm, $context, $viewobj);
+    gnrquiz_add_gnrquiz_question(10,$gnrquiz);
+    #gnrquiz_add_random_questions($gnrquiz, 0, 4, 1, false);
+    gnrquiz_delete_previews($gnrquiz);
+    gnrquiz_update_sumgrades($gnrquiz);
+
+    echo $output->view_page($course, $gnrquiz, $cm, $context, $viewobj);
 }
 
 echo $OUTPUT->footer();

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the setting form for the quiz overview report.
+ * This file defines the setting form for the gnrquiz overview report.
  *
  * @package   gnrquiz_overview
  * @copyright 2008 Jamie Pratt

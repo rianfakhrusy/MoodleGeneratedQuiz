@@ -15,12 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Back-end code for handling data about quizzes and the current user's attempt.
+ * Back-end code for handling data about gnrquizzes and the current user's attempt.
  *
- * There are classes for loading all the information about a quiz and attempts,
+ * There are classes for loading all the information about a gnrquiz and attempts,
  * and for displaying the navigation panel.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2008 onwards Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * Class for quiz exceptions. Just saves a couple of arguments on the
+ * Class for gnrquiz exceptions. Just saves a couple of arguments on the
  * constructor for a moodle_exception.
  *
  * @copyright 2008 Tim Hunt
@@ -38,9 +38,9 @@ defined('MOODLE_INTERNAL') || die();
  * @since     Moodle 2.0
  */
 class moodle_gnrquiz_exception extends moodle_exception {
-    public function __construct($quizobj, $errorcode, $a = null, $link = '', $debuginfo = null) {
+    public function __construct($gnrquizobj, $errorcode, $a = null, $link = '', $debuginfo = null) {
         if (!$link) {
-            $link = $quizobj->view_url();
+            $link = $gnrquizobj->view_url();
         }
         parent::__construct($errorcode, 'gnrquiz', $link, $a, $debuginfo);
     }
@@ -48,7 +48,7 @@ class moodle_gnrquiz_exception extends moodle_exception {
 
 
 /**
- * A class encapsulating a quiz and the questions it contains, and making the
+ * A class encapsulating a gnrquiz and the questions it contains, and making the
  * information available to scripts like view.php.
  *
  * Initially, it only loads a minimal amout of information about each question - loading
@@ -59,21 +59,21 @@ class moodle_gnrquiz_exception extends moodle_exception {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since      Moodle 2.0
  */
-class quiz {
+class gnrquiz {
     /** @var stdClass the course settings from the database. */
     protected $course;
     /** @var stdClass the course_module settings from the database. */
     protected $cm;
-    /** @var stdClass the quiz settings from the database. */
-    protected $quiz;
-    /** @var context the quiz context. */
+    /** @var stdClass the gnrquiz settings from the database. */
+    protected $gnrquiz;
+    /** @var context the gnrquiz context. */
     protected $context;
 
     /** @var array of questions augmented with slot information. */
     protected $questions = null;
     /** @var array of gnrquiz_section rows. */
     protected $sections = null;
-    /** @var gnrquiz_access_manager the access manager for this quiz. */
+    /** @var gnrquiz_access_manager the access manager for this gnrquiz. */
     protected $accessmanager = null;
     /** @var bool whether the current user has capability mod/gnrquiz:preview. */
     protected $ispreviewuser = null;
@@ -82,15 +82,15 @@ class quiz {
     /**
      * Constructor, assuming we already have the necessary data loaded.
      *
-     * @param object $quiz the row from the quiz table.
-     * @param object $cm the course_module object for this quiz.
+     * @param object $gnrquiz the row from the gnrquiz table.
+     * @param object $cm the course_module object for this gnrquiz.
      * @param object $course the row from the course table for the course we belong to.
      * @param bool $getcontext intended for testing - stops the constructor getting the context.
      */
-    public function __construct($quiz, $cm, $course, $getcontext = true) {
-        $this->quiz = $quiz;
+    public function __construct($gnrquiz, $cm, $course, $getcontext = true) {
+        $this->gnrquiz = $gnrquiz;
         $this->cm = $cm;
-        $this->quiz->cmid = $this->cm->id;
+        $this->gnrquiz->cmid = $this->cm->id;
         $this->course = $course;
         if ($getcontext && !empty($cm->id)) {
             $this->context = context_module::instance($cm->id);
@@ -98,50 +98,50 @@ class quiz {
     }
 
     /**
-     * Static function to create a new quiz object for a specific user.
+     * Static function to create a new gnrquiz object for a specific user.
      *
-     * @param int $quizid the the quiz id.
+     * @param int $gnrquizid the the gnrquiz id.
      * @param int $userid the the userid.
-     * @return quiz the new quiz object
+     * @return gnrquiz the new gnrquiz object
      */
-    public static function create($quizid, $userid = null) {
+    public static function create($gnrquizid, $userid = null) {
         global $DB;
 
-        $quiz = gnrquiz_access_manager::load_gnrquiz_and_settings($quizid);
-        $course = $DB->get_record('course', array('id' => $quiz->course), '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id, $course->id, false, MUST_EXIST);
+        $gnrquiz = gnrquiz_access_manager::load_gnrquiz_and_settings($gnrquizid);
+        $course = $DB->get_record('course', array('id' => $gnrquiz->course), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id, $course->id, false, MUST_EXIST);
 
-        // Update quiz with override information.
+        // Update gnrquiz with override information.
         if ($userid) {
-            $quiz = gnrquiz_update_effective_access($quiz, $userid);
+            $gnrquiz = gnrquiz_update_effective_access($gnrquiz, $userid);
         }
 
-        return new quiz($quiz, $cm, $course);
+        return new gnrquiz($gnrquiz, $cm, $course);
     }
 
     /**
-     * Create a {@link gnrquiz_attempt} for an attempt at this quiz.
+     * Create a {@link gnrquiz_attempt} for an attempt at this gnrquiz.
      * @param object $attemptdata row from the gnrquiz_attempts table.
      * @return gnrquiz_attempt the new gnrquiz_attempt object.
      */
     public function create_attempt_object($attemptdata) {
-        return new gnrquiz_attempt($attemptdata, $this->quiz, $this->cm, $this->course);
+        return new gnrquiz_attempt($attemptdata, $this->gnrquiz, $this->cm, $this->course);
     }
 
     // Functions for loading more data =========================================
 
     /**
-     * Load just basic information about all the questions in this quiz.
+     * Load just basic information about all the questions in this gnrquiz.
      */
     public function preload_questions() {
         $this->questions = question_preload_questions(null,
                 'slot.maxmark, slot.id AS slotid, slot.slot, slot.page',
-                '{gnrquiz_slots} slot ON slot.quizid = :quizid AND q.id = slot.questionid',
-                array('quizid' => $this->quiz->id), 'slot.slot');
+                '{gnrquiz_slots} slot ON slot.gnrquizid = :gnrquizid AND q.id = slot.questionid',
+                array('gnrquizid' => $this->gnrquiz->id), 'slot.slot');
     }
 
     /**
-     * Fully load some or all of the questions for this quiz. You must call
+     * Fully load some or all of the questions for this gnrquiz. You must call
      * {@link preload_questions()} first.
      *
      * @param array $questionids question ids of the questions to load. null for all.
@@ -163,11 +163,11 @@ class quiz {
     }
 
     /**
-     * Get an instance of the {@link \mod_quiz\structure} class for this quiz.
-     * @return \mod_quiz\structure describes the questions in the quiz.
+     * Get an instance of the {@link \mod_gnrquiz\structure} class for this gnrquiz.
+     * @return \mod_gnrquiz\structure describes the questions in the gnrquiz.
      */
     public function get_structure() {
-        return \mod_quiz\structure::create_for_quiz($this);
+        return \mod_gnrquiz\structure::create_for_gnrquiz($this);
     }
 
     // Simple getters ==========================================================
@@ -181,29 +181,29 @@ class quiz {
         return $this->course;
     }
 
-    /** @return int the quiz id. */
-    public function get_quizid() {
-        return $this->quiz->id;
+    /** @return int the gnrquiz id. */
+    public function get_gnrquizid() {
+        return $this->gnrquiz->id;
     }
 
-    /** @return object the row of the quiz table. */
-    public function get_quiz() {
-        return $this->quiz;
+    /** @return object the row of the gnrquiz table. */
+    public function get_gnrquiz() {
+        return $this->gnrquiz;
     }
 
-    /** @return string the name of this quiz. */
+    /** @return string the name of this gnrquiz. */
     public function get_gnrquiz_name() {
-        return $this->quiz->name;
+        return $this->gnrquiz->name;
     }
 
-    /** @return int the quiz navigation method. */
+    /** @return int the gnrquiz navigation method. */
     public function get_navigation_method() {
-        return $this->quiz->navmethod;
+        return $this->gnrquiz->navmethod;
     }
 
-    /** @return int the number of attempts allowed at this quiz (0 = infinite). */
+    /** @return int the number of attempts allowed at this gnrquiz (0 = infinite). */
     public function get_num_attempts_allowed() {
-        return $this->quiz->attempts;
+        return $this->gnrquiz->attempts;
     }
 
     /** @return int the course_module id. */
@@ -216,13 +216,13 @@ class quiz {
         return $this->cm;
     }
 
-    /** @return object the module context for this quiz. */
+    /** @return object the module context for this gnrquiz. */
     public function get_context() {
         return $this->context;
     }
 
     /**
-     * @return bool wether the current user is someone who previews the quiz,
+     * @return bool wether the current user is someone who previews the gnrquiz,
      * rather than attempting it.
      */
     public function is_preview_user() {
@@ -233,7 +233,7 @@ class quiz {
     }
 
     /**
-     * @return whether any questions have been added to this quiz.
+     * @return whether any questions have been added to this gnrquiz.
      */
     public function has_questions() {
         if ($this->questions === null) {
@@ -269,24 +269,24 @@ class quiz {
     }
 
     /**
-     * Get all the sections in this quiz.
+     * Get all the sections in this gnrquiz.
      * @return array 0, 1, 2, ... => gnrquiz_sections row from the database.
      */
     public function get_sections() {
         global $DB;
         if ($this->sections === null) {
             $this->sections = array_values($DB->get_records('gnrquiz_sections',
-                    array('quizid' => $this->get_quizid()), 'firstslot'));
+                    array('gnrquizid' => $this->get_gnrquizid()), 'firstslot'));
         }
         return $this->sections;
     }
 
     /**
      * Return gnrquiz_access_manager and instance of the gnrquiz_access_manager class
-     * for this quiz at this time.
+     * for this gnrquiz at this time.
      * @param int $timenow the current time as a unix timestamp.
      * @return gnrquiz_access_manager and instance of the gnrquiz_access_manager class
-     *      for this quiz at this time.
+     *      for this gnrquiz at this time.
      */
     public function get_access_manager($timenow) {
         if (is_null($this->accessmanager)) {
@@ -297,14 +297,14 @@ class quiz {
     }
 
     /**
-     * Wrapper round the has_capability funciton that automatically passes in the quiz context.
+     * Wrapper round the has_capability funciton that automatically passes in the gnrquiz context.
      */
     public function has_capability($capability, $userid = null, $doanything = true) {
         return has_capability($capability, $this->context, $userid, $doanything);
     }
 
     /**
-     * Wrapper round the require_capability funciton that automatically passes in the quiz context.
+     * Wrapper round the require_capability funciton that automatically passes in the gnrquiz context.
      */
     public function require_capability($capability, $userid = null, $doanything = true) {
         return require_capability($capability, $this->context, $userid, $doanything);
@@ -312,7 +312,7 @@ class quiz {
 
     // URLs related to this attempt ============================================
     /**
-     * @return string the URL of this quiz's view page.
+     * @return string the URL of this gnrquiz's view page.
      */
     public function view_url() {
         global $CFG;
@@ -320,7 +320,7 @@ class quiz {
     }
 
     /**
-     * @return string the URL of this quiz's edit page.
+     * @return string the URL of this gnrquiz's edit page.
      */
     public function edit_url() {
         global $CFG;
@@ -342,7 +342,7 @@ class quiz {
     }
 
     /**
-     * @return string the URL of this quiz's edit page. Needs to be POSTed to with a cmid parameter.
+     * @return string the URL of this gnrquiz's edit page. Needs to be POSTed to with a cmid parameter.
      */
     public function start_attempt_url($page = 0) {
         $params = array('cmid' => $this->cm->id, 'sesskey' => sesskey());
@@ -373,11 +373,11 @@ class quiz {
     /**
      * @param bool $notused not used.
      * @return string an empty string.
-     * @deprecated since 3.1. This sort of functionality is now entirely handled by quiz access rules.
+     * @deprecated since 3.1. This sort of functionality is now entirely handled by gnrquiz access rules.
      */
     public function confirm_start_attempt_message($notused) {
         debugging('confirm_start_attempt_message is deprecated. ' .
-                'This sort of functionality is now entirely handled by quiz access rules.');
+                'This sort of functionality is now entirely handled by gnrquiz access rules.');
         return '';
     }
 
@@ -403,17 +403,17 @@ class quiz {
         if ($when == mod_gnrquiz_display_options::DURING ||
                 $when == mod_gnrquiz_display_options::IMMEDIATELY_AFTER) {
             return '';
-        } else if ($when == mod_gnrquiz_display_options::LATER_WHILE_OPEN && $this->quiz->timeclose &&
-                $this->quiz->reviewattempt & mod_gnrquiz_display_options::AFTER_CLOSE) {
+        } else if ($when == mod_gnrquiz_display_options::LATER_WHILE_OPEN && $this->gnrquiz->timeclose &&
+                $this->gnrquiz->reviewattempt & mod_gnrquiz_display_options::AFTER_CLOSE) {
             return get_string('noreviewuntil' . $langstrsuffix, 'gnrquiz',
-                    userdate($this->quiz->timeclose, $dateformat));
+                    userdate($this->gnrquiz->timeclose, $dateformat));
         } else {
             return get_string('noreview' . $langstrsuffix, 'gnrquiz');
         }
     }
 
     /**
-     * @param string $title the name of this particular quiz page.
+     * @param string $title the name of this particular gnrquiz page.
      * @return array the data that needs to be sent to print_header_simple as the $navigation
      * parameter.
      */
@@ -435,9 +435,9 @@ class quiz {
     }
 
     /**
-     * Return all the question types used in this quiz.
+     * Return all the question types used in this gnrquiz.
      *
-     * @param  boolean $includepotential if the quiz include random questions, setting this flag to true will make the function to
+     * @param  boolean $includepotential if the gnrquiz include random questions, setting this flag to true will make the function to
      * return all the possible question types in the random questions category
      * @return array a sorted array including the different question types
      * @since  Moodle 3.1
@@ -448,7 +448,7 @@ class quiz {
         // To control if we need to look in categories for questions.
         $qcategories = array();
 
-        // We must be careful with random questions, if we find a random question we must assume that the quiz may content
+        // We must be careful with random questions, if we find a random question we must assume that the gnrquiz may content
         // any of the questions in the referenced category (or subcategories).
         foreach ($this->get_questions() as $questiondata) {
             if ($questiondata->qtype == 'random' and $includepotential) {
@@ -488,8 +488,8 @@ class quiz {
 
 
 /**
- * This class extends the quiz class to hold data about the state of a particular attempt,
- * in addition to the data about the quiz.
+ * This class extends the gnrquiz class to hold data about the state of a particular attempt,
+ * in addition to the data about the gnrquiz.
  *
  * @copyright  2008 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -506,16 +506,16 @@ class gnrquiz_attempt {
     /** @var string to identify the abandoned state. */
     const ABANDONED   = 'abandoned';
 
-    /** @var int maximum number of slots in the quiz for the review page to default to show all. */
+    /** @var int maximum number of slots in the gnrquiz for the review page to default to show all. */
     const MAX_SLOTS_FOR_DEFAULT_REVIEW_SHOW_ALL = 50;
 
-    /** @var quiz object containing the quiz settings. */
-    protected $quizobj;
+    /** @var gnrquiz object containing the gnrquiz settings. */
+    protected $gnrquizobj;
 
     /** @var stdClass the gnrquiz_attempts row. */
     protected $attempt;
 
-    /** @var question_usage_by_activity the question usage for this quiz attempt. */
+    /** @var question_usage_by_activity the question usage for this gnrquiz attempt. */
     protected $quba;
 
     /**
@@ -547,17 +547,17 @@ class gnrquiz_attempt {
      * Constructor assuming we already have the necessary data loaded.
      *
      * @param object $attempt the row of the gnrquiz_attempts table.
-     * @param object $quiz the quiz object for this attempt and user.
-     * @param object $cm the course_module object for this quiz.
+     * @param object $gnrquiz the gnrquiz object for this attempt and user.
+     * @param object $cm the course_module object for this gnrquiz.
      * @param object $course the row from the course table for the course we belong to.
      * @param bool $loadquestions (optional) if true, the default, load all the details
      *      of the state of each question. Else just set up the basic details of the attempt.
      */
-    public function __construct($attempt, $quiz, $cm, $course, $loadquestions = true) {
+    public function __construct($attempt, $gnrquiz, $cm, $course, $loadquestions = true) {
         global $DB;
 
         $this->attempt = $attempt;
-        $this->quizobj = new quiz($quiz, $cm, $course);
+        $this->gnrquizobj = new gnrquiz($gnrquiz, $cm, $course);
 
         if (!$loadquestions) {
             return;
@@ -565,10 +565,10 @@ class gnrquiz_attempt {
 
         $this->quba = question_engine::load_questions_usage_by_activity($this->attempt->uniqueid);
         $this->slots = $DB->get_records('gnrquiz_slots',
-                array('quizid' => $this->get_quizid()), 'slot',
+                array('gnrquizid' => $this->get_gnrquizid()), 'slot',
                 'slot, requireprevious, questionid');
         $this->sections = array_values($DB->get_records('gnrquiz_sections',
-                array('quizid' => $this->get_quizid()), 'firstslot'));
+                array('gnrquizid' => $this->get_gnrquizid()), 'firstslot'));
 
         $this->link_sections_and_slots();
         $this->determine_layout();
@@ -583,14 +583,14 @@ class gnrquiz_attempt {
         global $DB;
 
         $attempt = $DB->get_record('gnrquiz_attempts', $conditions, '*', MUST_EXIST);
-        $quiz = gnrquiz_access_manager::load_gnrquiz_and_settings($attempt->quiz);
-        $course = $DB->get_record('course', array('id' => $quiz->course), '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id, $course->id, false, MUST_EXIST);
+        $gnrquiz = gnrquiz_access_manager::load_gnrquiz_and_settings($attempt->gnrquiz);
+        $course = $DB->get_record('course', array('id' => $gnrquiz->course), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id, $course->id, false, MUST_EXIST);
 
-        // Update quiz with override information.
-        $quiz = gnrquiz_update_effective_access($quiz, $attempt->userid);
+        // Update gnrquiz with override information.
+        $gnrquiz = gnrquiz_update_effective_access($gnrquiz, $attempt->userid);
 
-        return new gnrquiz_attempt($attempt, $quiz, $cm, $course);
+        return new gnrquiz_attempt($attempt, $gnrquiz, $cm, $course);
     }
 
     /**
@@ -705,63 +705,63 @@ class gnrquiz_attempt {
     }
 
     // Simple getters ==========================================================
-    public function get_quiz() {
-        return $this->quizobj->get_quiz();
+    public function get_gnrquiz() {
+        return $this->gnrquizobj->get_gnrquiz();
     }
 
-    public function get_quizobj() {
-        return $this->quizobj;
+    public function get_gnrquizobj() {
+        return $this->gnrquizobj;
     }
 
     /** @return int the course id. */
     public function get_courseid() {
-        return $this->quizobj->get_courseid();
+        return $this->gnrquizobj->get_courseid();
     }
 
     /** @return int the course id. */
     public function get_course() {
-        return $this->quizobj->get_course();
+        return $this->gnrquizobj->get_course();
     }
 
-    /** @return int the quiz id. */
-    public function get_quizid() {
-        return $this->quizobj->get_quizid();
+    /** @return int the gnrquiz id. */
+    public function get_gnrquizid() {
+        return $this->gnrquizobj->get_gnrquizid();
     }
 
-    /** @return string the name of this quiz. */
+    /** @return string the name of this gnrquiz. */
     public function get_gnrquiz_name() {
-        return $this->quizobj->get_gnrquiz_name();
+        return $this->gnrquizobj->get_gnrquiz_name();
     }
 
-    /** @return int the quiz navigation method. */
+    /** @return int the gnrquiz navigation method. */
     public function get_navigation_method() {
-        return $this->quizobj->get_navigation_method();
+        return $this->gnrquizobj->get_navigation_method();
     }
 
     /** @return object the course_module object. */
     public function get_cm() {
-        return $this->quizobj->get_cm();
+        return $this->gnrquizobj->get_cm();
     }
 
     /** @return object the course_module object. */
     public function get_cmid() {
-        return $this->quizobj->get_cmid();
+        return $this->gnrquizobj->get_cmid();
     }
 
     /**
-     * @return bool wether the current user is someone who previews the quiz,
+     * @return bool wether the current user is someone who previews the gnrquiz,
      * rather than attempting it.
      */
     public function is_preview_user() {
-        return $this->quizobj->is_preview_user();
+        return $this->gnrquizobj->is_preview_user();
     }
 
-    /** @return int the number of attempts allowed at this quiz (0 = infinite). */
+    /** @return int the number of attempts allowed at this gnrquiz (0 = infinite). */
     public function get_num_attempts_allowed() {
-        return $this->quizobj->get_num_attempts_allowed();
+        return $this->gnrquizobj->get_num_attempts_allowed();
     }
 
-    /** @return int number fo pages in this quiz. */
+    /** @return int number fo pages in this gnrquiz. */
     public function get_num_pages() {
         return count($this->pagelayout);
     }
@@ -769,10 +769,10 @@ class gnrquiz_attempt {
     /**
      * @param int $timenow the current time as a unix timestamp.
      * @return gnrquiz_access_manager and instance of the gnrquiz_access_manager class
-     *      for this quiz at this time.
+     *      for this gnrquiz at this time.
      */
     public function get_access_manager($timenow) {
-        return $this->quizobj->get_access_manager($timenow);
+        return $this->gnrquizobj->get_access_manager($timenow);
     }
 
     /** @return int the attempt id. */
@@ -872,7 +872,7 @@ class gnrquiz_attempt {
     }
 
     /**
-     * Has the student, in this attempt, engaged with the quiz in a non-trivial way?
+     * Has the student, in this attempt, engaged with the gnrquiz in a non-trivial way?
      * That is, is there any question worth a non-zero number of marks, where
      * the student has made some response that we have saved?
      * @return bool true if we have saved a response for at least one graded question.
@@ -894,8 +894,8 @@ class gnrquiz_attempt {
      *
      * Some behaviours may be able to provide interesting summary information
      * about the attempt as a whole, and this method provides access to that data.
-     * To see how this works, try setting a quiz to one of the CBM behaviours,
-     * and then look at the extra information displayed at the top of the quiz
+     * To see how this works, try setting a gnrquiz to one of the CBM behaviours,
+     * and then look at the extra information displayed at the top of the gnrquiz
      * review page once you have sumitted an attempt.
      *
      * In the return value, the array keys are identifiers of the form
@@ -903,7 +903,7 @@ class gnrquiz_attempt {
      * The values are arrays with two items, title and content. Each of these
      * will be either a string, or a renderable.
      *
-     * @param question_display_options $options the display options for this quiz attempt at this time.
+     * @param question_display_options $options the display options for this gnrquiz attempt at this time.
      * @return array as described above.
      */
     public function get_additional_summary_data(question_display_options $options) {
@@ -915,22 +915,22 @@ class gnrquiz_attempt {
      * @param $grade a particular grade.
      */
     public function get_overall_feedback($grade) {
-        return gnrquiz_feedback_for_grade($grade, $this->get_quiz(),
-                $this->quizobj->get_context());
+        return gnrquiz_feedback_for_grade($grade, $this->get_gnrquiz(),
+                $this->gnrquizobj->get_context());
     }
 
     /**
-     * Wrapper round the has_capability funciton that automatically passes in the quiz context.
+     * Wrapper round the has_capability funciton that automatically passes in the gnrquiz context.
      */
     public function has_capability($capability, $userid = null, $doanything = true) {
-        return $this->quizobj->has_capability($capability, $userid, $doanything);
+        return $this->gnrquizobj->has_capability($capability, $userid, $doanything);
     }
 
     /**
-     * Wrapper round the require_capability funciton that automatically passes in the quiz context.
+     * Wrapper round the require_capability funciton that automatically passes in the gnrquiz context.
      */
     public function require_capability($capability, $userid = null, $doanything = true) {
-        return $this->quizobj->require_capability($capability, $userid, $doanything);
+        return $this->gnrquizobj->require_capability($capability, $userid, $doanything);
     }
 
     /**
@@ -945,11 +945,11 @@ class gnrquiz_attempt {
         }
 
         // These next tests are in a slighly funny order. The point is that the
-        // common and most performance-critical case is students attempting a quiz
+        // common and most performance-critical case is students attempting a gnrquiz
         // so we want to check that permisison first.
 
         if ($this->has_capability($capability)) {
-            // User has the permission that lets you do the quiz as a student. Fine.
+            // User has the permission that lets you do the gnrquiz as a student. Fine.
             return;
         }
 
@@ -970,10 +970,10 @@ class gnrquiz_attempt {
      */
     public function can_navigate_to($slot) {
         switch ($this->get_navigation_method()) {
-            case QUIZ_NAVMETHOD_FREE:
+            case GNRQUIZ_NAVMETHOD_FREE:
                 return true;
                 break;
-            case QUIZ_NAVMETHOD_SEQ:
+            case GNRQUIZ_NAVMETHOD_SEQ:
                 return false;
                 break;
         }
@@ -985,11 +985,11 @@ class gnrquiz_attempt {
      *      IMMEDIATELY_AFTER, LATER_WHILE_OPEN or AFTER_CLOSE constants.
      */
     public function get_attempt_state() {
-        return gnrquiz_attempt_state($this->get_quiz(), $this->attempt);
+        return gnrquiz_attempt_state($this->get_gnrquiz(), $this->attempt);
     }
 
     /**
-     * Wrapper that the correct mod_gnrquiz_display_options for this quiz at the
+     * Wrapper that the correct mod_gnrquiz_display_options for this gnrquiz at the
      * moment.
      *
      * @return question_display_options the render options for this user on this attempt.
@@ -997,8 +997,8 @@ class gnrquiz_attempt {
     public function get_display_options($reviewing) {
         if ($reviewing) {
             if (is_null($this->reviewoptions)) {
-                $this->reviewoptions = gnrquiz_get_review_options($this->get_quiz(),
-                        $this->attempt, $this->quizobj->get_context());
+                $this->reviewoptions = gnrquiz_get_review_options($this->get_gnrquiz(),
+                        $this->attempt, $this->gnrquizobj->get_context());
                 if ($this->is_own_preview()) {
                     // It should  always be possible for a teacher to review their
                     // own preview irrespective of the review options settings.
@@ -1008,15 +1008,15 @@ class gnrquiz_attempt {
             return $this->reviewoptions;
 
         } else {
-            $options = mod_gnrquiz_display_options::make_from_quiz($this->get_quiz(),
+            $options = mod_gnrquiz_display_options::make_from_gnrquiz($this->get_gnrquiz(),
                     mod_gnrquiz_display_options::DURING);
-            $options->flags = gnrquiz_get_flag_option($this->attempt, $this->quizobj->get_context());
+            $options->flags = gnrquiz_get_flag_option($this->attempt, $this->gnrquizobj->get_context());
             return $options;
         }
     }
 
     /**
-     * Wrapper that the correct mod_gnrquiz_display_options for this quiz at the
+     * Wrapper that the correct mod_gnrquiz_display_options for this gnrquiz at the
      * moment.
      *
      * @param bool $reviewing true for review page, else attempt page.
@@ -1051,15 +1051,15 @@ class gnrquiz_attempt {
 
     /**
      * @param int $page page number
-     * @return bool true if this is the last page of the quiz.
+     * @return bool true if this is the last page of the gnrquiz.
      */
     public function is_last_page($page) {
         return $page == count($this->pagelayout) - 1;
     }
 
     /**
-     * Return the list of slot numbers for either a given page of the quiz, or for the
-     * whole quiz.
+     * Return the list of slot numbers for either a given page of the gnrquiz, or for the
+     * whole gnrquiz.
      *
      * @param mixed $page string 'all' or integer page number.
      * @return array the requested list of slot numbers.
@@ -1077,8 +1077,8 @@ class gnrquiz_attempt {
     }
 
     /**
-     * Return the list of slot numbers for either a given page of the quiz, or for the
-     * whole quiz.
+     * Return the list of slot numbers for either a given page of the gnrquiz, or for the
+     * whole gnrquiz.
      *
      * @param mixed $page string 'all' or integer page number.
      * @return array the requested list of slot numbers.
@@ -1147,7 +1147,7 @@ class gnrquiz_attempt {
         return $slot > 1 && isset($this->slots[$slot]) && $this->slots[$slot]->requireprevious &&
                 !$this->slots[$slot]->section->shufflequestions &&
                 !$this->slots[$slot - 1]->section->shufflequestions &&
-                $this->get_navigation_method() != QUIZ_NAVMETHOD_SEQ &&
+                $this->get_navigation_method() != GNRQUIZ_NAVMETHOD_SEQ &&
                 !$this->get_question_state($slot - 1)->is_finished() &&
                 $this->quba->can_question_finish_during_attempt($slot - 1);
     }
@@ -1159,7 +1159,7 @@ class gnrquiz_attempt {
      * @return whether the student should be given the option to restart this question now.
      */
     public function can_question_be_redone_now($slot) {
-        return $this->get_quiz()->canredoquestions && !$this->is_finished() &&
+        return $this->get_gnrquiz()->canredoquestions && !$this->is_finished() &&
                 $this->get_question_state($slot)->is_finished();
     }
 
@@ -1202,9 +1202,9 @@ class gnrquiz_attempt {
     }
 
     /**
-     * Return the page of the quiz where this question appears.
+     * Return the page of the gnrquiz where this question appears.
      * @param int $slot the number used to identify this question within this attempt.
-     * @return int the page of the quiz this question appears on.
+     * @return int the page of the gnrquiz this question appears on.
      */
     public function get_question_page($slot) {
         return $this->questionpages[$slot];
@@ -1217,7 +1217,7 @@ class gnrquiz_attempt {
      *
      * @param int $slot the number used to identify this question within this attempt.
      * @return string the formatted grade, to the number of decimal places specified
-     *      by the quiz.
+     *      by the gnrquiz.
      */
     public function get_question_name($slot) {
         return $this->quba->get_question($slot)->name;
@@ -1242,7 +1242,7 @@ class gnrquiz_attempt {
      * @param bool $showcorrectness Whether right/partial/wrong states should
      * be distinguised.
      * @return string the formatted grade, to the number of decimal places specified
-     *      by the quiz.
+     *      by the gnrquiz.
      */
     public function get_question_status($slot, $showcorrectness) {
         return $this->quba->get_question_state_string($slot, $showcorrectness);
@@ -1268,10 +1268,10 @@ class gnrquiz_attempt {
      * data about this question.
      *
      * @param int $slot the number used to identify this question within this attempt.
-     * @return string the formatted grade, to the number of decimal places specified by the quiz.
+     * @return string the formatted grade, to the number of decimal places specified by the gnrquiz.
      */
     public function get_question_mark($slot) {
-        return gnrquiz_format_question_grade($this->get_quiz(), $this->quba->get_question_mark($slot));
+        return gnrquiz_format_question_grade($this->get_gnrquiz(), $this->quba->get_question_mark($slot));
     }
 
     /**
@@ -1324,11 +1324,11 @@ class gnrquiz_attempt {
      */
     public function get_due_date() {
         $deadlines = array();
-        if ($this->quizobj->get_quiz()->timelimit) {
-            $deadlines[] = $this->attempt->timestart + $this->quizobj->get_quiz()->timelimit;
+        if ($this->gnrquizobj->get_gnrquiz()->timelimit) {
+            $deadlines[] = $this->attempt->timestart + $this->gnrquizobj->get_gnrquiz()->timelimit;
         }
-        if ($this->quizobj->get_quiz()->timeclose) {
-            $deadlines[] = $this->quizobj->get_quiz()->timeclose;
+        if ($this->gnrquizobj->get_gnrquiz()->timeclose) {
+            $deadlines[] = $this->gnrquizobj->get_gnrquiz()->timeclose;
         }
         if ($deadlines) {
             $duedate = min($deadlines);
@@ -1341,7 +1341,7 @@ class gnrquiz_attempt {
                 return $duedate;
 
             case self::OVERDUE:
-                return $duedate + $this->quizobj->get_quiz()->graceperiod;
+                return $duedate + $this->gnrquizobj->get_gnrquiz()->graceperiod;
 
             default:
                 throw new coding_exception('Unexpected state: ' . $this->attempt->state);
@@ -1350,14 +1350,14 @@ class gnrquiz_attempt {
 
     // URLs related to this attempt ============================================
     /**
-     * @return string quiz view url.
+     * @return string gnrquiz view url.
      */
     public function view_url() {
-        return $this->quizobj->view_url();
+        return $this->gnrquizobj->view_url();
     }
 
     /**
-     * @return string the URL of this quiz's edit page. Needs to be POSTed to with a cmid parameter.
+     * @return string the URL of this gnrquiz's edit page. Needs to be POSTed to with a cmid parameter.
      */
     public function start_attempt_url($slot = null, $page = -1) {
         if ($page == -1 && !is_null($slot)) {
@@ -1365,7 +1365,7 @@ class gnrquiz_attempt {
         } else {
             $page = 0;
         }
-        return $this->quizobj->start_attempt_url($page);
+        return $this->gnrquizobj->start_attempt_url($page);
     }
 
     /**
@@ -1383,14 +1383,14 @@ class gnrquiz_attempt {
     }
 
     /**
-     * @return string the URL of this quiz's summary page.
+     * @return string the URL of this gnrquiz's summary page.
      */
     public function summary_url() {
         return new moodle_url('/mod/gnrquiz/summary.php', array('attempt' => $this->attempt->id));
     }
 
     /**
-     * @return string the URL of this quiz's summary page.
+     * @return string the URL of this gnrquiz's summary page.
      */
     public function processattempt_url() {
         return new moodle_url('/mod/gnrquiz/processattempt.php');
@@ -1429,7 +1429,7 @@ class gnrquiz_attempt {
      * @return string an appropraite message.
      */
     public function cannot_review_message($short = false) {
-        return $this->quizobj->cannot_review_message(
+        return $this->gnrquizobj->cannot_review_message(
                 $this->get_attempt_state(), $short);
     }
 
@@ -1479,7 +1479,7 @@ class gnrquiz_attempt {
      *
      * @param int $slot identifies the question in the attempt.
      * @param bool $reviewing is the being printed on an attempt or a review page.
-     * @param mod_gnrquiz_renderer $renderer the quiz renderer.
+     * @param mod_gnrquiz_renderer $renderer the gnrquiz renderer.
      * @param moodle_url $thispageurl the URL of the page this question is being printed on.
      * @return string HTML for the question in its current state.
      */
@@ -1494,7 +1494,7 @@ class gnrquiz_attempt {
 
             return html_writer::div($placeholderqa->render($displayoptions,
                     $this->get_question_number($this->get_original_slot($slot))),
-                    'mod_quiz-blocked_question_warning');
+                    'mod_gnrquiz-blocked_question_warning');
         }
 
         return $this->render_question_helper($slot, $reviewing, $thispageurl, $renderer, null);
@@ -1506,7 +1506,7 @@ class gnrquiz_attempt {
      * @param int $slot identifies the question in the attempt.
      * @param bool $reviewing is the being printed on an attempt or a review page.
      * @param moodle_url $thispageurl the URL of the page this question is being printed on.
-     * @param mod_gnrquiz_renderer $renderer the quiz renderer.
+     * @param mod_gnrquiz_renderer $renderer the gnrquiz renderer.
      * @param int|null $seq the seq number of the past state to display.
      * @return string HTML fragment.
      */
@@ -1580,7 +1580,7 @@ class gnrquiz_attempt {
         $placeholderqa = new question_attempt($question, $this->quba->get_id(),
                 null, $this->quba->get_question_max_mark($slot));
         $placeholderqa->set_slot($slot);
-        $placeholderqa->start($this->get_quiz()->preferredbehaviour, 1);
+        $placeholderqa->start($this->get_gnrquiz()->preferredbehaviour, 1);
         $placeholderqa->set_flagged($this->is_question_flagged($slot));
         return $placeholderqa;
     }
@@ -1589,10 +1589,10 @@ class gnrquiz_attempt {
      * Like {@link render_question()} but displays the question at the past step
      * indicated by $seq, rather than showing the latest step.
      *
-     * @param int $id the id of a question in this quiz attempt.
+     * @param int $id the id of a question in this gnrquiz attempt.
      * @param int $seq the seq number of the past state to display.
      * @param bool $reviewing is the being printed on an attempt or a review page.
-     * @param mod_gnrquiz_renderer $renderer the quiz renderer.
+     * @param mod_gnrquiz_renderer $renderer the gnrquiz renderer.
      * @param string $thispageurl the URL of the page this question is being printed on.
      * @return string HTML for the question in its current state.
      */
@@ -1603,7 +1603,7 @@ class gnrquiz_attempt {
     /**
      * Wrapper round print_question from lib/questionlib.php.
      *
-     * @param int $id the id of a question in this quiz attempt.
+     * @param int $id the id of a question in this gnrquiz attempt.
      */
     public function render_question_for_commenting($slot) {
         $options = $this->get_display_options(true);
@@ -1616,7 +1616,7 @@ class gnrquiz_attempt {
     /**
      * Check wheter access should be allowed to a particular file.
      *
-     * @param int $id the id of a question in this quiz attempt.
+     * @param int $id the id of a question in this gnrquiz attempt.
      * @param bool $reviewing is the being printed on an attempt or a review page.
      * @param string $thispageurl the URL of the page this question is being printed on.
      * @return string HTML for the question in its current state.
@@ -1644,7 +1644,7 @@ class gnrquiz_attempt {
      *
      * @param $panelclass The type of panel, gnrquiz_attempt_nav_panel or gnrquiz_review_nav_panel
      * @param $page the current page number.
-     * @param $showall whether we are showing the whole quiz on one page. (Used by review.php)
+     * @param $showall whether we are showing the whole gnrquiz on one page. (Used by review.php)
      * @return gnrquiz_nav_panel_base the requested object.
      */
     public function get_navigation_panel(mod_gnrquiz_renderer $output,
@@ -1661,7 +1661,7 @@ class gnrquiz_attempt {
     }
 
     /**
-     * Return an array of variant URLs to other attempts at this quiz.
+     * Return an array of variant URLs to other attempts at this gnrquiz.
      *
      * The $url passed in must contain an attempt parameter.
      *
@@ -1675,7 +1675,7 @@ class gnrquiz_attempt {
      * @return mod_gnrquiz_links_to_other_attempts containing array int => null|moodle_url.
      */
     public function links_to_other_attempts(moodle_url $url) {
-        $attempts = gnrquiz_get_user_attempts($this->get_quiz()->id, $this->attempt->userid, 'all');
+        $attempts = gnrquiz_get_user_attempts($this->get_gnrquiz()->id, $this->attempt->userid, 'all');
         if (count($attempts) <= 1) {
             return false;
         }
@@ -1757,7 +1757,7 @@ class gnrquiz_attempt {
         // If the attempt is already overdue, look to see if it should be abandoned ...
         if ($this->attempt->state == self::OVERDUE) {
             $timeoverdue = $timestamp - $timeclose;
-            $graceperiod = $this->quizobj->get_quiz()->graceperiod;
+            $graceperiod = $this->gnrquizobj->get_gnrquiz()->graceperiod;
             if ($timeoverdue >= $graceperiod) {
                 $this->process_abandon($timestamp, $studentisonline);
             } else {
@@ -1774,7 +1774,7 @@ class gnrquiz_attempt {
 
         // Otherwise, we were in gnrquiz_attempt::IN_PROGRESS, and time has now expired.
         // Transition to the appropriate state.
-        switch ($this->quizobj->get_quiz()->overduehandling) {
+        switch ($this->gnrquizobj->get_gnrquiz()->overduehandling) {
             case 'autosubmit':
                 $this->process_finish($timestamp, false);
                 return;
@@ -1829,7 +1829,7 @@ class gnrquiz_attempt {
         }
 
         if (!$this->is_preview() && $this->attempt->state == self::FINISHED) {
-            gnrquiz_save_best_grade($this->get_quiz(), $this->get_userid());
+            gnrquiz_save_best_grade($this->get_gnrquiz(), $this->get_userid());
         }
 
         $transaction->allow_commit();
@@ -1848,8 +1848,8 @@ class gnrquiz_attempt {
                     ' when it is not in a state to be restarted.');
         }
 
-        $qubaids = new \mod_quiz\question\qubaids_for_users_attempts(
-                $this->get_quizid(), $this->get_userid());
+        $qubaids = new \mod_gnrquiz\question\qubaids_for_users_attempts(
+                $this->get_gnrquizid(), $this->get_userid());
 
         $transaction = $DB->start_delegated_transaction();
 
@@ -1864,7 +1864,7 @@ class gnrquiz_attempt {
                     (bool) $questiondata->questiontext);
             if ($newqusetionid === null) {
                 throw new moodle_exception('notenoughrandomquestions', 'gnrquiz',
-                        $quizobj->view_url(), $questiondata);
+                        $gnrquizobj->view_url(), $questiondata);
             }
         }
 
@@ -1941,10 +1941,10 @@ class gnrquiz_attempt {
         $DB->update_record('gnrquiz_attempts', $this->attempt);
 
         if (!$this->is_preview()) {
-            gnrquiz_save_best_grade($this->get_quiz(), $this->attempt->userid);
+            gnrquiz_save_best_grade($this->get_gnrquiz(), $this->attempt->userid);
 
             // Trigger event.
-            $this->fire_state_transition_event('\mod_quiz\event\attempt_submitted', $timestamp);
+            $this->fire_state_transition_event('\mod_gnrquiz\event\attempt_submitted', $timestamp);
 
             // Tell any access rules that care that the attempt is over.
             $this->get_access_manager($timestamp)->current_attempt_finished();
@@ -1981,7 +1981,7 @@ class gnrquiz_attempt {
         $this->attempt->timecheckstate = $timestamp;
         $DB->update_record('gnrquiz_attempts', $this->attempt);
 
-        $this->fire_state_transition_event('\mod_quiz\event\attempt_becameoverdue', $timestamp);
+        $this->fire_state_transition_event('\mod_gnrquiz\event\attempt_becameoverdue', $timestamp);
 
         $transaction->allow_commit();
 
@@ -2002,7 +2002,7 @@ class gnrquiz_attempt {
         $this->attempt->timecheckstate = null;
         $DB->update_record('gnrquiz_attempts', $this->attempt);
 
-        $this->fire_state_transition_event('\mod_quiz\event\attempt_abandoned', $timestamp);
+        $this->fire_state_transition_event('\mod_gnrquiz\event\attempt_abandoned', $timestamp);
 
         $transaction->allow_commit();
     }
@@ -2016,20 +2016,20 @@ class gnrquiz_attempt {
      */
     protected function fire_state_transition_event($eventclass, $timestamp) {
         global $USER;
-        $quizrecord = $this->get_quiz();
+        $gnrquizrecord = $this->get_gnrquiz();
         $params = array(
-            'context' => $this->get_quizobj()->get_context(),
+            'context' => $this->get_gnrquizobj()->get_context(),
             'courseid' => $this->get_courseid(),
             'objectid' => $this->attempt->id,
             'relateduserid' => $this->attempt->userid,
             'other' => array(
                 'submitterid' => CLI_SCRIPT ? null : $USER->id,
-                'quizid' => $quizrecord->id
+                'gnrquizid' => $gnrquizrecord->id
             )
         );
 
         $event = $eventclass::create($params);
-        $event->add_record_snapshot('gnrquiz', $this->get_quiz());
+        $event->add_record_snapshot('gnrquiz', $this->get_gnrquiz());
         $event->add_record_snapshot('gnrquiz_attempts', $this->get_attempt());
         $event->trigger();
     }
@@ -2037,7 +2037,7 @@ class gnrquiz_attempt {
     // Private methods =========================================================
 
     /**
-     * Get a URL for a particular question on a particular page of the quiz.
+     * Get a URL for a particular question on a particular page of the gnrquiz.
      * Used by {@link attempt_url()} and {@link review_url()}.
      *
      * @param string $script. Used in the URL like /mod/gnrquiz/$script.php
@@ -2099,7 +2099,7 @@ class gnrquiz_attempt {
     }
 
     /**
-     * Process responses during an attempt at a quiz.
+     * Process responses during an attempt at a gnrquiz.
      *
      * @param  int $timenow time when the processing started
      * @param  bool $finishattempt whether to finish the attempt or not
@@ -2115,7 +2115,7 @@ class gnrquiz_attempt {
         $transaction = $DB->start_delegated_transaction();
 
         // If there is only a very small amount of time left, there is no point trying
-        // to show the student another page of the quiz. Just finish now.
+        // to show the student another page of the gnrquiz. Just finish now.
         $graceperiodmin = null;
         $accessmanager = $this->get_access_manager($timenow);
         $timeclose = $accessmanager->get_end_time($this->get_attempt());
@@ -2125,9 +2125,9 @@ class gnrquiz_attempt {
             $timeclose = false;
         }
         $toolate = false;
-        if ($timeclose !== false && $timenow > $timeclose - QUIZ_MIN_TIME_TO_CONTINUE) {
+        if ($timeclose !== false && $timenow > $timeclose - GNRQUIZ_MIN_TIME_TO_CONTINUE) {
             $timeup = true;
-            $graceperiodmin = get_config('gnrquiz', 'graceperiodmin');
+            $graceperiodmin = get_config('quiz', 'graceperiodmin');
             if ($timenow > $timeclose + $graceperiodmin) {
                 $toolate = true;
             }
@@ -2137,11 +2137,11 @@ class gnrquiz_attempt {
         $becomingoverdue = false;
         $becomingabandoned = false;
         if ($timeup) {
-            if ($this->get_quiz()->overduehandling == 'graceperiod') {
+            if ($this->get_gnrquiz()->overduehandling == 'graceperiod') {
                 if (is_null($graceperiodmin)) {
-                    $graceperiodmin = get_config('gnrquiz', 'graceperiodmin');
+                    $graceperiodmin = get_config('quiz', 'graceperiodmin');
                 }
-                if ($timenow > $timeclose + $this->get_quiz()->graceperiod + $graceperiodmin) {
+                if ($timenow > $timeclose + $this->get_gnrquiz()->graceperiod + $graceperiodmin) {
                     // Grace period has run out.
                     $finishattempt = true;
                     $becomingabandoned = true;
@@ -2194,7 +2194,7 @@ class gnrquiz_attempt {
             return $becomingoverdue ? self::OVERDUE : self::IN_PROGRESS;
         }
 
-        // Update the quiz attempt record.
+        // Update the gnrquiz attempt record.
         try {
             if ($becomingabandoned) {
                 $this->process_abandon($timenow, true);
@@ -2234,7 +2234,7 @@ class gnrquiz_attempt {
         global $DB;
 
         if ($this->get_currentpage() != $page) {
-            if ($this->get_navigation_method() == QUIZ_NAVMETHOD_SEQ && $this->get_currentpage() > $page) {
+            if ($this->get_navigation_method() == GNRQUIZ_NAVMETHOD_SEQ && $this->get_currentpage() > $page) {
                 return false;
             }
         }
@@ -2270,10 +2270,10 @@ class gnrquiz_attempt {
             'courseid' => $this->get_courseid(),
             'context' => context_module::instance($this->get_cmid()),
             'other' => array(
-                'quizid' => $this->get_quizid()
+                'gnrquizid' => $this->get_gnrquizid()
             )
         );
-        $event = \mod_quiz\event\attempt_viewed::create($params);
+        $event = \mod_gnrquiz\event\attempt_viewed::create($params);
         $event->add_record_snapshot('gnrquiz_attempts', $this->get_attempt());
         $event->trigger();
     }
@@ -2291,10 +2291,10 @@ class gnrquiz_attempt {
             'courseid' => $this->get_courseid(),
             'context' => context_module::instance($this->get_cmid()),
             'other' => array(
-                'quizid' => $this->get_quizid()
+                'gnrquizid' => $this->get_gnrquizid()
             )
         );
-        $event = \mod_quiz\event\attempt_summary_viewed::create($params);
+        $event = \mod_gnrquiz\event\attempt_summary_viewed::create($params);
         $event->add_record_snapshot('gnrquiz_attempts', $this->get_attempt());
         $event->trigger();
     }
@@ -2312,10 +2312,10 @@ class gnrquiz_attempt {
             'courseid' => $this->get_courseid(),
             'context' => context_module::instance($this->get_cmid()),
             'other' => array(
-                'quizid' => $this->get_quizid()
+                'gnrquizid' => $this->get_gnrquizid()
             )
         );
-        $event = \mod_quiz\event\attempt_reviewed::create($params);
+        $event = \mod_gnrquiz\event\attempt_reviewed::create($params);
         $event->add_record_snapshot('gnrquiz_attempts', $this->get_attempt());
         $event->trigger();
     }
@@ -2398,7 +2398,7 @@ abstract class gnrquiz_nav_panel_base {
     }
 
     /**
-     * Get the buttons and section headings to go in the quiz navigation block.
+     * Get the buttons and section headings to go in the gnrquiz navigation block.
      * @return renderable[] the buttons, possibly interleaved with section headings.
      */
     public function get_question_buttons() {
@@ -2466,13 +2466,13 @@ abstract class gnrquiz_nav_panel_base {
 
     public function user_picture() {
         global $DB;
-        if ($this->attemptobj->get_quiz()->showuserpicture == QUIZ_SHOWIMAGE_NONE) {
+        if ($this->attemptobj->get_gnrquiz()->showuserpicture == GNRQUIZ_SHOWIMAGE_NONE) {
             return null;
         }
         $user = $DB->get_record('user', array('id' => $this->attemptobj->get_userid()));
         $userpicture = new user_picture($user);
         $userpicture->courseid = $this->attemptobj->get_courseid();
-        if ($this->attemptobj->get_quiz()->showuserpicture == QUIZ_SHOWIMAGE_LARGE) {
+        if ($this->attemptobj->get_gnrquiz()->showuserpicture == GNRQUIZ_SHOWIMAGE_LARGE) {
             $userpicture->size = true;
         }
         return $userpicture;
@@ -2495,7 +2495,7 @@ abstract class gnrquiz_nav_panel_base {
 
 
 /**
- * Specialisation of {@link gnrquiz_nav_panel_base} for the attempt quiz page.
+ * Specialisation of {@link gnrquiz_nav_panel_base} for the attempt gnrquiz page.
  *
  * @copyright  2008 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -2525,7 +2525,7 @@ class gnrquiz_attempt_nav_panel extends gnrquiz_nav_panel_base {
 
 
 /**
- * Specialisation of {@link gnrquiz_nav_panel_base} for the review quiz page.
+ * Specialisation of {@link gnrquiz_nav_panel_base} for the review gnrquiz page.
  *
  * @copyright  2008 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

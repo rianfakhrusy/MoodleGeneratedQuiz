@@ -15,9 +15,9 @@
 
 
 /**
- * Repaginate functionality for a popup in quiz editing page.
+ * Repaginate functionality for a popup in gnrquiz editing page.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2014 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -74,8 +74,8 @@ Y.extend(POPUP, Y.Base, {
     }
 });
 
-M.mod_quiz = M.mod_quiz || {};
-M.mod_quiz.repaginate = M.mod_quiz.repaginate || {};
-M.mod_quiz.repaginate.init = function() {
+M.mod_gnrquiz = M.mod_gnrquiz || {};
+M.mod_gnrquiz.repaginate = M.mod_gnrquiz.repaginate || {};
+M.mod_gnrquiz.repaginate.init = function() {
     return new POPUP();
 };

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the quizaccess_delaybetweenattempts plugin.
+ * Version information for the gnrquizaccess_delaybetweenattempts plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage delaybetweenattempts
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

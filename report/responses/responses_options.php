@@ -53,7 +53,7 @@ class gnrquiz_responses_options extends mod_gnrquiz_attempts_report_options {
         $params['qtext']      = $this->showqtext;
         $params['resp']       = $this->showresponses;
         $params['right']      = $this->showright;
-        if (gnrquiz_allows_multiple_tries($this->quiz)) {
+        if (gnrquiz_allows_multiple_tries($this->gnrquiz)) {
             $params['whichtries'] = $this->whichtries;
         }
         return $params;
@@ -64,7 +64,7 @@ class gnrquiz_responses_options extends mod_gnrquiz_attempts_report_options {
         $toform->qtext      = $this->showqtext;
         $toform->resp       = $this->showresponses;
         $toform->right      = $this->showright;
-        if (gnrquiz_allows_multiple_tries($this->quiz)) {
+        if (gnrquiz_allows_multiple_tries($this->gnrquiz)) {
             $toform->whichtries = $this->whichtries;
         }
 
@@ -77,7 +77,7 @@ class gnrquiz_responses_options extends mod_gnrquiz_attempts_report_options {
         $this->showqtext     = $fromform->qtext;
         $this->showresponses = $fromform->resp;
         $this->showright     = $fromform->right;
-        if (gnrquiz_allows_multiple_tries($this->quiz)) {
+        if (gnrquiz_allows_multiple_tries($this->gnrquiz)) {
             $this->whichtries = $fromform->whichtries;
         }
     }
@@ -88,7 +88,7 @@ class gnrquiz_responses_options extends mod_gnrquiz_attempts_report_options {
         $this->showqtext     = optional_param('qtext', $this->showqtext,     PARAM_BOOL);
         $this->showresponses = optional_param('resp',  $this->showresponses, PARAM_BOOL);
         $this->showright     = optional_param('right', $this->showright,     PARAM_BOOL);
-        if (gnrquiz_allows_multiple_tries($this->quiz)) {
+        if (gnrquiz_allows_multiple_tries($this->gnrquiz)) {
             $this->whichtries    = optional_param('whichtries', $this->whichtries, PARAM_ALPHA);
         }
     }
@@ -99,7 +99,7 @@ class gnrquiz_responses_options extends mod_gnrquiz_attempts_report_options {
         $this->showqtext     = get_user_preferences('gnrquiz_report_responses_qtext', $this->showqtext);
         $this->showresponses = get_user_preferences('gnrquiz_report_responses_resp',  $this->showresponses);
         $this->showright     = get_user_preferences('gnrquiz_report_responses_right', $this->showright);
-        if (gnrquiz_allows_multiple_tries($this->quiz)) {
+        if (gnrquiz_allows_multiple_tries($this->gnrquiz)) {
             $this->whichtries    = get_user_preferences('gnrquiz_report_responses_which_tries', $this->whichtries);
         }
     }
@@ -110,7 +110,7 @@ class gnrquiz_responses_options extends mod_gnrquiz_attempts_report_options {
         set_user_preference('gnrquiz_report_responses_qtext', $this->showqtext);
         set_user_preference('gnrquiz_report_responses_resp',  $this->showresponses);
         set_user_preference('gnrquiz_report_responses_right', $this->showright);
-        if (gnrquiz_allows_multiple_tries($this->quiz)) {
+        if (gnrquiz_allows_multiple_tries($this->gnrquiz)) {
             set_user_preference('gnrquiz_report_responses_which_tries', $this->whichtries);
         }
     }

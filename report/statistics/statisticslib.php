@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Common functions for the quiz statistics report.
+ * Common functions for the gnrquiz statistics report.
  *
  * @package    gnrquiz_statistics
  * @copyright  2013 The Open University
@@ -26,22 +26,22 @@
 /**
  * SQL to fetch relevant 'gnrquiz_attempts' records.
  *
- * @param int    $quizid        quiz id to get attempts for
+ * @param int    $gnrquizid        gnrquiz id to get attempts for
  * @param array  $groupstudents empty array if not using groups or array of students in current group.
  * @param string $whichattempts which attempts to use, represented internally as one of the constants as used in
- *                                   $quiz->grademethod ie.
- *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+ *                                   $gnrquiz->grademethod ie.
+ *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
  *                                   we calculate stats based on which attempts would affect the grade for each student.
  * @param bool   $includeungraded whether to fetch ungraded attempts too
  * @return array FROM and WHERE sql fragments and sql params
  */
-function gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $whichattempts = QUIZ_GRADEAVERAGE, $includeungraded = false) {
+function gnrquiz_statistics_attempts_sql($gnrquizid, $groupstudents, $whichattempts = GNRQUIZ_GRADEAVERAGE, $includeungraded = false) {
     global $DB;
 
-    $fromqa = '{gnrquiz_attempts} quiza ';
+    $fromqa = '{gnrquiz_attempts} gnrquiza ';
 
-    $whereqa = 'gnrquiza.quiz = :quizid AND quiza.preview = 0 AND quiza.state = :quizstatefinished';
-    $qaparams = array('gnrquizid' => (int)$quizid, 'gnrquizstatefinished' => gnrquiz_attempt::FINISHED);
+    $whereqa = 'gnrquiza.gnrquiz = :gnrquizid AND gnrquiza.preview = 0 AND gnrquiza.state = :gnrquizstatefinished';
+    $qaparams = array('gnrquizid' => (int)$gnrquizid, 'gnrquizstatefinished' => gnrquiz_attempt::FINISHED);
 
     if ($groupstudents) {
         ksort($groupstudents);
@@ -49,7 +49,7 @@ function gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $whichattempts
                 SQL_PARAMS_NAMED, 'statsuser');
         list($grpsql, $grpparams) = gnrquiz_statistics_renumber_placeholders(
                 $grpsql, $grpparams, 'statsuser');
-        $whereqa .= " AND quiza.userid $grpsql";
+        $whereqa .= " AND gnrquiza.userid $grpsql";
         $qaparams += $grpparams;
     }
 
@@ -59,7 +59,7 @@ function gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $whichattempts
     }
 
     if (!$includeungraded) {
-        $whereqa .= ' AND quiza.sumgrades IS NOT NULL';
+        $whereqa .= ' AND gnrquiza.sumgrades IS NOT NULL';
     }
 
     return array($fromqa, $whereqa, $qaparams);
@@ -93,17 +93,17 @@ function gnrquiz_statistics_renumber_placeholders($sql, $params, $paramprefix) {
 /**
  * Return a {@link qubaid_condition} from the values returned by {@link gnrquiz_statistics_attempts_sql}.
  *
- * @param int     $quizid
+ * @param int     $gnrquizid
  * @param array   $groupstudents
  * @param string $whichattempts which attempts to use, represented internally as one of the constants as used in
- *                                   $quiz->grademethod ie.
- *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+ *                                   $gnrquiz->grademethod ie.
+ *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
  *                                   we calculate stats based on which attempts would affect the grade for each student.
  * @param bool    $includeungraded
  * @return        \qubaid_join
  */
-function gnrquiz_statistics_qubaids_condition($quizid, $groupstudents, $whichattempts = QUIZ_GRADEAVERAGE, $includeungraded = false) {
-    list($fromqa, $whereqa, $qaparams) = gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $whichattempts, $includeungraded);
+function gnrquiz_statistics_qubaids_condition($gnrquizid, $groupstudents, $whichattempts = GNRQUIZ_GRADEAVERAGE, $includeungraded = false) {
+    list($fromqa, $whereqa, $qaparams) = gnrquiz_statistics_attempts_sql($gnrquizid, $groupstudents, $whichattempts, $includeungraded);
     return new qubaid_join($fromqa, 'gnrquiza.uniqueid', $whereqa, $qaparams);
 }
 

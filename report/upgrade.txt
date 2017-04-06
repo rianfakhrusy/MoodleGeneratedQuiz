@@ -1,4 +1,4 @@
-This files describes API changes for quiz report plugins.
+This files describes API changes for gnrquiz report plugins.
 
 Overview of this plugin type at http://docs.moodle.org/dev/Quiz_reports
 === 2.6 ===
@@ -16,7 +16,7 @@ Instead, you need a lib.php file inside the plugin with a cron function
 called gnrquiz_myreportname_cron(). The statistics report is an example of how
 it should be done.
 
-* There was a big refactor of the quiz reports, in issues MDL-32300, MDL-32322 and MDL-3030.
+* There was a big refactor of the gnrquiz reports, in issues MDL-32300, MDL-32322 and MDL-3030.
 It is difficult to explain the changes. Probably the best way to understand what
 happened is to look at
     git log mod/gnrquiz/report/overview
@@ -25,13 +25,13 @@ and so on. Here are some notes on a few of the changes:
 
 The class gnrquiz_attempt_report was renamed to gnrquiz_attempts_report (with an extra s).
 
-Some globally defined constants with the prefix QUIZ_REPORT_ATTEMPTS_ moved into
+Some globally defined constants with the prefix GNRQUIZ_REPORT_ATTEMPTS_ moved into
 the gnrquiz_attempts_report class. Specifically
 
-gnrquiz_attempts_report::ALL_WITH         replaces QUIZ_REPORT_ATTEMPTS_ALL
-gnrquiz_attempts_report::ENROLLED_ALL     replaces QUIZ_REPORT_ATTEMPTS_ALL_STUDENTS
-gnrquiz_attempts_report::ENROLLED_WITH    replaces QUIZ_REPORT_ATTEMPTS_STUDENTS_WITH
-gnrquiz_attempts_report::ENROLLED_WITHOUT replaces QUIZ_REPORT_ATTEMPTS_STUDENTS_WITH_NO
+gnrquiz_attempts_report::ALL_WITH         replaces GNRQUIZ_REPORT_ATTEMPTS_ALL
+gnrquiz_attempts_report::ENROLLED_ALL     replaces GNRQUIZ_REPORT_ATTEMPTS_ALL_STUDENTS
+gnrquiz_attempts_report::ENROLLED_WITH    replaces GNRQUIZ_REPORT_ATTEMPTS_STUDENTS_WITH
+gnrquiz_attempts_report::ENROLLED_WITHOUT replaces GNRQUIZ_REPORT_ATTEMPTS_STUDENTS_WITH_NO
 
 Your if you have a table class, it needs to be renamed like
 gnrquiz_report_myreportname_table -> gnrquiz_myreportname_table. That is, all the

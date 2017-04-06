@@ -15,22 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the \mod_quiz\structure class.
+ * Defines the \mod_gnrquiz\structure class.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2013 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz;
+namespace mod_gnrquiz;
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Quiz structure class.
  *
- * The structure of the quiz. That is, which questions it is built up
- * from. This is used on the Edit quiz page (edit.php) and also when
- * starting an attempt at the quiz (startattempt.php). Once an attempt
+ * The structure of the gnrquiz. That is, which questions it is built up
+ * from. This is used on the Edit gnrquiz page (edit.php) and also when
+ * starting an attempt at the gnrquiz (startattempt.php). Once an attempt
  * has been started, then the attempt holds the specific set of questions
  * that that student should answer, and we no longer use this class.
  *
@@ -38,19 +38,19 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class structure {
-    /** @var \quiz the quiz this is the structure of. */
-    protected $quizobj = null;
+    /** @var \gnrquiz the gnrquiz this is the structure of. */
+    protected $gnrquizobj = null;
 
     /**
-     * @var \stdClass[] the questions in this quiz. Contains the row from the questions
+     * @var \stdClass[] the questions in this gnrquiz. Contains the row from the questions
      * table, with the data from the gnrquiz_slots table added, and also question_categories.contextid.
      */
     protected $questions = array();
 
-    /** @var \stdClass[] gnrquiz_slots.id => the gnrquiz_slots rows for this quiz, agumented by sectionid. */
+    /** @var \stdClass[] gnrquiz_slots.id => the gnrquiz_slots rows for this gnrquiz, agumented by sectionid. */
     protected $slots = array();
 
-    /** @var \stdClass[] gnrquiz_slots.slot => the gnrquiz_slots rows for this quiz, agumented by sectionid. */
+    /** @var \stdClass[] gnrquiz_slots.slot => the gnrquiz_slots rows for this gnrquiz, agumented by sectionid. */
     protected $slotsinorder = array();
 
     /**
@@ -63,7 +63,7 @@ class structure {
     protected $canbeedited = null;
 
     /**
-     * Create an instance of this class representing an empty quiz.
+     * Create an instance of this class representing an empty gnrquiz.
      * @return structure
      */
     public static function create() {
@@ -71,28 +71,28 @@ class structure {
     }
 
     /**
-     * Create an instance of this class representing the structure of a given quiz.
-     * @param \quiz $quizobj the quiz.
+     * Create an instance of this class representing the structure of a given gnrquiz.
+     * @param \gnrquiz $gnrquizobj the gnrquiz.
      * @return structure
      */
-    public static function create_for_quiz($quizobj) {
+    public static function create_for_gnrquiz($gnrquizobj) {
         $structure = self::create();
-        $structure->quizobj = $quizobj;
-        $structure->populate_structure($quizobj->get_quiz());
+        $structure->gnrquizobj = $gnrquizobj;
+        $structure->populate_structure($gnrquizobj->get_gnrquiz());
         return $structure;
     }
 
     /**
-     * Whether there are any questions in the quiz.
-     * @return bool true if there is at least one question in the quiz.
+     * Whether there are any questions in the gnrquiz.
+     * @return bool true if there is at least one question in the gnrquiz.
      */
     public function has_questions() {
         return !empty($this->questions);
     }
 
     /**
-     * Get the number of questions in the quiz.
-     * @return int the number of questions in the quiz.
+     * Get the number of questions in the gnrquiz.
+     * @return int the number of questions in the gnrquiz.
      */
     public function get_question_count() {
         return count($this->questions);
@@ -102,7 +102,7 @@ class structure {
      * Get the information about the question with this id.
      * @param int $questionid The question id.
      * @return \stdClass the data from the questions table, augmented with
-     * question_category.contextid, and the gnrquiz_slots data for the question in this quiz.
+     * question_category.contextid, and the gnrquiz_slots data for the question in this gnrquiz.
      */
     public function get_question_by_id($questionid) {
         return $this->questions[$questionid];
@@ -112,7 +112,7 @@ class structure {
      * Get the information about the question in a given slot.
      * @param int $slotnumber the index of the slot in question.
      * @return \stdClass the data from the questions table, augmented with
-     * question_category.contextid, and the gnrquiz_slots data for the question in this quiz.
+     * question_category.contextid, and the gnrquiz_slots data for the question in this gnrquiz.
      */
     public function get_question_in_slot($slotnumber) {
         return $this->questions[$this->slotsinorder[$slotnumber]->questionid];
@@ -168,12 +168,12 @@ class structure {
     /**
      * Whether it is possible for another question to depend on this one finishing.
      * Note that the answer is not exact, because of random questions, and sometimes
-     * questions cannot be depended upon because of quiz options.
+     * questions cannot be depended upon because of gnrquiz options.
      * @param int $slotnumber the index of the slot in question.
      * @return bool can this question finish naturally during the attempt?
      */
     public function can_finish_during_the_attempt($slotnumber) {
-        if ($this->quizobj->get_navigation_method() == QUIZ_NAVMETHOD_SEQ) {
+        if ($this->gnrquizobj->get_navigation_method() == GNRQUIZ_NAVMETHOD_SEQ) {
             return false;
         }
 
@@ -183,7 +183,7 @@ class structure {
 
         if (in_array($this->get_question_type_for_slot($slotnumber), array('random', 'missingtype'))) {
             return \question_engine::can_questions_finish_during_the_attempt(
-                    $this->quizobj->get_quiz()->preferredbehaviour);
+                    $this->gnrquizobj->get_gnrquiz()->preferredbehaviour);
         }
 
         if (isset($this->slotsinorder[$slotnumber]->canfinish)) {
@@ -191,10 +191,10 @@ class structure {
         }
 
         try {
-            $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $this->quizobj->get_context());
+            $quba = \question_engine::make_questions_usage_by_activity('mod_gnrquiz', $this->gnrquizobj->get_context());
             $tempslot = $quba->add_question(\question_bank::load_question(
                     $this->slotsinorder[$slotnumber]->questionid));
-            $quba->set_preferred_behaviour($this->quizobj->get_quiz()->preferredbehaviour);
+            $quba->set_preferred_behaviour($this->gnrquizobj->get_gnrquiz()->preferredbehaviour);
             $quba->start_all_questions();
 
             $this->slotsinorder[$slotnumber]->canfinish = $quba->can_question_finish_during_attempt($tempslot);
@@ -226,41 +226,41 @@ class structure {
     }
 
     /**
-     * Get the course id that the quiz belongs to.
-     * @return int the course.id for the quiz.
+     * Get the course id that the gnrquiz belongs to.
+     * @return int the course.id for the gnrquiz.
      */
     public function get_courseid() {
-        return $this->quizobj->get_courseid();
+        return $this->gnrquizobj->get_courseid();
     }
 
     /**
-     * Get the course module id of the quiz.
-     * @return int the course_modules.id for the quiz.
+     * Get the course module id of the gnrquiz.
+     * @return int the course_modules.id for the gnrquiz.
      */
     public function get_cmid() {
-        return $this->quizobj->get_cmid();
+        return $this->gnrquizobj->get_cmid();
     }
 
     /**
-     * Get id of the quiz.
-     * @return int the quiz.id for the quiz.
+     * Get id of the gnrquiz.
+     * @return int the gnrquiz.id for the gnrquiz.
      */
-    public function get_quizid() {
-        return $this->quizobj->get_quizid();
+    public function get_gnrquizid() {
+        return $this->gnrquizobj->get_gnrquizid();
     }
 
     /**
-     * Get the quiz object.
-     * @return \stdClass the quiz settings row from the database.
+     * Get the gnrquiz object.
+     * @return \stdClass the gnrquiz settings row from the database.
      */
-    public function get_quiz() {
-        return $this->quizobj->get_quiz();
+    public function get_gnrquiz() {
+        return $this->gnrquizobj->get_gnrquiz();
     }
 
     /**
      * Quizzes can only be repaginated if they have not been attempted, the
      * questions are not shuffled, and there are two or more questions.
-     * @return bool whether this quiz can be repaginated.
+     * @return bool whether this gnrquiz can be repaginated.
      */
     public function can_be_repaginated() {
         return $this->can_be_edited() && $this->get_question_count() >= 2;
@@ -268,42 +268,42 @@ class structure {
 
     /**
      * Quizzes can only be edited if they have not been attempted.
-     * @return bool whether the quiz can be edited.
+     * @return bool whether the gnrquiz can be edited.
      */
     public function can_be_edited() {
         if ($this->canbeedited === null) {
-            $this->canbeedited = !gnrquiz_has_attempts($this->quizobj->get_quizid());
+            $this->canbeedited = !gnrquiz_has_attempts($this->gnrquizobj->get_gnrquizid());
         }
         return $this->canbeedited;
     }
 
     /**
-     * This quiz can only be edited if they have not been attempted.
+     * This gnrquiz can only be edited if they have not been attempted.
      * Throw an exception if this is not the case.
      */
     public function check_can_be_edited() {
         if (!$this->can_be_edited()) {
-            $reportlink = gnrquiz_attempt_summary_link_to_reports($this->get_quiz(),
-                    $this->quizobj->get_cm(), $this->quizobj->get_context());
+            $reportlink = gnrquiz_attempt_summary_link_to_reports($this->get_gnrquiz(),
+                    $this->gnrquizobj->get_cm(), $this->gnrquizobj->get_context());
             throw new \moodle_exception('cannoteditafterattempts', 'gnrquiz',
                     new \moodle_url('/mod/gnrquiz/edit.php', array('cmid' => $this->get_cmid())), $reportlink);
         }
     }
 
     /**
-     * How many questions are allowed per page in the quiz.
+     * How many questions are allowed per page in the gnrquiz.
      * This setting controls how frequently extra page-breaks should be inserted
-     * automatically when questions are added to the quiz.
+     * automatically when questions are added to the gnrquiz.
      * @return int the number of questions that should be on each page of the
-     * quiz by default.
+     * gnrquiz by default.
      */
     public function get_questions_per_page() {
-        return $this->quizobj->get_quiz()->questionsperpage;
+        return $this->gnrquizobj->get_gnrquiz()->questionsperpage;
     }
 
     /**
-     * Get quiz slots.
-     * @return \stdClass[] the slots in this quiz.
+     * Get gnrquiz slots.
+     * @return \stdClass[] the slots in this gnrquiz.
      */
     public function get_slots() {
         return $this->slots;
@@ -353,28 +353,28 @@ class structure {
     }
 
     /**
-     * Is this slot the last one in the quiz?
+     * Is this slot the last one in the gnrquiz?
      * @param int $slotnumber the index of the slot in question.
-     * @return bool whether this slot the last one in the quiz.
+     * @return bool whether this slot the last one in the gnrquiz.
      */
-    public function is_last_slot_in_quiz($slotnumber) {
+    public function is_last_slot_in_gnrquiz($slotnumber) {
         end($this->slotsinorder);
         return $slotnumber == key($this->slotsinorder);
     }
 
     /**
-     * Is this the first section in the quiz?
+     * Is this the first section in the gnrquiz?
      * @param \stdClass $section the gnrquiz_sections row.
-     * @return bool whether this is first section in the quiz.
+     * @return bool whether this is first section in the gnrquiz.
      */
     public function is_first_section($section) {
         return $section->firstslot == 1;
     }
 
     /**
-     * Is this the last section in the quiz?
+     * Is this the last section in the gnrquiz?
      * @param \stdClass $section the gnrquiz_sections row.
-     * @return bool whether this is first section in the quiz.
+     * @return bool whether this is first section in the gnrquiz.
      */
     public function is_last_section($section) {
         return $section->id == end($this->sections)->id;
@@ -390,8 +390,8 @@ class structure {
     }
 
     /**
-     * Get the final slot in the quiz.
-     * @return \stdClass the gnrquiz_slots for for the final slot in the quiz.
+     * Get the final slot in the gnrquiz.
+     * @return \stdClass the gnrquiz_slots for for the final slot in the gnrquiz.
      */
     public function get_last_slot() {
         return end($this->slotsinorder);
@@ -440,7 +440,7 @@ class structure {
     }
 
     /**
-     * Get all the slots in a section of the quiz.
+     * Get all the slots in a section of the gnrquiz.
      * @param int $sectionid the section id.
      * @return int[] slot numbers.
      */
@@ -455,8 +455,8 @@ class structure {
     }
 
     /**
-     * Get all the sections of the quiz.
-     * @return \stdClass[] the sections in this quiz.
+     * Get all the sections of the gnrquiz.
+     * @return \stdClass[] the sections in this gnrquiz.
      */
     public function get_sections() {
         return $this->sections;
@@ -471,19 +471,19 @@ class structure {
     }
 
     /**
-     * Get the number of questions in the quiz.
-     * @return int the number of questions in the quiz.
+     * Get the number of questions in the gnrquiz.
+     * @return int the number of questions in the gnrquiz.
      */
     public function get_section_count() {
         return count($this->sections);
     }
 
     /**
-     * Get the overall quiz grade formatted for display.
-     * @return string the maximum grade for this quiz.
+     * Get the overall gnrquiz grade formatted for display.
+     * @return string the maximum grade for this gnrquiz.
      */
     public function formatted_gnrquiz_grade() {
-        return gnrquiz_format_grade($this->get_quiz(), $this->get_quiz()->grade);
+        return gnrquiz_format_grade($this->get_gnrquiz(), $this->get_gnrquiz()->grade);
     }
 
     /**
@@ -492,15 +492,15 @@ class structure {
      * @return string the maximum mark for the question in this slot.
      */
     public function formatted_question_grade($slotnumber) {
-        return gnrquiz_format_question_grade($this->get_quiz(), $this->slotsinorder[$slotnumber]->maxmark);
+        return gnrquiz_format_question_grade($this->get_gnrquiz(), $this->slotsinorder[$slotnumber]->maxmark);
     }
 
     /**
-     * Get the number of decimal places for displyaing overall quiz grades or marks.
+     * Get the number of decimal places for displyaing overall gnrquiz grades or marks.
      * @return int the number of decimal places.
      */
     public function get_decimal_places_for_grades() {
-        return $this->get_quiz()->decimalpoints;
+        return $this->get_gnrquiz()->decimalpoints;
     }
 
     /**
@@ -508,7 +508,7 @@ class structure {
      * @return int the number of decimal places.
      */
     public function get_decimal_places_for_question_marks() {
-        return gnrquiz_get_grade_format($this->get_quiz());
+        return gnrquiz_get_grade_format($this->get_gnrquiz());
     }
 
     /**
@@ -518,9 +518,9 @@ class structure {
     public function get_edit_page_warnings() {
         $warnings = array();
 
-        if (gnrquiz_has_attempts($this->quizobj->get_quizid())) {
-            $reviewlink = gnrquiz_attempt_summary_link_to_reports($this->quizobj->get_quiz(),
-                    $this->quizobj->get_cm(), $this->quizobj->get_context());
+        if (gnrquiz_has_attempts($this->gnrquizobj->get_gnrquizid())) {
+            $reviewlink = gnrquiz_attempt_summary_link_to_reports($this->gnrquizobj->get_gnrquiz(),
+                    $this->gnrquizobj->get_cm(), $this->gnrquizobj->get_context());
             $warnings[] = get_string('cannoteditafterattempts', 'gnrquiz', $reviewlink);
         }
 
@@ -528,28 +528,28 @@ class structure {
     }
 
     /**
-     * Get the date information about the current state of the quiz.
+     * Get the date information about the current state of the gnrquiz.
      * @return string[] array of two strings. First a short summary, then a longer
      * explanation of the current state, e.g. for a tool-tip.
      */
     public function get_dates_summary() {
         $timenow = time();
-        $quiz = $this->quizobj->get_quiz();
+        $gnrquiz = $this->gnrquizobj->get_gnrquiz();
 
         // Exact open and close dates for the tool-tip.
         $dates = array();
-        if ($quiz->timeopen > 0) {
-            if ($timenow > $quiz->timeopen) {
-                $dates[] = get_string('gnrquizopenedon', 'gnrquiz', userdate($quiz->timeopen));
+        if ($gnrquiz->timeopen > 0) {
+            if ($timenow > $gnrquiz->timeopen) {
+                $dates[] = get_string('gnrquizopenedon', 'gnrquiz', userdate($gnrquiz->timeopen));
             } else {
-                $dates[] = get_string('gnrquizwillopen', 'gnrquiz', userdate($quiz->timeopen));
+                $dates[] = get_string('gnrquizwillopen', 'gnrquiz', userdate($gnrquiz->timeopen));
             }
         }
-        if ($quiz->timeclose > 0) {
-            if ($timenow > $quiz->timeclose) {
-                $dates[] = get_string('gnrquizclosed', 'gnrquiz', userdate($quiz->timeclose));
+        if ($gnrquiz->timeclose > 0) {
+            if ($timenow > $gnrquiz->timeclose) {
+                $dates[] = get_string('gnrquizclosed', 'gnrquiz', userdate($gnrquiz->timeclose));
             } else {
-                $dates[] = get_string('gnrquizcloseson', 'gnrquiz', userdate($quiz->timeclose));
+                $dates[] = get_string('gnrquizcloseson', 'gnrquiz', userdate($gnrquiz->timeclose));
             }
         }
         if (empty($dates)) {
@@ -558,13 +558,13 @@ class structure {
         $explanation = implode(', ', $dates);
 
         // Brief summary on the page.
-        if ($timenow < $quiz->timeopen) {
+        if ($timenow < $gnrquiz->timeopen) {
             $currentstatus = get_string('gnrquizisclosedwillopen', 'gnrquiz',
-                    userdate($quiz->timeopen, get_string('strftimedatetimeshort', 'langconfig')));
-        } else if ($quiz->timeclose && $timenow <= $quiz->timeclose) {
+                    userdate($gnrquiz->timeopen, get_string('strftimedatetimeshort', 'langconfig')));
+        } else if ($gnrquiz->timeclose && $timenow <= $gnrquiz->timeclose) {
             $currentstatus = get_string('gnrquizisopenwillclose', 'gnrquiz',
-                    userdate($quiz->timeclose, get_string('strftimedatetimeshort', 'langconfig')));
-        } else if ($quiz->timeclose && $timenow > $quiz->timeclose) {
+                    userdate($gnrquiz->timeclose, get_string('strftimedatetimeshort', 'langconfig')));
+        } else if ($gnrquiz->timeclose && $timenow > $gnrquiz->timeclose) {
             $currentstatus = get_string('gnrquizisclosed', 'gnrquiz');
         } else {
             $currentstatus = get_string('gnrquizisopen', 'gnrquiz');
@@ -574,10 +574,10 @@ class structure {
     }
 
     /**
-     * Set up this class with the structure for a given quiz.
-     * @param \stdClass $quiz the quiz settings.
+     * Set up this class with the structure for a given gnrquiz.
+     * @param \stdClass $gnrquiz the gnrquiz settings.
      */
-    public function populate_structure($quiz) {
+    public function populate_structure($gnrquiz) {
         global $DB;
 
         $slots = $DB->get_records_sql("
@@ -586,8 +586,8 @@ class structure {
                   FROM {gnrquiz_slots} slot
                   LEFT JOIN {question} q ON q.id = slot.questionid
                   LEFT JOIN {question_categories} qc ON qc.id = q.category
-                 WHERE slot.quizid = ?
-              ORDER BY slot.slot", array($quiz->id));
+                 WHERE slot.gnrquizid = ?
+              ORDER BY slot.slot", array($gnrquiz->id));
 
         $slots = $this->populate_missing_questions($slots);
 
@@ -600,7 +600,7 @@ class structure {
             $slot = new \stdClass();
             $slot->id = $slotdata->slotid;
             $slot->slot = $slotdata->slot;
-            $slot->quizid = $quiz->id;
+            $slot->gnrquizid = $gnrquiz->id;
             $slot->page = $slotdata->page;
             $slot->questionid = $slotdata->questionid;
             $slot->maxmark = $slotdata->maxmark;
@@ -610,15 +610,15 @@ class structure {
             $this->slotsinorder[$slot->slot] = $slot;
         }
 
-        // Get quiz sections in ascending order of the firstslot.
-        $this->sections = $DB->get_records('gnrquiz_sections', array('gnrquizid' => $quiz->id), 'firstslot ASC');
+        // Get gnrquiz sections in ascending order of the firstslot.
+        $this->sections = $DB->get_records('gnrquiz_sections', array('gnrquizid' => $gnrquiz->id), 'firstslot ASC');
         $this->populate_slots_with_sections();
         $this->populate_question_numbers();
     }
 
     /**
      * Used by populate. Make up fake data for any missing questions.
-     * @param \stdClass[] $slots the data about the slots and questions in the quiz.
+     * @param \stdClass[] $slots the data about the slots and questions in the gnrquiz.
      * @return \stdClass[] updated $slots array.
      */
     protected function populate_missing_questions($slots) {
@@ -726,7 +726,7 @@ class structure {
         if (($moveafterslotnumber > 0 && $page < $this->get_page_number_for_slot($moveafterslotnumber)) ||
                 $page < 1) {
             throw new \coding_exception('The target page number is too small.');
-        } else if (!$this->is_last_slot_in_quiz($moveafterslotnumber) &&
+        } else if (!$this->is_last_slot_in_gnrquiz($moveafterslotnumber) &&
                 $page > $this->get_page_number_for_slot($followingslotnumber)) {
             throw new \coding_exception('The target page number is too large.');
         }
@@ -741,7 +741,7 @@ class structure {
             }
 
             $headingmoveafter = $movingslotnumber;
-            if ($this->is_last_slot_in_quiz($moveafterslotnumber) ||
+            if ($this->is_last_slot_in_gnrquiz($moveafterslotnumber) ||
                     $page == $this->get_page_number_for_slot($moveafterslotnumber + 1)) {
                 // We are moving to the start of a section, so that heading needs
                 // to be included in the ones that move up.
@@ -791,7 +791,7 @@ class structure {
         // Slot has moved record new order.
         if ($slotreorder) {
             update_field_with_unique_index('gnrquiz_slots', 'slot', $slotreorder,
-                    array('gnrquizid' => $this->get_quizid()));
+                    array('gnrquizid' => $this->get_gnrquizid()));
         }
 
         // Page has changed. Record it.
@@ -807,7 +807,7 @@ class structure {
                  WHERE gnrquizid = ?
                    AND firstslot > ?
                    AND firstslot < ?
-                ", array($headingmovedirection, $this->get_quizid(),
+                ", array($headingmovedirection, $this->get_gnrquizid(),
                         $headingmoveafter, $headingmovebefore));
 
         // If any pages are now empty, remove them.
@@ -818,7 +818,7 @@ class structure {
                    AND page > 1
                    AND NOT EXISTS (SELECT 1 FROM {gnrquiz_slots} WHERE gnrquizid = ? AND page = slot.page - 1)
               ORDER BY page - 1 DESC
-                ", array($this->get_quizid(), $this->get_quizid()));
+                ", array($this->get_gnrquizid(), $this->get_gnrquizid()));
 
         foreach ($emptypages as $page) {
             $DB->execute("
@@ -826,14 +826,14 @@ class structure {
                        SET page = page - 1
                      WHERE gnrquizid = ?
                        AND page > ?
-                    ", array($this->get_quizid(), $page));
+                    ", array($this->get_gnrquizid(), $page));
         }
 
         $trans->allow_commit();
     }
 
     /**
-     * Refresh page numbering of quiz slots.
+     * Refresh page numbering of gnrquiz slots.
      * @param \stdClass[] $slots (optional) array of slot objects.
      * @return \stdClass[] array of slot objects.
      */
@@ -841,7 +841,7 @@ class structure {
         global $DB;
         // Get slots ordered by page then slot.
         if (!count($slots)) {
-            $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_quizid()), 'slot, page');
+            $slots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_gnrquizid()), 'slot, page');
         }
 
         // Loop slots. Start Page number at 1 and increment as required.
@@ -863,8 +863,8 @@ class structure {
     }
 
     /**
-     * Refresh page numbering of quiz slots and save to the database.
-     * @param \stdClass $quiz the quiz object.
+     * Refresh page numbering of gnrquiz slots and save to the database.
+     * @param \stdClass $gnrquiz the gnrquiz object.
      * @return \stdClass[] array of slot objects.
      */
     public function refresh_page_numbers_and_update_db() {
@@ -883,7 +883,7 @@ class structure {
     }
 
     /**
-     * Remove a slot from a quiz
+     * Remove a slot from a gnrquiz
      * @param int $slotnumber The number of the slot to be deleted.
      */
     public function remove_slot($slotnumber) {
@@ -895,17 +895,17 @@ class structure {
             throw new \coding_exception('You cannot remove the last slot in a section.');
         }
 
-        $slot = $DB->get_record('gnrquiz_slots', array('gnrquizid' => $this->get_quizid(), 'slot' => $slotnumber));
+        $slot = $DB->get_record('gnrquiz_slots', array('gnrquizid' => $this->get_gnrquizid(), 'slot' => $slotnumber));
         if (!$slot) {
             return;
         }
-        $maxslot = $DB->get_field_sql('SELECT MAX(slot) FROM {gnrquiz_slots} WHERE gnrquizid = ?', array($this->get_quizid()));
+        $maxslot = $DB->get_field_sql('SELECT MAX(slot) FROM {gnrquiz_slots} WHERE gnrquizid = ?', array($this->get_gnrquizid()));
 
         $trans = $DB->start_delegated_transaction();
         $DB->delete_records('gnrquiz_slots', array('id' => $slot->id));
         for ($i = $slot->slot + 1; $i <= $maxslot; $i++) {
             $DB->set_field('gnrquiz_slots', 'slot', $i - 1,
-                    array('gnrquizid' => $this->get_quizid(), 'slot' => $i));
+                    array('gnrquizid' => $this->get_gnrquizid(), 'slot' => $i));
         }
 
         $qtype = $DB->get_field('question', 'qtype', array('id' => $slot->questionid));
@@ -919,7 +919,7 @@ class structure {
                    SET firstslot = firstslot - 1
                  WHERE gnrquizid = ?
                    AND firstslot > ?
-                ", array($this->get_quizid(), $slotnumber));
+                ", array($this->get_gnrquizid(), $slotnumber));
         unset($this->questions[$slot->questionid]);
 
         $this->refresh_page_numbers_and_update_db();
@@ -932,7 +932,7 @@ class structure {
      *
      * Saves changes to the question grades in the gnrquiz_slots table and any
      * corresponding question_attempts.
-     * It does not update 'sumgrades' in the quiz table.
+     * It does not update 'sumgrades' in the gnrquiz table.
      *
      * @param \stdClass $slot row from the gnrquiz_slots table.
      * @param float $maxmark the new maxmark.
@@ -949,7 +949,7 @@ class structure {
         $trans = $DB->start_delegated_transaction();
         $slot->maxmark = $maxmark;
         $DB->update_record('gnrquiz_slots', $slot);
-        \question_engine::set_max_mark_in_attempts(new \qubaids_for_quiz($slot->quizid),
+        \question_engine::set_max_mark_in_attempts(new \qubaids_for_gnrquiz($slot->gnrquizid),
                 $slot->slot, $maxmark);
         $trans->allow_commit();
 
@@ -981,9 +981,9 @@ class structure {
 
         $this->check_can_be_edited();
 
-        $quizslots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_quizid()), 'slot');
-        $repaginate = new \mod_quiz\repaginate($this->get_quizid(), $quizslots);
-        $repaginate->repaginate_slots($quizslots[$slotid]->slot, $type);
+        $gnrquizslots = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_gnrquizid()), 'slot');
+        $repaginate = new \mod_gnrquiz\repaginate($this->get_gnrquizid(), $gnrquizslots);
+        $repaginate->repaginate_slots($gnrquizslots[$slotid]->slot, $type);
         $slots = $this->refresh_page_numbers_and_update_db();
 
         return $slots;
@@ -998,8 +998,8 @@ class structure {
         global $DB;
         $section = new \stdClass();
         $section->heading = $heading;
-        $section->quizid = $this->get_quizid();
-        $slotsonpage = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_quizid(), 'page' => $pagenumber), 'slot DESC');
+        $section->gnrquizid = $this->get_gnrquizid();
+        $slotsonpage = $DB->get_records('gnrquiz_slots', array('gnrquizid' => $this->get_gnrquizid(), 'page' => $pagenumber), 'slot DESC');
         $section->firstslot = end($slotsonpage)->slot;
         $section->shufflequestions = 0;
         return $DB->insert_record('gnrquiz_sections', $section);
@@ -1037,7 +1037,7 @@ class structure {
         global $DB;
         $section = $DB->get_record('gnrquiz_sections', array('id' => $sectionid), '*', MUST_EXIST);
         if ($section->firstslot == 1) {
-            throw new \coding_exception('Cannot remove the first section in a quiz.');
+            throw new \coding_exception('Cannot remove the first section in a gnrquiz.');
         }
         $DB->delete_records('gnrquiz_sections', array('id' => $sectionid));
     }

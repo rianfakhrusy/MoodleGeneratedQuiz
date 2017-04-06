@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_numattempts plugin.
+ * Unit tests for the gnrquizaccess_numattempts plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage numattempts
  * @category   phpunit
  * @copyright  2008 The Open University
@@ -32,19 +32,19 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/numattempts/rule.php');
 
 
 /**
- * Unit tests for the quizaccess_numattempts plugin.
+ * Unit tests for the gnrquizaccess_numattempts plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_numattempts_testcase extends basic_testcase {
+class gnrquizaccess_numattempts_testcase extends basic_testcase {
     public function test_num_attempts_access_rule() {
-        $quiz = new stdClass();
-        $quiz->attempts = 3;
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 3;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
-        $rule = new quizaccess_numattempts($quizobj, 0);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
+        $rule = new gnrquizaccess_numattempts($gnrquizobj, 0);
         $attempt = new stdClass();
 
         $this->assertEquals($rule->description(),

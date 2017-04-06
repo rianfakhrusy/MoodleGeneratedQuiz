@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Admin settings class for the quiz overdue attempt handling method.
+ * Admin settings class for the gnrquiz overdue attempt handling method.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2008 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * Admin settings class for the quiz overdue attempt handling method.
+ * Admin settings class for the gnrquiz overdue attempt handling method.
  *
  * Just so we can lazy-load the choices.
  *

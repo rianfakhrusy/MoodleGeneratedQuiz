@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the Moodle forum used to add random questions to the quiz.
+ * Defines the Moodle forum used to add random questions to the gnrquiz.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2008 Olli Savolainen
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

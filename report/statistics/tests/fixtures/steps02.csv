@@ -1,4 +1,4 @@
-quizattempt,firstname,lastname,responses.1.-submit,responses.1.-tryagain,responses.1.cat,responses.1.frog,responses.1.newt,finished
+gnrquizattempt,firstname,lastname,responses.1.-submit,responses.1.-tryagain,responses.1.cat,responses.1.frog,responses.1.newt,finished
 1,John,Jones,1,,insect,insect,insect,0
 1,,,,1,insect,insect,insect,0
 1,,,1,,insect,insect,insect,0

@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This script deals with starting a new attempt at a quiz.
+ * This script deals with starting a new attempt at a gnrquiz.
  *
  * Normally, it will end up redirecting to attempt.php - unless a password form is displayed.
  *
  * This code used to be at the top of attempt.php, if you are looking for CVS history.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2009 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,59 +41,59 @@ if (!$course = $DB->get_record('course', array('id' => $cm->course))) {
     print_error("coursemisconf");
 }
 
-$quizobj = quiz::create($cm->instance, $USER->id);
+$gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
 // This script should only ever be posted to, so set page URL to the view page.
-$PAGE->set_url($quizobj->view_url());
+$PAGE->set_url($gnrquizobj->view_url());
 
 // Check login and sesskey.
-require_login($quizobj->get_course(), false, $quizobj->get_cm());
+require_login($gnrquizobj->get_course(), false, $gnrquizobj->get_cm());
 require_sesskey();
-$PAGE->set_heading($quizobj->get_course()->fullname);
+$PAGE->set_heading($gnrquizobj->get_course()->fullname);
 
 // If no questions have been set up yet redirect to edit.php or display an error.
-if (!$quizobj->has_questions()) {
-    if ($quizobj->has_capability('mod/gnrquiz:manage')) {
-        redirect($quizobj->edit_url());
+if (!$gnrquizobj->has_questions()) {
+    if ($gnrquizobj->has_capability('mod/gnrquiz:manage')) {
+        redirect($gnrquizobj->edit_url());
     } else {
-        print_error('cannotstartnoquestions', 'gnrquiz', $quizobj->view_url());
+        print_error('cannotstartnoquestions', 'gnrquiz', $gnrquizobj->view_url());
     }
 }
 
 // Create an object to manage all the other (non-roles) access rules.
 $timenow = time();
-$accessmanager = $quizobj->get_access_manager($timenow);
+$accessmanager = $gnrquizobj->get_access_manager($timenow);
 
 // Validate permissions for creating a new attempt and start a new preview attempt if required.
 list($currentattemptid, $attemptnumber, $lastattempt, $messages, $page) =
-    gnrquiz_validate_new_attempt($quizobj, $accessmanager, $forcenew, $page, true);
+    gnrquiz_validate_new_attempt($gnrquizobj, $accessmanager, $forcenew, $page, true);
 
 // Check access.
-if (!$quizobj->is_preview_user() && $messages) {
-    $output = $PAGE->get_renderer('mod_quiz');
-    print_error('attempterror', 'gnrquiz', $quizobj->view_url(),
+if (!$gnrquizobj->is_preview_user() && $messages) {
+    $output = $PAGE->get_renderer('mod_gnrquiz');
+    print_error('attempterror', 'gnrquiz', $gnrquizobj->view_url(),
             $output->access_messages($messages));
 }
 
 if ($accessmanager->is_preflight_check_required($currentattemptid)) {
     // Need to do some checks before allowing the user to continue.
     $mform = $accessmanager->get_preflight_check_form(
-            $quizobj->start_attempt_url($page), $currentattemptid);
+            $gnrquizobj->start_attempt_url($page), $currentattemptid);
 
     if ($mform->is_cancelled()) {
-        $accessmanager->back_to_view_page($PAGE->get_renderer('mod_quiz'));
+        $accessmanager->back_to_view_page($PAGE->get_renderer('mod_gnrquiz'));
 
     } else if (!$mform->get_data()) {
 
         // Form not submitted successfully, re-display it and stop.
-        $PAGE->set_url($quizobj->start_attempt_url($page));
-        $PAGE->set_title($quizobj->get_gnrquiz_name());
+        $PAGE->set_url($gnrquizobj->start_attempt_url($page));
+        $PAGE->set_title($gnrquizobj->get_gnrquiz_name());
         $accessmanager->setup_attempt_page($PAGE);
-        $output = $PAGE->get_renderer('mod_quiz');
-        if (empty($quizobj->get_quiz()->showblocks)) {
+        $output = $PAGE->get_renderer('mod_gnrquiz');
+        if (empty($gnrquizobj->get_gnrquiz()->showblocks)) {
             $PAGE->blocks->show_only_fake_blocks();
         }
 
-        echo $output->start_attempt_page($quizobj, $mform);
+        echo $output->start_attempt_page($gnrquizobj, $mform);
         die();
     }
 
@@ -102,13 +102,13 @@ if ($accessmanager->is_preflight_check_required($currentattemptid)) {
 }
 if ($currentattemptid) {
     if ($lastattempt->state == gnrquiz_attempt::OVERDUE) {
-        redirect($quizobj->summary_url($lastattempt->id));
+        redirect($gnrquizobj->summary_url($lastattempt->id));
     } else {
-        redirect($quizobj->attempt_url($currentattemptid, $page));
+        redirect($gnrquizobj->attempt_url($currentattemptid, $page));
     }
 }
 
-$attempt = gnrquiz_prepare_and_start_new_attempt($quizobj, $attemptnumber, $lastattempt);
+$attempt = gnrquiz_prepare_and_start_new_attempt($gnrquizobj, $attemptnumber, $lastattempt);
 
 // Redirect to the attempt page.
-redirect($quizobj->attempt_url($attempt->id, $page));
+redirect($gnrquizobj->attempt_url($attempt->id, $page));

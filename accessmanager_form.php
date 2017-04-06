@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the form that limits student's access to attempt a quiz.
+ * Defines the form that limits student's access to attempt a gnrquiz.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2011 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,7 +29,7 @@ require_once($CFG->libdir.'/formslib.php');
 
 
 /**
- * A form that limits student's access to attempt a quiz.
+ * A form that limits student's access to attempt a gnrquiz.
  *
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

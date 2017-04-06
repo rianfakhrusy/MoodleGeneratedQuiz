@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Helper functions for the quiz reports.
+ * Helper functions for the gnrquiz reports.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2008 Jamie Pratt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -78,21 +78,21 @@ function gnrquiz_report_unindex($datum) {
 }
 
 /**
- * Are there any questions in this quiz?
- * @param int $quizid the quiz id.
+ * Are there any questions in this gnrquiz?
+ * @param int $gnrquizid the gnrquiz id.
  */
-function gnrquiz_has_questions($quizid) {
+function gnrquiz_has_questions($gnrquizid) {
     global $DB;
-    return $DB->record_exists('gnrquiz_slots', array('gnrquizid' => $quizid));
+    return $DB->record_exists('gnrquiz_slots', array('gnrquizid' => $gnrquizid));
 }
 
 /**
- * Get the slots of real questions (not descriptions) in this quiz, in order.
- * @param object $quiz the quiz.
+ * Get the slots of real questions (not descriptions) in this gnrquiz, in order.
+ * @param object $gnrquiz the gnrquiz.
  * @return array of slot => $question object with fields
  *      ->slot, ->id, ->maxmark, ->number, ->length.
  */
-function gnrquiz_report_get_significant_questions($quiz) {
+function gnrquiz_report_get_significant_questions($gnrquiz) {
     global $DB;
 
     $qsbyslot = $DB->get_records_sql("
@@ -104,10 +104,10 @@ function gnrquiz_report_get_significant_questions($quiz) {
               FROM {question} q
               JOIN {gnrquiz_slots} slot ON slot.questionid = q.id
 
-             WHERE slot.quizid = ?
+             WHERE slot.gnrquizid = ?
                AND q.length > 0
 
-          ORDER BY slot.slot", array($quiz->id));
+          ORDER BY slot.slot", array($gnrquiz->id));
 
     $number = 1;
     foreach ($qsbyslot as $question) {
@@ -119,82 +119,82 @@ function gnrquiz_report_get_significant_questions($quiz) {
 }
 
 /**
- * @param object $quiz the quiz settings.
- * @return bool whether, for this quiz, it is possible to filter attempts to show
+ * @param object $gnrquiz the gnrquiz settings.
+ * @return bool whether, for this gnrquiz, it is possible to filter attempts to show
  *      only those that gave the final grade.
  */
-function gnrquiz_report_can_filter_only_graded($quiz) {
-    return $quiz->attempts != 1 && $quiz->grademethod != QUIZ_GRADEAVERAGE;
+function gnrquiz_report_can_filter_only_graded($gnrquiz) {
+    return $gnrquiz->attempts != 1 && $gnrquiz->grademethod != GNRQUIZ_GRADEAVERAGE;
 }
 
 /**
- * This is a wrapper for {@link gnrquiz_report_grade_method_sql} that takes the whole quiz object instead of just the grading method
+ * This is a wrapper for {@link gnrquiz_report_grade_method_sql} that takes the whole gnrquiz object instead of just the grading method
  * as a param. See definition for {@link gnrquiz_report_grade_method_sql} below.
  *
- * @param object $quiz
- * @param string $quizattemptsalias sql alias for 'gnrquiz_attempts' table
+ * @param object $gnrquiz
+ * @param string $gnrquizattemptsalias sql alias for 'gnrquiz_attempts' table
  * @return string sql to test if this is an attempt that will contribute towards the grade of the user
  */
-function gnrquiz_report_qm_filter_select($quiz, $quizattemptsalias = 'gnrquiza') {
-    if ($quiz->attempts == 1) {
-        // This quiz only allows one attempt.
+function gnrquiz_report_qm_filter_select($gnrquiz, $gnrquizattemptsalias = 'gnrquiza') {
+    if ($gnrquiz->attempts == 1) {
+        // This gnrquiz only allows one attempt.
         return '';
     }
-    return gnrquiz_report_grade_method_sql($quiz->grademethod, $quizattemptsalias);
+    return gnrquiz_report_grade_method_sql($gnrquiz->grademethod, $gnrquizattemptsalias);
 }
 
 /**
- * Given a quiz grading method return sql to test if this is an
+ * Given a gnrquiz grading method return sql to test if this is an
  * attempt that will be contribute towards the grade of the user. Or return an
- * empty string if the grading method is QUIZ_GRADEAVERAGE and thus all attempts
+ * empty string if the grading method is GNRQUIZ_GRADEAVERAGE and thus all attempts
  * contribute to final grade.
  *
- * @param string $grademethod quiz grading method.
- * @param string $quizattemptsalias sql alias for 'gnrquiz_attempts' table
+ * @param string $grademethod gnrquiz grading method.
+ * @param string $gnrquizattemptsalias sql alias for 'gnrquiz_attempts' table
  * @return string sql to test if this is an attempt that will contribute towards the graded of the user
  */
-function gnrquiz_report_grade_method_sql($grademethod, $quizattemptsalias = 'gnrquiza') {
+function gnrquiz_report_grade_method_sql($grademethod, $gnrquizattemptsalias = 'gnrquiza') {
     switch ($grademethod) {
-        case QUIZ_GRADEHIGHEST :
-            return "($quizattemptsalias.state = 'finished' AND NOT EXISTS (
+        case GNRQUIZ_GRADEHIGHEST :
+            return "($gnrquizattemptsalias.state = 'finished' AND NOT EXISTS (
                            SELECT 1 FROM {gnrquiz_attempts} qa2
-                            WHERE qa2.quiz = $quizattemptsalias.quiz AND
-                                qa2.userid = $quizattemptsalias.userid AND
+                            WHERE qa2.gnrquiz = $gnrquizattemptsalias.gnrquiz AND
+                                qa2.userid = $gnrquizattemptsalias.userid AND
                                  qa2.state = 'finished' AND (
-                COALESCE(qa2.sumgrades, 0) > COALESCE($quizattemptsalias.sumgrades, 0) OR
-               (COALESCE(qa2.sumgrades, 0) = COALESCE($quizattemptsalias.sumgrades, 0) AND qa2.attempt < $quizattemptsalias.attempt)
+                COALESCE(qa2.sumgrades, 0) > COALESCE($gnrquizattemptsalias.sumgrades, 0) OR
+               (COALESCE(qa2.sumgrades, 0) = COALESCE($gnrquizattemptsalias.sumgrades, 0) AND qa2.attempt < $gnrquizattemptsalias.attempt)
                                 )))";
 
-        case QUIZ_GRADEAVERAGE :
+        case GNRQUIZ_GRADEAVERAGE :
             return '';
 
-        case QUIZ_ATTEMPTFIRST :
-            return "($quizattemptsalias.state = 'finished' AND NOT EXISTS (
+        case GNRQUIZ_ATTEMPTFIRST :
+            return "($gnrquizattemptsalias.state = 'finished' AND NOT EXISTS (
                            SELECT 1 FROM {gnrquiz_attempts} qa2
-                            WHERE qa2.quiz = $quizattemptsalias.quiz AND
-                                qa2.userid = $quizattemptsalias.userid AND
+                            WHERE qa2.gnrquiz = $gnrquizattemptsalias.gnrquiz AND
+                                qa2.userid = $gnrquizattemptsalias.userid AND
                                  qa2.state = 'finished' AND
-                               qa2.attempt < $quizattemptsalias.attempt))";
+                               qa2.attempt < $gnrquizattemptsalias.attempt))";
 
-        case QUIZ_ATTEMPTLAST :
-            return "($quizattemptsalias.state = 'finished' AND NOT EXISTS (
+        case GNRQUIZ_ATTEMPTLAST :
+            return "($gnrquizattemptsalias.state = 'finished' AND NOT EXISTS (
                            SELECT 1 FROM {gnrquiz_attempts} qa2
-                            WHERE qa2.quiz = $quizattemptsalias.quiz AND
-                                qa2.userid = $quizattemptsalias.userid AND
+                            WHERE qa2.gnrquiz = $gnrquizattemptsalias.gnrquiz AND
+                                qa2.userid = $gnrquizattemptsalias.userid AND
                                  qa2.state = 'finished' AND
-                               qa2.attempt > $quizattemptsalias.attempt))";
+                               qa2.attempt > $gnrquizattemptsalias.attempt))";
     }
 }
 
 /**
- * Get the number of students whose score was in a particular band for this quiz.
+ * Get the number of students whose score was in a particular band for this gnrquiz.
  * @param number $bandwidth the width of each band.
  * @param int $bands the number of bands
- * @param int $quizid the quiz id.
+ * @param int $gnrquizid the gnrquiz id.
  * @param array $userids list of user ids.
  * @return array band number => number of users with scores in that band.
  */
-function gnrquiz_report_grade_bands($bandwidth, $bands, $quizid, $userids = array()) {
+function gnrquiz_report_grade_bands($bandwidth, $bands, $gnrquizid, $userids = array()) {
     global $DB;
     if (!is_int($bands)) {
         debugging('$bands passed to gnrquiz_report_grade_bands must be an integer. (' .
@@ -215,7 +215,7 @@ SELECT band, COUNT(1)
 FROM (
     SELECT FLOOR(qg.grade / :bandwidth) AS band
       FROM {gnrquiz_grades} qg
-     WHERE $usql qg.quiz = :quizid
+     WHERE $usql qg.gnrquiz = :gnrquizid
 ) subquery
 
 GROUP BY
@@ -224,7 +224,7 @@ GROUP BY
 ORDER BY
     band";
 
-    $params['gnrquizid'] = $quizid;
+    $params['gnrquizid'] = $gnrquizid;
     $params['bandwidth'] = $bandwidth;
 
     $data = $DB->get_records_sql_menu($sql, $params);
@@ -242,8 +242,8 @@ ORDER BY
     return $data;
 }
 
-function gnrquiz_report_highlighting_grading_method($quiz, $qmsubselect, $qmfilter) {
-    if ($quiz->attempts == 1) {
+function gnrquiz_report_highlighting_grading_method($gnrquiz, $qmsubselect, $qmfilter) {
+    if ($gnrquiz->attempts == 1) {
         return '<p>' . get_string('onlyoneattemptallowed', 'gnrquiz_overview') . '</p>';
 
     } else if (!$qmsubselect) {
@@ -254,33 +254,33 @@ function gnrquiz_report_highlighting_grading_method($quiz, $qmsubselect, $qmfilt
 
     } else {
         return '<p>' . get_string('showinggradedandungraded', 'gnrquiz_overview',
-                '<span class="gradedattempt">' . gnrquiz_get_grading_option_name($quiz->grademethod) .
+                '<span class="gradedattempt">' . gnrquiz_get_grading_option_name($gnrquiz->grademethod) .
                 '</span>') . '</p>';
     }
 }
 
 /**
- * Get the feedback text for a grade on this quiz. The feedback is
+ * Get the feedback text for a grade on this gnrquiz. The feedback is
  * processed ready for display.
  *
- * @param float $grade a grade on this quiz.
- * @param int $quizid the id of the quiz object.
+ * @param float $grade a grade on this gnrquiz.
+ * @param int $gnrquizid the id of the gnrquiz object.
  * @return string the comment that corresponds to this grade (empty string if there is not one.
  */
-function gnrquiz_report_feedback_for_grade($grade, $quizid, $context) {
+function gnrquiz_report_feedback_for_grade($grade, $gnrquizid, $context) {
     global $DB;
 
     static $feedbackcache = array();
 
-    if (!isset($feedbackcache[$quizid])) {
-        $feedbackcache[$quizid] = $DB->get_records('gnrquiz_feedback', array('gnrquizid' => $quizid));
+    if (!isset($feedbackcache[$gnrquizid])) {
+        $feedbackcache[$gnrquizid] = $DB->get_records('gnrquiz_feedback', array('gnrquizid' => $gnrquizid));
     }
 
     // With CBM etc, it is possible to get -ve grades, which would then not match
     // any feedback. Therefore, we replace -ve grades with 0.
     $grade = max($grade, 0);
 
-    $feedbacks = $feedbackcache[$quizid];
+    $feedbacks = $feedbackcache[$gnrquizid];
     $feedbackid = 0;
     $feedbacktext = '';
     $feedbacktextformat = FORMAT_MOODLE;
@@ -297,29 +297,29 @@ function gnrquiz_report_feedback_for_grade($grade, $quizid, $context) {
     $formatoptions = new stdClass();
     $formatoptions->noclean = true;
     $feedbacktext = file_rewrite_pluginfile_urls($feedbacktext, 'pluginfile.php',
-            $context->id, 'mod_quiz', 'feedback', $feedbackid);
+            $context->id, 'mod_gnrquiz', 'feedback', $feedbackid);
     $feedbacktext = format_text($feedbacktext, $feedbacktextformat, $formatoptions);
 
     return $feedbacktext;
 }
 
 /**
- * Format a number as a percentage out of $quiz->sumgrades
+ * Format a number as a percentage out of $gnrquiz->sumgrades
  * @param number $rawgrade the mark to format.
- * @param object $quiz the quiz settings
- * @param bool $round whether to round the results ot $quiz->decimalpoints.
+ * @param object $gnrquiz the gnrquiz settings
+ * @param bool $round whether to round the results ot $gnrquiz->decimalpoints.
  */
-function gnrquiz_report_scale_summarks_as_percentage($rawmark, $quiz, $round = true) {
-    if ($quiz->sumgrades == 0) {
+function gnrquiz_report_scale_summarks_as_percentage($rawmark, $gnrquiz, $round = true) {
+    if ($gnrquiz->sumgrades == 0) {
         return '';
     }
     if (!is_numeric($rawmark)) {
         return $rawmark;
     }
 
-    $mark = $rawmark * 100 / $quiz->sumgrades;
+    $mark = $rawmark * 100 / $gnrquiz->sumgrades;
     if ($round) {
-        $mark = gnrquiz_format_grade($quiz, $mark);
+        $mark = gnrquiz_format_grade($gnrquiz, $mark);
     }
     return $mark . '%';
 }
@@ -365,21 +365,21 @@ function gnrquiz_report_list($context) {
 }
 
 /**
- * Create a filename for use when downloading data from a quiz report. It is
+ * Create a filename for use when downloading data from a gnrquiz report. It is
  * expected that this will be passed to flexible_table::is_downloading, which
  * cleans the filename of bad characters and adds the file extension.
  * @param string $report the type of report.
  * @param string $courseshortname the course shortname.
- * @param string $quizname the quiz name.
+ * @param string $gnrquizname the gnrquiz name.
  * @return string the filename.
  */
-function gnrquiz_report_download_filename($report, $courseshortname, $quizname) {
-    return $courseshortname . '-' . format_string($quizname, true) . '-' . $report;
+function gnrquiz_report_download_filename($report, $courseshortname, $gnrquizname) {
+    return $courseshortname . '-' . format_string($gnrquizname, true) . '-' . $report;
 }
 
 /**
  * Get the default report for the current user.
- * @param object $context the quiz context.
+ * @param object $context the gnrquiz context.
  */
 function gnrquiz_report_default_report($context) {
     $reports = gnrquiz_report_list($context);
@@ -387,42 +387,42 @@ function gnrquiz_report_default_report($context) {
 }
 
 /**
- * Generate a message saying that this quiz has no questions, with a button to
+ * Generate a message saying that this gnrquiz has no questions, with a button to
  * go to the edit page, if the user has the right capability.
- * @param object $quiz the quiz settings.
+ * @param object $gnrquiz the gnrquiz settings.
  * @param object $cm the course_module object.
- * @param object $context the quiz context.
+ * @param object $context the gnrquiz context.
  * @return string HTML to output.
  */
-function gnrquiz_no_questions_message($quiz, $cm, $context) {
+function gnrquiz_no_questions_message($gnrquiz, $cm, $context) {
     global $OUTPUT;
 
     $output = '';
     $output .= $OUTPUT->notification(get_string('noquestions', 'gnrquiz'));
     if (has_capability('mod/gnrquiz:manage', $context)) {
         $output .= $OUTPUT->single_button(new moodle_url('/mod/gnrquiz/edit.php',
-        array('cmid' => $cm->id)), get_string('editquiz', 'gnrquiz'), 'get');
+        array('cmid' => $cm->id)), get_string('editgnrquiz', 'gnrquiz'), 'get');
     }
 
     return $output;
 }
 
 /**
- * Should the grades be displayed in this report. That depends on the quiz
- * display options, and whether the quiz is graded.
- * @param object $quiz the quiz settings.
- * @param context $context the quiz context.
+ * Should the grades be displayed in this report. That depends on the gnrquiz
+ * display options, and whether the gnrquiz is graded.
+ * @param object $gnrquiz the gnrquiz settings.
+ * @param context $context the gnrquiz context.
  * @return bool
  */
-function gnrquiz_report_should_show_grades($quiz, context $context) {
-    if ($quiz->timeclose && time() > $quiz->timeclose) {
+function gnrquiz_report_should_show_grades($gnrquiz, context $context) {
+    if ($gnrquiz->timeclose && time() > $gnrquiz->timeclose) {
         $when = mod_gnrquiz_display_options::AFTER_CLOSE;
     } else {
         $when = mod_gnrquiz_display_options::LATER_WHILE_OPEN;
     }
-    $reviewoptions = mod_gnrquiz_display_options::make_from_quiz($quiz, $when);
+    $reviewoptions = mod_gnrquiz_display_options::make_from_gnrquiz($gnrquiz, $when);
 
-    return gnrquiz_has_grades($quiz) &&
+    return gnrquiz_has_grades($gnrquiz) &&
             ($reviewoptions->marks >= question_display_options::MARK_AND_MAX ||
             has_capability('moodle/grade:viewhidden', $context));
 }

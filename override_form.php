@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Settings form for overrides in the quiz module.
+ * Settings form for overrides in the gnrquiz module.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2010 Matt Petro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,10 +40,10 @@ class gnrquiz_override_form extends moodleform {
     /** @var object course module object. */
     protected $cm;
 
-    /** @var object the quiz settings object. */
-    protected $quiz;
+    /** @var object the gnrquiz settings object. */
+    protected $gnrquiz;
 
-    /** @var context the quiz context. */
+    /** @var context the gnrquiz context. */
     protected $context;
 
     /** @var bool editing group override (true) or user override (false). */
@@ -59,15 +59,15 @@ class gnrquiz_override_form extends moodleform {
      * Constructor.
      * @param moodle_url $submiturl the form action URL.
      * @param object course module object.
-     * @param object the quiz settings object.
-     * @param context the quiz context.
+     * @param object the gnrquiz settings object.
+     * @param context the gnrquiz context.
      * @param bool editing group override (true) or user override (false).
      * @param object $override the override being edited, if it already exists.
      */
-    public function __construct($submiturl, $cm, $quiz, $context, $groupmode, $override) {
+    public function __construct($submiturl, $cm, $gnrquiz, $context, $groupmode, $override) {
 
         $this->cm = $cm;
-        $this->quiz = $quiz;
+        $this->gnrquiz = $gnrquiz;
         $this->context = $context;
         $this->groupmode = $groupmode;
         $this->groupid = empty($override->groupid) ? 0 : $override->groupid;
@@ -179,31 +179,31 @@ class gnrquiz_override_form extends moodleform {
         $mform->addElement('passwordunmask', 'password', get_string('requirepassword', 'gnrquiz'));
         $mform->setType('password', PARAM_TEXT);
         $mform->addHelpButton('password', 'requirepassword', 'gnrquiz');
-        $mform->setDefault('password', $this->quiz->password);
+        $mform->setDefault('password', $this->gnrquiz->password);
 
         // Open and close dates.
         $mform->addElement('date_time_selector', 'timeopen',
                 get_string('gnrquizopen', 'gnrquiz'), mod_gnrquiz_mod_form::$datefieldoptions);
-        $mform->setDefault('timeopen', $this->quiz->timeopen);
+        $mform->setDefault('timeopen', $this->gnrquiz->timeopen);
 
         $mform->addElement('date_time_selector', 'timeclose',
                 get_string('gnrquizclose', 'gnrquiz'), mod_gnrquiz_mod_form::$datefieldoptions);
-        $mform->setDefault('timeclose', $this->quiz->timeclose);
+        $mform->setDefault('timeclose', $this->gnrquiz->timeclose);
 
         // Time limit.
         $mform->addElement('duration', 'timelimit',
                 get_string('timelimit', 'gnrquiz'), array('optional' => true));
         $mform->addHelpButton('timelimit', 'timelimit', 'gnrquiz');
-        $mform->setDefault('timelimit', $this->quiz->timelimit);
+        $mform->setDefault('timelimit', $this->gnrquiz->timelimit);
 
         // Number of attempts.
         $attemptoptions = array('0' => get_string('unlimited'));
-        for ($i = 1; $i <= QUIZ_MAX_ATTEMPT_OPTION; $i++) {
+        for ($i = 1; $i <= GNRQUIZ_MAX_ATTEMPT_OPTION; $i++) {
             $attemptoptions[$i] = $i;
         }
         $mform->addElement('select', 'attempts',
                 get_string('attemptsallowed', 'gnrquiz'), $attemptoptions);
-        $mform->setDefault('attempts', $this->quiz->attempts);
+        $mform->setDefault('attempts', $this->gnrquiz->attempts);
 
         // Submit buttons.
         $mform->addElement('submit', 'resetbutton',
@@ -226,7 +226,7 @@ class gnrquiz_override_form extends moodleform {
         $errors = parent::validation($data, $files);
 
         $mform =& $this->_form;
-        $quiz = $this->quiz;
+        $gnrquiz = $this->gnrquiz;
 
         if ($mform->elementExists('userid')) {
             if (empty($data['userid'])) {
@@ -247,11 +247,11 @@ class gnrquiz_override_form extends moodleform {
             }
         }
 
-        // Ensure that at least one quiz setting was changed.
+        // Ensure that at least one gnrquiz setting was changed.
         $changed = false;
         $keys = array('timeopen', 'timeclose', 'timelimit', 'attempts', 'password');
         foreach ($keys as $key) {
-            if ($data[$key] != $quiz->{$key}) {
+            if ($data[$key] != $gnrquiz->{$key}) {
                 $changed = true;
                 break;
             }

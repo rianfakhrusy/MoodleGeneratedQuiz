@@ -15,29 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the custom question bank view used on the Edit quiz page.
+ * Defines the custom question bank view used on the Edit gnrquiz page.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @category  question
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\question\bank;
+namespace mod_gnrquiz\question\bank;
 defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * Subclass to customise the view of the question bank for the quiz editing screen.
+ * Subclass to customise the view of the question bank for the gnrquiz editing screen.
  *
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class custom_view extends \core_question\bank\view {
-    /** @var bool whether the quiz this is used by has been attemptd. */
-    protected $quizhasattempts = false;
-    /** @var \stdClass the quiz settings. */
-    protected $quiz = false;
+    /** @var bool whether the gnrquiz this is used by has been attemptd. */
+    protected $gnrquizhasattempts = false;
+    /** @var \stdClass the gnrquiz settings. */
+    protected $gnrquiz = false;
     /** @var int The maximum displayed length of the category info. */
     const MAX_TEXT_LENGTH = 200;
 
@@ -47,18 +47,18 @@ class custom_view extends \core_question\bank\view {
      * @param \moodle_url $pageurl
      * @param \stdClass $course course settings
      * @param \stdClass $cm activity settings.
-     * @param \stdClass $quiz quiz settings.
+     * @param \stdClass $gnrquiz gnrquiz settings.
      */
-    public function __construct($contexts, $pageurl, $course, $cm, $quiz) {
+    public function __construct($contexts, $pageurl, $course, $cm, $gnrquiz) {
         parent::__construct($contexts, $pageurl, $course, $cm);
-        $this->quiz = $quiz;
+        $this->gnrquiz = $gnrquiz;
     }
 
     protected function wanted_columns() {
         global $CFG;
 
-        if (empty($CFG->quizquestionbankcolumns)) {
-            $quizquestionbankcolumns = array(
+        if (empty($CFG->gnrquizquestionbankcolumns)) {
+            $gnrquizquestionbankcolumns = array(
                 'add_action_column',
                 'checkbox_column',
                 'question_type_column',
@@ -66,18 +66,18 @@ class custom_view extends \core_question\bank\view {
                 'preview_action_column',
             );
         } else {
-            $quizquestionbankcolumns = explode(',', $CFG->quizquestionbankcolumns);
+            $gnrquizquestionbankcolumns = explode(',', $CFG->gnrquizquestionbankcolumns);
         }
 
-        foreach ($quizquestionbankcolumns as $fullname) {
+        foreach ($gnrquizquestionbankcolumns as $fullname) {
             if (!class_exists($fullname)) {
-                if (class_exists('mod_quiz\\question\\bank\\' . $fullname)) {
-                    $fullname = 'mod_quiz\\question\\bank\\' . $fullname;
+                if (class_exists('mod_gnrquiz\\question\\bank\\' . $fullname)) {
+                    $fullname = 'mod_gnrquiz\\question\\bank\\' . $fullname;
                 } else if (class_exists('core_question\\bank\\' . $fullname)) {
                     $fullname = 'core_question\\bank\\' . $fullname;
                 } else if (class_exists('question_bank_' . $fullname)) {
                     debugging('Legacy question bank column class question_bank_' .
-                            $fullname . ' should be renamed to mod_quiz\\question\\bank\\' .
+                            $fullname . ' should be renamed to mod_gnrquiz\\question\\bank\\' .
                             $fullname, DEBUG_DEVELOPER);
                     $fullname = 'question_bank_' . $fullname;
                 } else {
@@ -95,31 +95,31 @@ class custom_view extends \core_question\bank\view {
      * @return string Column name for the heading
      */
     protected function heading_column() {
-        return 'mod_quiz\\question\\bank\\question_name_text_column';
+        return 'mod_gnrquiz\\question\\bank\\question_name_text_column';
     }
 
     protected function default_sort() {
         return array(
             'core_question\\bank\\question_type_column' => 1,
-            'mod_quiz\\question\\bank\\question_name_text_column' => 1,
+            'mod_gnrquiz\\question\\bank\\question_name_text_column' => 1,
         );
     }
 
     /**
-     * Let the question bank display know whether the quiz has been attempted,
-     * hence whether some bits of UI, like the add this question to the quiz icon,
+     * Let the question bank display know whether the gnrquiz has been attempted,
+     * hence whether some bits of UI, like the add this question to the gnrquiz icon,
      * should be displayed.
-     * @param bool $quizhasattempts whether the quiz has attempts.
+     * @param bool $gnrquizhasattempts whether the gnrquiz has attempts.
      */
-    public function set_gnrquiz_has_attempts($quizhasattempts) {
-        $this->quizhasattempts = $quizhasattempts;
-        if ($quizhasattempts && isset($this->visiblecolumns['addtoquizaction'])) {
-            unset($this->visiblecolumns['addtoquizaction']);
+    public function set_gnrquiz_has_attempts($gnrquizhasattempts) {
+        $this->gnrquizhasattempts = $gnrquizhasattempts;
+        if ($gnrquizhasattempts && isset($this->visiblecolumns['addtognrquizaction'])) {
+            unset($this->visiblecolumns['addtognrquizaction']);
         }
     }
 
     public function preview_question_url($question) {
-        return gnrquiz_question_preview_url($this->quiz, $question);
+        return gnrquiz_question_preview_url($this->gnrquiz, $question);
     }
 
     public function add_to_gnrquiz_url($questionid) {
@@ -156,18 +156,18 @@ class custom_view extends \core_question\bank\view {
      */
     protected function display_bottom_controls($totalnumber, $recurse, $category, \context $catcontext, array $addcontexts) {
         $cmoptions = new \stdClass();
-        $cmoptions->hasattempts = !empty($this->quizhasattempts);
+        $cmoptions->hasattempts = !empty($this->gnrquizhasattempts);
 
         $canuseall = has_capability('moodle/question:useall', $catcontext);
 
         echo '<div class="modulespecificbuttonscontainer">';
         if ($canuseall) {
 
-            // Add selected questions to the quiz.
+            // Add selected questions to the gnrquiz.
             $params = array(
                     'type' => 'submit',
                     'name' => 'add',
-                    'value' => get_string('addselectedquestionstoquiz', 'gnrquiz'),
+                    'value' => get_string('addselectedquestionstognrquiz', 'gnrquiz'),
             );
             if ($cmoptions->hasattempts) {
                 $params['disabled'] = 'disabled';

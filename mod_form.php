@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the quiz module ettings form.
+ * Defines the gnrquiz module ettings form.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2006 Jamie Pratt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,19 +30,19 @@ require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
 
 /**
- * Settings form for the quiz module.
+ * Settings form for the gnrquiz module.
  *
  * @copyright  2006 Jamie Pratt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_gnrquiz_mod_form extends moodleform_mod {
-    /** @var array options to be used with date_time_selector fields in the quiz. */
+    /** @var array options to be used with date_time_selector fields in the gnrquiz. */
     public static $datefieldoptions = array('optional' => true, 'step' => 1);
 
     protected $_feedbacks;
     protected static $reviewfields = array(); // Initialised in the constructor.
 
-    /** @var int the max number of attempts allowed in any user or group override on this quiz. */
+    /** @var int the max number of attempts allowed in any user or group override on this gnrquiz. */
     protected $maxattemptsanyoverride = null;
 
     public function __construct($current, $section, $cm, $course) {
@@ -60,7 +60,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
 
     protected function definition() {
         global $COURSE, $CFG, $DB, $PAGE;
-        $quizconfig = get_config('quiz');
+        $gnrquizconfig = get_config('quiz');
         $mform = $this->_form;
 
         // -------------------------------------------------------------------------------
@@ -101,15 +101,15 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('duration', 'timelimit', get_string('timelimit', 'gnrquiz'),
                 array('optional' => true));
         $mform->addHelpButton('timelimit', 'timelimit', 'gnrquiz');
-        $mform->setAdvanced('timelimit', $quizconfig->timelimit_adv);
-        $mform->setDefault('timelimit', $quizconfig->timelimit);
+        $mform->setAdvanced('timelimit', $gnrquizconfig->timelimit_adv);
+        $mform->setDefault('timelimit', $gnrquizconfig->timelimit);
 
         // What to do with overdue attempts.
         $mform->addElement('select', 'overduehandling', get_string('overduehandling', 'gnrquiz'),
                 gnrquiz_get_overdue_handling_options());
         $mform->addHelpButton('overduehandling', 'overduehandling', 'gnrquiz');
-        $mform->setAdvanced('overduehandling', $quizconfig->overduehandling_adv);
-        $mform->setDefault('overduehandling', $quizconfig->overduehandling);
+        $mform->setAdvanced('overduehandling', $gnrquizconfig->overduehandling_adv);
+        $mform->setDefault('overduehandling', $gnrquizconfig->overduehandling);
         // TODO Formslib does OR logic on disableif, and we need AND logic here.
         // $mform->disabledIf('overduehandling', 'timelimit', 'eq', 0);
         // $mform->disabledIf('overduehandling', 'timeclose', 'eq', 0);
@@ -118,8 +118,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('duration', 'graceperiod', get_string('graceperiod', 'gnrquiz'),
                 array('optional' => true));
         $mform->addHelpButton('graceperiod', 'graceperiod', 'gnrquiz');
-        $mform->setAdvanced('graceperiod', $quizconfig->graceperiod_adv);
-        $mform->setDefault('graceperiod', $quizconfig->graceperiod);
+        $mform->setAdvanced('graceperiod', $gnrquizconfig->graceperiod_adv);
+        $mform->setDefault('graceperiod', $gnrquizconfig->graceperiod);
         $mform->disabledIf('graceperiod', 'overduehandling', 'neq', 'graceperiod');
 
         // -------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         if (property_exists($this->current, 'grade')) {
             $currentgrade = $this->current->grade;
         } else {
-            $currentgrade = $quizconfig->maximumgrade;
+            $currentgrade = $gnrquizconfig->maximumgrade;
         }
         $mform->addElement('hidden', 'grade', $currentgrade);
         $mform->setType('grade', PARAM_FLOAT);
@@ -142,15 +142,15 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         }
         $mform->addElement('select', 'attempts', get_string('attemptsallowed', 'gnrquiz'),
                 $attemptoptions);
-        $mform->setAdvanced('attempts', $quizconfig->attempts_adv);
-        $mform->setDefault('attempts', $quizconfig->attempts);
+        $mform->setAdvanced('attempts', $gnrquizconfig->attempts_adv);
+        $mform->setDefault('attempts', $gnrquizconfig->attempts);
 
         // Grading method.
         $mform->addElement('select', 'grademethod', get_string('grademethod', 'gnrquiz'),
                 gnrquiz_get_grading_options());
         $mform->addHelpButton('grademethod', 'grademethod', 'gnrquiz');
-        $mform->setAdvanced('grademethod', $quizconfig->grademethod_adv);
-        $mform->setDefault('grademethod', $quizconfig->grademethod);
+        $mform->setAdvanced('grademethod', $gnrquizconfig->grademethod_adv);
+        $mform->setDefault('grademethod', $gnrquizconfig->grademethod);
         if ($this->get_max_attempts_for_any_override() < 2) {
             $mform->disabledIf('grademethod', 'attempts', 'eq', 1);
         }
@@ -161,7 +161,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $pagegroup = array();
         $pagegroup[] = $mform->createElement('select', 'questionsperpage',
                 get_string('newpage', 'gnrquiz'), gnrquiz_questions_per_page_options(), array('id' => 'id_questionsperpage'));
-        $mform->setDefault('questionsperpage', $quizconfig->questionsperpage);
+        $mform->setDefault('questionsperpage', $gnrquizconfig->questionsperpage);
 
         if (!empty($this->_cm)) {
             $pagegroup[] = $mform->createElement('checkbox', 'repaginatenow', '',
@@ -171,14 +171,14 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addGroup($pagegroup, 'questionsperpagegrp',
                 get_string('newpage', 'gnrquiz'), null, false);
         $mform->addHelpButton('questionsperpagegrp', 'newpage', 'gnrquiz');
-        $mform->setAdvanced('questionsperpagegrp', $quizconfig->questionsperpage_adv);
+        $mform->setAdvanced('questionsperpagegrp', $gnrquizconfig->questionsperpage_adv);
 
         // Navigation method.
         $mform->addElement('select', 'navmethod', get_string('navmethod', 'gnrquiz'),
                 gnrquiz_get_navigation_options());
         $mform->addHelpButton('navmethod', 'navmethod', 'gnrquiz');
-        $mform->setAdvanced('navmethod', $quizconfig->navmethod_adv);
-        $mform->setDefault('navmethod', $quizconfig->navmethod);
+        $mform->setAdvanced('navmethod', $gnrquizconfig->navmethod_adv);
+        $mform->setDefault('navmethod', $gnrquizconfig->navmethod);
 
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'interactionhdr', get_string('questionbehaviour', 'gnrquiz'));
@@ -186,8 +186,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         // Shuffle within questions.
         $mform->addElement('selectyesno', 'shuffleanswers', get_string('shufflewithin', 'gnrquiz'));
         $mform->addHelpButton('shuffleanswers', 'shufflewithin', 'gnrquiz');
-        $mform->setAdvanced('shuffleanswers', $quizconfig->shuffleanswers_adv);
-        $mform->setDefault('shuffleanswers', $quizconfig->shuffleanswers);
+        $mform->setAdvanced('shuffleanswers', $gnrquizconfig->shuffleanswers_adv);
+        $mform->setDefault('shuffleanswers', $gnrquizconfig->shuffleanswers);
 
         // How questions behave (question behaviour).
         if (!empty($this->current->preferredbehaviour)) {
@@ -199,14 +199,14 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('select', 'preferredbehaviour',
                 get_string('howquestionsbehave', 'question'), $behaviours);
         $mform->addHelpButton('preferredbehaviour', 'howquestionsbehave', 'question');
-        $mform->setDefault('preferredbehaviour', $quizconfig->preferredbehaviour);
+        $mform->setDefault('preferredbehaviour', $gnrquizconfig->preferredbehaviour);
 
         // Can redo completed questions.
         $redochoices = array(0 => get_string('no'), 1 => get_string('canredoquestionsyes', 'gnrquiz'));
         $mform->addElement('select', 'canredoquestions', get_string('canredoquestions', 'gnrquiz'), $redochoices);
         $mform->addHelpButton('canredoquestions', 'canredoquestions', 'gnrquiz');
-        $mform->setAdvanced('canredoquestions', $quizconfig->canredoquestions_adv);
-        $mform->setDefault('canredoquestions', $quizconfig->canredoquestions);
+        $mform->setAdvanced('canredoquestions', $gnrquizconfig->canredoquestions_adv);
+        $mform->setDefault('canredoquestions', $gnrquizconfig->canredoquestions);
         foreach ($behaviours as $behaviour => $notused) {
             if (!question_engine::can_questions_finish_during_the_attempt($behaviour)) {
                 $mform->disabledIf('canredoquestions', 'preferredbehaviour', 'eq', $behaviour);
@@ -217,8 +217,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('selectyesno', 'attemptonlast',
                 get_string('eachattemptbuildsonthelast', 'gnrquiz'));
         $mform->addHelpButton('attemptonlast', 'eachattemptbuildsonthelast', 'gnrquiz');
-        $mform->setAdvanced('attemptonlast', $quizconfig->attemptonlast_adv);
-        $mform->setDefault('attemptonlast', $quizconfig->attemptonlast);
+        $mform->setAdvanced('attemptonlast', $gnrquizconfig->attemptonlast_adv);
+        $mform->setDefault('attemptonlast', $gnrquizconfig->attemptonlast);
         if ($this->get_max_attempts_for_any_override() < 2) {
             $mform->disabledIf('attemptonlast', 'attempts', 'eq', 1);
         }
@@ -229,13 +229,13 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addHelpButton('reviewoptionshdr', 'reviewoptionsheading', 'gnrquiz');
 
         // Review options.
-        $this->add_review_options_group($mform, $quizconfig, 'during',
+        $this->add_review_options_group($mform, $gnrquizconfig, 'during',
                 mod_gnrquiz_display_options::DURING, true);
-        $this->add_review_options_group($mform, $quizconfig, 'immediately',
+        $this->add_review_options_group($mform, $gnrquizconfig, 'immediately',
                 mod_gnrquiz_display_options::IMMEDIATELY_AFTER);
-        $this->add_review_options_group($mform, $quizconfig, 'open',
+        $this->add_review_options_group($mform, $gnrquizconfig, 'open',
                 mod_gnrquiz_display_options::LATER_WHILE_OPEN);
-        $this->add_review_options_group($mform, $quizconfig, 'closed',
+        $this->add_review_options_group($mform, $gnrquizconfig, 'closed',
                 mod_gnrquiz_display_options::AFTER_CLOSE);
 
         foreach ($behaviours as $behaviour => $notused) {
@@ -257,8 +257,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('select', 'showuserpicture', get_string('showuserpicture', 'gnrquiz'),
                 gnrquiz_get_user_image_options());
         $mform->addHelpButton('showuserpicture', 'showuserpicture', 'gnrquiz');
-        $mform->setAdvanced('showuserpicture', $quizconfig->showuserpicture_adv);
-        $mform->setDefault('showuserpicture', $quizconfig->showuserpicture);
+        $mform->setAdvanced('showuserpicture', $gnrquizconfig->showuserpicture_adv);
+        $mform->setDefault('showuserpicture', $gnrquizconfig->showuserpicture);
 
         // Overall decimal points.
         $options = array();
@@ -268,8 +268,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('select', 'decimalpoints', get_string('decimalplaces', 'gnrquiz'),
                 $options);
         $mform->addHelpButton('decimalpoints', 'decimalplaces', 'gnrquiz');
-        $mform->setAdvanced('decimalpoints', $quizconfig->decimalpoints_adv);
-        $mform->setDefault('decimalpoints', $quizconfig->decimalpoints);
+        $mform->setAdvanced('decimalpoints', $gnrquizconfig->decimalpoints_adv);
+        $mform->setDefault('decimalpoints', $gnrquizconfig->decimalpoints);
 
         // Question decimal points.
         $options = array(-1 => get_string('sameasoverall', 'gnrquiz'));
@@ -279,38 +279,38 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('select', 'questiondecimalpoints',
                 get_string('decimalplacesquestion', 'gnrquiz'), $options);
         $mform->addHelpButton('questiondecimalpoints', 'decimalplacesquestion', 'gnrquiz');
-        $mform->setAdvanced('questiondecimalpoints', $quizconfig->questiondecimalpoints_adv);
-        $mform->setDefault('questiondecimalpoints', $quizconfig->questiondecimalpoints);
+        $mform->setAdvanced('questiondecimalpoints', $gnrquizconfig->questiondecimalpoints_adv);
+        $mform->setDefault('questiondecimalpoints', $gnrquizconfig->questiondecimalpoints);
 
-        // Show blocks during quiz attempt.
+        // Show blocks during gnrquiz attempt.
         $mform->addElement('selectyesno', 'showblocks', get_string('showblocks', 'gnrquiz'));
         $mform->addHelpButton('showblocks', 'showblocks', 'gnrquiz');
-        $mform->setAdvanced('showblocks', $quizconfig->showblocks_adv);
-        $mform->setDefault('showblocks', $quizconfig->showblocks);
+        $mform->setAdvanced('showblocks', $gnrquizconfig->showblocks_adv);
+        $mform->setDefault('showblocks', $gnrquizconfig->showblocks);
 
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'security', get_string('extraattemptrestrictions', 'gnrquiz'));
 
-        // Require password to begin quiz attempt.
+        // Require password to begin gnrquiz attempt.
         $mform->addElement('passwordunmask', 'gnrquizpassword', get_string('requirepassword', 'gnrquiz'));
         $mform->setType('gnrquizpassword', PARAM_TEXT);
         $mform->addHelpButton('gnrquizpassword', 'requirepassword', 'gnrquiz');
-        $mform->setAdvanced('gnrquizpassword', $quizconfig->password_adv);
-        $mform->setDefault('gnrquizpassword', $quizconfig->password);
+        $mform->setAdvanced('gnrquizpassword', $gnrquizconfig->password_adv);
+        $mform->setDefault('gnrquizpassword', $gnrquizconfig->password);
 
         // IP address.
         $mform->addElement('text', 'subnet', get_string('requiresubnet', 'gnrquiz'));
         $mform->setType('subnet', PARAM_TEXT);
         $mform->addHelpButton('subnet', 'requiresubnet', 'gnrquiz');
-        $mform->setAdvanced('subnet', $quizconfig->subnet_adv);
-        $mform->setDefault('subnet', $quizconfig->subnet);
+        $mform->setAdvanced('subnet', $gnrquizconfig->subnet_adv);
+        $mform->setDefault('subnet', $gnrquizconfig->subnet);
 
-        // Enforced time delay between quiz attempts.
+        // Enforced time delay between gnrquiz attempts.
         $mform->addElement('duration', 'delay1', get_string('delay1st2nd', 'gnrquiz'),
                 array('optional' => true));
         $mform->addHelpButton('delay1', 'delay1st2nd', 'gnrquiz');
-        $mform->setAdvanced('delay1', $quizconfig->delay1_adv);
-        $mform->setDefault('delay1', $quizconfig->delay1);
+        $mform->setAdvanced('delay1', $gnrquizconfig->delay1_adv);
+        $mform->setDefault('delay1', $gnrquizconfig->delay1);
         if ($this->get_max_attempts_for_any_override() < 2) {
             $mform->disabledIf('delay1', 'attempts', 'eq', 1);
         }
@@ -318,8 +318,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('duration', 'delay2', get_string('delaylater', 'gnrquiz'),
                 array('optional' => true));
         $mform->addHelpButton('delay2', 'delaylater', 'gnrquiz');
-        $mform->setAdvanced('delay2', $quizconfig->delay2_adv);
-        $mform->setDefault('delay2', $quizconfig->delay2);
+        $mform->setAdvanced('delay2', $gnrquizconfig->delay2_adv);
+        $mform->setDefault('delay2', $gnrquizconfig->delay2);
         if ($this->get_max_attempts_for_any_override() < 3) {
             $mform->disabledIf('delay2', 'attempts', 'eq', 1);
             $mform->disabledIf('delay2', 'attempts', 'eq', 2);
@@ -329,8 +329,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addElement('select', 'browsersecurity', get_string('browsersecurity', 'gnrquiz'),
                 gnrquiz_access_manager::get_browser_security_choices());
         $mform->addHelpButton('browsersecurity', 'browsersecurity', 'gnrquiz');
-        $mform->setAdvanced('browsersecurity', $quizconfig->browsersecurity_adv);
-        $mform->setDefault('browsersecurity', $quizconfig->browsersecurity);
+        $mform->setAdvanced('browsersecurity', $gnrquizconfig->browsersecurity_adv);
+        $mform->setDefault('browsersecurity', $gnrquizconfig->browsersecurity);
 
         // Any other rule plugins.
         gnrquiz_access_manager::add_settings_form_fields($this, $mform);
@@ -342,7 +342,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         if (isset($this->current->grade)) {
             $needwarning = $this->current->grade === 0;
         } else {
-            $needwarning = $quizconfig->maximumgrade == 0;
+            $needwarning = $gnrquizconfig->maximumgrade == 0;
         }
         if ($needwarning) {
             $mform->addElement('static', 'nogradewarning', '',
@@ -368,7 +368,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
             $numfeedbacks = count($this->_feedbacks);
         } else {
             $this->_feedbacks = array();
-            $numfeedbacks = $quizconfig->initialnumfeedbacks;
+            $numfeedbacks = $gnrquizconfig->initialnumfeedbacks;
         }
         $numfeedbacks = max($numfeedbacks, 1);
 
@@ -397,19 +397,19 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $this->standard_coursemodule_elements();
 
         // Check and act on whether setting outcomes is considered an advanced setting.
-        $mform->setAdvanced('modoutcomes', !empty($quizconfig->outcomes_adv));
+        $mform->setAdvanced('modoutcomes', !empty($gnrquizconfig->outcomes_adv));
 
         // The standard_coursemodule_elements method sets this to 100, but the
-        // quiz has its own setting, so use that.
-        $mform->setDefault('grade', $quizconfig->maximumgrade);
+        // gnrquiz has its own setting, so use that.
+        $mform->setDefault('grade', $gnrquizconfig->maximumgrade);
 
         // -------------------------------------------------------------------------------
         $this->add_action_buttons();
 
-        $PAGE->requires->yui_module('moodle-mod_quiz-modform', 'M.mod_quiz.modform.init');
+        $PAGE->requires->yui_module('moodle-mod_gnrquiz-modform', 'M.mod_gnrquiz.modform.init');
     }
 
-    protected function add_review_options_group($mform, $quizconfig, $whenname,
+    protected function add_review_options_group($mform, $gnrquizconfig, $whenname,
             $when, $withhelp = false) {
         global $OUTPUT;
 
@@ -429,7 +429,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
 
         foreach (self::$reviewfields as $field => $notused) {
             $cfgfield = 'review' . $field;
-            if ($quizconfig->$cfgfield & $when) {
+            if ($gnrquizconfig->$cfgfield & $when) {
                 $mform->setDefault($field . $whenname, 1);
             } else {
                 $mform->setDefault($field . $whenname, 0);
@@ -466,7 +466,7 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
                 $toform['feedbacktext['.$key.']']['text'] = file_prepare_draft_area(
                     $draftid,               // Draftid.
                     $this->context->id,     // Context.
-                    'mod_quiz',             // Component.
+                    'mod_gnrquiz',             // Component.
                     'feedback',             // Filarea.
                     !empty($feedback->id) ? (int) $feedback->id : null, // Itemid.
                     null,
@@ -476,8 +476,8 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
                 $toform['feedbacktext['.$key.']']['itemid'] = $draftid;
 
                 if ($toform['grade'] == 0) {
-                    // When a quiz is un-graded, there can only be one lot of
-                    // feedback. If the quiz previously had a maximum grade and
+                    // When a gnrquiz is un-graded, there can only be one lot of
+                    // feedback. If the gnrquiz previously had a maximum grade and
                     // several lots of feedback, we must now avoid putting text
                     // into input boxes that are disabled, but which the
                     // validation will insist are blank.

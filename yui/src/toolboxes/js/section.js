@@ -6,19 +6,19 @@
  * This class is responsible for managing AJAX interactions with sections
  * when adding, editing, removing section headings.
  *
- * @module moodle-mod_quiz-toolboxes
- * @namespace M.mod_quiz.toolboxes
+ * @module moodle-mod_gnrquiz-toolboxes
+ * @namespace M.mod_gnrquiz.toolboxes
  */
 
 /**
  * Section toolbox class.
  *
  * This class is responsible for managing AJAX interactions with sections
- * when adding, editing, removing section headings when editing a quiz.
+ * when adding, editing, removing section headings when editing a gnrquiz.
  *
  * @class section
  * @constructor
- * @extends M.mod_quiz.toolboxes.toolbox
+ * @extends M.mod_gnrquiz.toolboxes.toolbox
  */
 var SECTIONTOOLBOX = function() {
     SECTIONTOOLBOX.superclass.constructor.apply(this, arguments);
@@ -45,7 +45,7 @@ Y.extend(SECTIONTOOLBOX, TOOLBOX, {
      * @protected
      */
     initializer: function() {
-        M.mod_quiz.quizbase.register_module(this);
+        M.mod_gnrquiz.gnrquizbase.register_module(this);
 
         BODY.delegate('key', this.handle_data_action, 'down:enter', SELECTOR.ACTIVITYACTION, this);
         Y.delegate('click', this.handle_data_action, BODY, SELECTOR.ACTIVITYACTION, this);
@@ -322,17 +322,17 @@ Y.extend(SECTIONTOOLBOX, TOOLBOX, {
     }
 
 },  {
-    NAME: 'mod_quiz-section-toolbox',
+    NAME: 'mod_gnrquiz-section-toolbox',
     ATTRS: {
         courseid: {
             'value': 0
         },
-        quizid: {
+        gnrquizid: {
             'value': 0
         }
     }
 });
 
-M.mod_quiz.init_section_toolbox = function(config) {
+M.mod_gnrquiz.init_section_toolbox = function(config) {
     return new SECTIONTOOLBOX(config);
 };

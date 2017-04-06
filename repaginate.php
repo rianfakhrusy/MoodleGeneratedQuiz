@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Rest endpoint for ajax editing for paging operations on the quiz structure.
+ * Rest endpoint for ajax editing for paging operations on the gnrquiz structure.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2014 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,26 +25,26 @@
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
-$quizid = required_param('gnrquizid', PARAM_INT);
+$gnrquizid = required_param('gnrquizid', PARAM_INT);
 $slotnumber = required_param('slot', PARAM_INT);
 $repagtype = required_param('repag', PARAM_INT);
 
 require_sesskey();
-$quizobj = quiz::create($quizid);
-require_login($quizobj->get_course(), false, $quizobj->get_cm());
-require_capability('mod/gnrquiz:manage', $quizobj->get_context());
-if (gnrquiz_has_attempts($quizid)) {
-    $reportlink = gnrquiz_attempt_summary_link_to_reports($quizobj->get_quiz(),
-                    $quizobj->get_cm(), $quizobj->get_context());
+$gnrquizobj = gnrquiz::create($gnrquizid);
+require_login($gnrquizobj->get_course(), false, $gnrquizobj->get_cm());
+require_capability('mod/gnrquiz:manage', $gnrquizobj->get_context());
+if (gnrquiz_has_attempts($gnrquizid)) {
+    $reportlink = gnrquiz_attempt_summary_link_to_reports($gnrquizobj->get_gnrquiz(),
+                    $gnrquizobj->get_cm(), $gnrquizobj->get_context());
     throw new \moodle_exception('cannoteditafterattempts', 'gnrquiz',
-            new moodle_url('/mod/gnrquiz/edit.php', array('cmid' => $quizobj->get_cmid())), $reportlink);
+            new moodle_url('/mod/gnrquiz/edit.php', array('cmid' => $gnrquizobj->get_cmid())), $reportlink);
 }
 
 $slotnumber++;
-$repage = new \mod_quiz\repaginate($quizid);
+$repage = new \mod_gnrquiz\repaginate($gnrquizid);
 $repage->repaginate_slots($slotnumber, $repagtype);
 
-$structure = $quizobj->get_structure();
+$structure = $gnrquizobj->get_structure();
 $slots = $structure->refresh_page_numbers_and_update_db();
 
-redirect(new moodle_url('edit.php', array('cmid' => $quizobj->get_cmid())));
+redirect(new moodle_url('edit.php', array('cmid' => $gnrquizobj->get_cmid())));

@@ -1,18 +1,18 @@
 {
-  "name": "moodle-mod_quiz-util",
+  "name": "moodle-mod_gnrquiz-util",
   "builds": {
-    "moodle-mod_quiz-util-base": {
+    "moodle-mod_gnrquiz-util-base": {
       "jsfiles": [
         "base.js"
       ]
     },
-    "moodle-mod_quiz-util-slot": {
+    "moodle-mod_gnrquiz-util-slot": {
       "jsfiles": [
         "slot.js"
       ]
     }
     ,
-    "moodle-mod_quiz-util-page": {
+    "moodle-mod_gnrquiz-util-page": {
       "jsfiles": [
         "page.js"
       ]

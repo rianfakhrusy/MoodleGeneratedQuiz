@@ -17,7 +17,7 @@
 /**
  * Lists renamed classes so that the autoloader can make the old names still work.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2014 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $renamedclasses = array(
 
     // Changed in Moodle 2.8.
-    'gnrquiz_question_bank_view'                 => 'mod_quiz\question\bank\custom_view',
-    'question_bank_add_to_gnrquiz_action_column' => 'mod_quiz\question\bank\add_action_column',
-    'question_bank_question_name_text_column' => 'mod_quiz\question\bank\question_name_text_column',
+    'gnrquiz_question_bank_view'                 => 'mod_gnrquiz\question\bank\custom_view',
+    'question_bank_add_to_gnrquiz_action_column' => 'mod_gnrquiz\question\bank\add_action_column',
+    'question_bank_question_name_text_column' => 'mod_gnrquiz\question\bank\question_name_text_column',
 );

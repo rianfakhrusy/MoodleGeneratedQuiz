@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This script lists all the instances of quiz in a particular course
+ * This script lists all the instances of gnrquiz in a particular course
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,11 +38,11 @@ $PAGE->set_pagelayout('incourse');
 $params = array(
     'context' => $coursecontext
 );
-$event = \mod_quiz\event\course_module_instance_list_viewed::create($params);
+$event = \mod_gnrquiz\event\course_module_instance_list_viewed::create($params);
 $event->trigger();
 
 // Print the header.
-$strquizzes = get_string("modulenameplural", "quiz");
+$strgnrquizzes = get_string("modulenameplural", "gnrquiz");
 $streditquestions = '';
 $editqcontexts = new question_edit_contexts($coursecontext);
 if ($editqcontexts->have_one_edit_tab_cap('questions')) {
@@ -50,31 +50,31 @@ if ($editqcontexts->have_one_edit_tab_cap('questions')) {
             "<form target=\"_parent\" method=\"get\" action=\"$CFG->wwwroot/question/edit.php\">
                <div>
                <input type=\"hidden\" name=\"courseid\" value=\"$course->id\" />
-               <input type=\"submit\" value=\"".get_string("editquestions", "quiz")."\" />
+               <input type=\"submit\" value=\"".get_string("editquestions", "gnrquiz")."\" />
                </div>
              </form>";
 }
-$PAGE->navbar->add($strquizzes);
-$PAGE->set_title($strquizzes);
+$PAGE->navbar->add($strgnrquizzes);
+$PAGE->set_title($strgnrquizzes);
 $PAGE->set_button($streditquestions);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
-echo $OUTPUT->heading($strquizzes, 2);
+echo $OUTPUT->heading($strgnrquizzes, 2);
 
 // Get all the appropriate data.
-if (!$quizzes = get_all_instances_in_course("quiz", $course)) {
-    notice(get_string('thereareno', 'moodle', $strquizzes), "../../course/view.php?id=$course->id");
+if (!$gnrquizzes = get_all_instances_in_course("gnrquiz", $course)) {
+    notice(get_string('thereareno', 'moodle', $strgnrquizzes), "../../course/view.php?id=$course->id");
     die;
 }
 
 // Check if we need the closing date header.
 $showclosingheader = false;
 $showfeedback = false;
-foreach ($quizzes as $quiz) {
-    if ($quiz->timeclose!=0) {
+foreach ($gnrquizzes as $gnrquiz) {
+    if ($gnrquiz->timeclose!=0) {
         $showclosingheader=true;
     }
-    if (gnrquiz_has_feedback($quiz)) {
+    if (gnrquiz_has_feedback($gnrquiz)) {
         $showfeedback=true;
     }
     if ($showclosingheader && $showfeedback) {
@@ -116,9 +116,9 @@ if (has_capability('mod/gnrquiz:viewreports', $coursecontext)) {
     $showing = 'grades';
 
     $grades = $DB->get_records_sql_menu('
-            SELECT qg.quiz, qg.grade
+            SELECT qg.gnrquiz, qg.grade
             FROM {gnrquiz_grades} qg
-            JOIN {quiz} q ON q.id = qg.quiz
+            JOIN {gnrquiz} q ON q.id = qg.gnrquiz
             WHERE q.course = ? AND qg.userid = ?',
             array($course->id, $USER->id));
 }
@@ -129,62 +129,62 @@ $table->align = $align;
 
 // Populate the table with the list of instances.
 $currentsection = '';
-foreach ($quizzes as $quiz) {
-    $cm = get_coursemodule_from_instance('gnrquiz', $quiz->id);
+foreach ($gnrquizzes as $gnrquiz) {
+    $cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id);
     $context = context_module::instance($cm->id);
     $data = array();
 
     // Section number if necessary.
     $strsection = '';
-    if ($quiz->section != $currentsection) {
-        if ($quiz->section) {
-            $strsection = $quiz->section;
-            $strsection = get_section_name($course, $quiz->section);
+    if ($gnrquiz->section != $currentsection) {
+        if ($gnrquiz->section) {
+            $strsection = $gnrquiz->section;
+            $strsection = get_section_name($course, $gnrquiz->section);
         }
         if ($currentsection) {
             $learningtable->data[] = 'hr';
         }
-        $currentsection = $quiz->section;
+        $currentsection = $gnrquiz->section;
     }
     $data[] = $strsection;
 
     // Link to the instance.
     $class = '';
-    if (!$quiz->visible) {
+    if (!$gnrquiz->visible) {
         $class = ' class="dimmed"';
     }
-    $data[] = "<a$class href=\"view.php?id=$quiz->coursemodule\">" .
-            format_string($quiz->name, true) . '</a>';
+    $data[] = "<a$class href=\"view.php?id=$gnrquiz->coursemodule\">" .
+            format_string($gnrquiz->name, true) . '</a>';
 
     // Close date.
-    if ($quiz->timeclose) {
-        $data[] = userdate($quiz->timeclose);
+    if ($gnrquiz->timeclose) {
+        $data[] = userdate($gnrquiz->timeclose);
     } else if ($showclosingheader) {
         $data[] = '';
     }
 
     if ($showing == 'stats') {
-        // The $quiz objects returned by get_all_instances_in_course have the necessary $cm
+        // The $gnrquiz objects returned by get_all_instances_in_course have the necessary $cm
         // fields set to make the following call work.
-        $data[] = gnrquiz_attempt_summary_link_to_reports($quiz, $cm, $context);
+        $data[] = gnrquiz_attempt_summary_link_to_reports($gnrquiz, $cm, $context);
 
     } else if ($showing == 'grades') {
         // Grade and feedback.
-        $attempts = gnrquiz_get_user_attempts($quiz->id, $USER->id, 'all');
+        $attempts = gnrquiz_get_user_attempts($gnrquiz->id, $USER->id, 'all');
         list($someoptions, $alloptions) = gnrquiz_get_combined_reviewoptions(
-                $quiz, $attempts);
+                $gnrquiz, $attempts);
 
         $grade = '';
         $feedback = '';
-        if ($quiz->grade && array_key_exists($quiz->id, $grades)) {
+        if ($gnrquiz->grade && array_key_exists($gnrquiz->id, $grades)) {
             if ($alloptions->marks >= question_display_options::MARK_AND_MAX) {
                 $a = new stdClass();
-                $a->grade = gnrquiz_format_grade($quiz, $grades[$quiz->id]);
-                $a->maxgrade = gnrquiz_format_grade($quiz, $quiz->grade);
+                $a->grade = gnrquiz_format_grade($gnrquiz, $grades[$gnrquiz->id]);
+                $a->maxgrade = gnrquiz_format_grade($gnrquiz, $gnrquiz->grade);
                 $grade = get_string('outofshort', 'gnrquiz', $a);
             }
             if ($alloptions->overallfeedback) {
-                $feedback = gnrquiz_feedback_for_grade($grades[$quiz->id], $quiz, $context);
+                $feedback = gnrquiz_feedback_for_grade($grades[$gnrquiz->id], $gnrquiz, $context);
             }
         }
         $data[] = $grade;
@@ -194,7 +194,7 @@ foreach ($quizzes as $quiz) {
     }
 
     $table->data[] = $data;
-} // End of loop over quiz instances.
+} // End of loop over gnrquiz instances.
 
 // Display the table.
 echo html_writer::table($table);

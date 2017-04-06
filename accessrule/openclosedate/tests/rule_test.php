@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_openclosedate plugin.
+ * Unit tests for the gnrquizaccess_openclosedate plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage openclosedate
  * @category   phpunit
  * @copyright  2008 The Open University
@@ -32,24 +32,24 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/openclosedate/rule.php');
 
 
 /**
- * Unit tests for the quizaccess_openclosedate plugin.
+ * Unit tests for the gnrquizaccess_openclosedate plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_openclosedate_testcase extends basic_testcase {
+class gnrquizaccess_openclosedate_testcase extends basic_testcase {
     public function test_no_dates() {
-        $quiz = new stdClass();
-        $quiz->timeopen = 0;
-        $quiz->timeclose = 0;
-        $quiz->overduehandling = 'autosubmit';
+        $gnrquiz = new stdClass();
+        $gnrquiz->timeopen = 0;
+        $gnrquiz->timeclose = 0;
+        $gnrquiz->overduehandling = 'autosubmit';
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->preview = 0;
 
-        $rule = new quizaccess_openclosedate($quizobj, 10000);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 10000);
         $this->assertEmpty($rule->description());
         $this->assertFalse($rule->prevent_access());
         $this->assertFalse($rule->prevent_new_attempt(0, $attempt));
@@ -58,7 +58,7 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertFalse($rule->time_left_display($attempt, 10000));
         $this->assertFalse($rule->time_left_display($attempt, 0));
 
-        $rule = new quizaccess_openclosedate($quizobj, 0);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 0);
         $this->assertEmpty($rule->description());
         $this->assertFalse($rule->prevent_access());
         $this->assertFalse($rule->prevent_new_attempt(0, $attempt));
@@ -68,17 +68,17 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
     }
 
     public function test_start_date() {
-        $quiz = new stdClass();
-        $quiz->timeopen = 10000;
-        $quiz->timeclose = 0;
-        $quiz->overduehandling = 'autosubmit';
+        $gnrquiz = new stdClass();
+        $gnrquiz->timeopen = 10000;
+        $gnrquiz->timeclose = 0;
+        $gnrquiz->overduehandling = 'autosubmit';
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->preview = 0;
 
-        $rule = new quizaccess_openclosedate($quizobj, 9999);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 9999);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquiznotavailable', 'gnrquizaccess_openclosedate', userdate(10000))));
         $this->assertEquals($rule->prevent_access(),
@@ -88,7 +88,7 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertFalse($rule->end_time($attempt));
         $this->assertFalse($rule->time_left_display($attempt, 0));
 
-        $rule = new quizaccess_openclosedate($quizobj, 10000);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 10000);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquizopenedon', 'gnrquiz', userdate(10000))));
         $this->assertFalse($rule->prevent_access());
@@ -99,17 +99,17 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
     }
 
     public function test_close_date() {
-        $quiz = new stdClass();
-        $quiz->timeopen = 0;
-        $quiz->timeclose = 20000;
-        $quiz->overduehandling = 'autosubmit';
+        $gnrquiz = new stdClass();
+        $gnrquiz->timeopen = 0;
+        $gnrquiz->timeclose = 20000;
+        $gnrquiz->overduehandling = 'autosubmit';
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->preview = 0;
 
-        $rule = new quizaccess_openclosedate($quizobj, 20000);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 20000);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquizcloseson', 'gnrquiz', userdate(20000))));
         $this->assertFalse($rule->prevent_access());
@@ -117,12 +117,12 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertFalse($rule->is_finished(0, $attempt));
 
         $this->assertEquals($rule->end_time($attempt), 20000);
-        $this->assertFalse($rule->time_left_display($attempt, 20000 - QUIZ_SHOW_TIME_BEFORE_DEADLINE));
+        $this->assertFalse($rule->time_left_display($attempt, 20000 - GNRQUIZ_SHOW_TIME_BEFORE_DEADLINE));
         $this->assertEquals($rule->time_left_display($attempt, 19900), 100);
         $this->assertEquals($rule->time_left_display($attempt, 20000), 0);
         $this->assertEquals($rule->time_left_display($attempt, 20100), -100);
 
-        $rule = new quizaccess_openclosedate($quizobj, 20001);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 20001);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquizclosed', 'gnrquiz', userdate(20000))));
         $this->assertEquals($rule->prevent_access(),
@@ -130,24 +130,24 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertFalse($rule->prevent_new_attempt(0, $attempt));
         $this->assertTrue($rule->is_finished(0, $attempt));
         $this->assertEquals($rule->end_time($attempt), 20000);
-        $this->assertFalse($rule->time_left_display($attempt, 20000 - QUIZ_SHOW_TIME_BEFORE_DEADLINE));
+        $this->assertFalse($rule->time_left_display($attempt, 20000 - GNRQUIZ_SHOW_TIME_BEFORE_DEADLINE));
         $this->assertEquals($rule->time_left_display($attempt, 19900), 100);
         $this->assertEquals($rule->time_left_display($attempt, 20000), 0);
         $this->assertEquals($rule->time_left_display($attempt, 20100), -100);
     }
 
     public function test_both_dates() {
-        $quiz = new stdClass();
-        $quiz->timeopen = 10000;
-        $quiz->timeclose = 20000;
-        $quiz->overduehandling = 'autosubmit';
+        $gnrquiz = new stdClass();
+        $gnrquiz->timeopen = 10000;
+        $gnrquiz->timeclose = 20000;
+        $gnrquiz->overduehandling = 'autosubmit';
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->preview = 0;
 
-        $rule = new quizaccess_openclosedate($quizobj, 9999);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 9999);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquiznotavailable', 'gnrquizaccess_openclosedate', userdate(10000)),
                     get_string('gnrquizcloseson', 'gnrquiz', userdate(20000))));
@@ -156,7 +156,7 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertFalse($rule->prevent_new_attempt(0, $attempt));
         $this->assertFalse($rule->is_finished(0, $attempt));
 
-        $rule = new quizaccess_openclosedate($quizobj, 10000);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 10000);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquizopenedon', 'gnrquiz', userdate(10000)),
                 get_string('gnrquizcloseson', 'gnrquiz', userdate(20000))));
@@ -164,7 +164,7 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertFalse($rule->prevent_new_attempt(0, $attempt));
         $this->assertFalse($rule->is_finished(0, $attempt));
 
-        $rule = new quizaccess_openclosedate($quizobj, 20000);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 20000);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquizopenedon', 'gnrquiz', userdate(10000)),
                 get_string('gnrquizcloseson', 'gnrquiz', userdate(20000))));
@@ -172,7 +172,7 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertFalse($rule->prevent_new_attempt(0, $attempt));
         $this->assertFalse($rule->is_finished(0, $attempt));
 
-        $rule = new quizaccess_openclosedate($quizobj, 20001);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 20001);
         $this->assertEquals($rule->description(),
             array(get_string('gnrquizclosed', 'gnrquiz', userdate(20000))));
         $this->assertEquals($rule->prevent_access(),
@@ -181,34 +181,34 @@ class quizaccess_openclosedate_testcase extends basic_testcase {
         $this->assertTrue($rule->is_finished(0, $attempt));
 
         $this->assertEquals($rule->end_time($attempt), 20000);
-        $this->assertFalse($rule->time_left_display($attempt, 20000 - QUIZ_SHOW_TIME_BEFORE_DEADLINE));
+        $this->assertFalse($rule->time_left_display($attempt, 20000 - GNRQUIZ_SHOW_TIME_BEFORE_DEADLINE));
         $this->assertEquals($rule->time_left_display($attempt, 19900), 100);
         $this->assertEquals($rule->time_left_display($attempt, 20000), 0);
         $this->assertEquals($rule->time_left_display($attempt, 20100), -100);
     }
 
     public function test_close_date_with_overdue() {
-        $quiz = new stdClass();
-        $quiz->timeopen = 0;
-        $quiz->timeclose = 20000;
-        $quiz->overduehandling = 'graceperiod';
-        $quiz->graceperiod = 1000;
+        $gnrquiz = new stdClass();
+        $gnrquiz->timeopen = 0;
+        $gnrquiz->timeclose = 20000;
+        $gnrquiz->overduehandling = 'graceperiod';
+        $gnrquiz->graceperiod = 1000;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->preview = 0;
 
-        $rule = new quizaccess_openclosedate($quizobj, 20000);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 20000);
         $this->assertFalse($rule->prevent_access());
 
-        $rule = new quizaccess_openclosedate($quizobj, 20001);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 20001);
         $this->assertFalse($rule->prevent_access());
 
-        $rule = new quizaccess_openclosedate($quizobj, 21000);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 21000);
         $this->assertFalse($rule->prevent_access());
 
-        $rule = new quizaccess_openclosedate($quizobj, 21001);
+        $rule = new gnrquizaccess_openclosedate($gnrquizobj, 21001);
         $this->assertEquals($rule->prevent_access(),
                 get_string('notavailable', 'gnrquizaccess_openclosedate'));
     }

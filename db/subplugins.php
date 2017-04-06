@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Sub-plugin definitions for the quiz module.
+ * Sub-plugin definitions for the gnrquiz module.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2010 Petr Skoda
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

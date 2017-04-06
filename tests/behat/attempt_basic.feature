@@ -1,8 +1,8 @@
-@mod @mod_quiz
-Feature: Attemp a quiz where some questions require that the previous question has been answered.
+@mod @mod_gnrquiz
+Feature: Attemp a gnrquiz where some questions require that the previous question has been answered.
   As a student
   In order to demonstrate what I know
-  I need to be able to attempt quizzes
+  I need to be able to attempt gnrquizzes
 
   Background:
     Given the following "users" exist:
@@ -19,22 +19,22 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Course       | C1        | Test questions |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
 
   @javascript
-  Scenario: Attempt a quiz with a single unnamed section
+  Scenario: Attempt a gnrquiz with a single unnamed section
     Given the following "questions" exist:
       | questioncategory | qtype       | name  | questiontext    |
       | Test questions   | truefalse   | TF1   | First question  |
       | Test questions   | truefalse   | TF2   | Second question |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | maxmark |
       | TF1      | 1    |         |
       | TF2      | 1    | 3.0     |
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I click on "True" "radio" in the "First question" "question"
     And I click on "False" "radio" in the "Second question" "question"
     And I press "Finish attempt ..."
@@ -43,7 +43,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
     Then I should see "25.00 out of 100.00"
 
   @javascript
-  Scenario: Attempt a quiz with mulitple sections
+  Scenario: Attempt a gnrquiz with mulitple sections
     Given the following "questions" exist:
       | questioncategory | qtype       | name  | questiontext    |
       | Test questions   | truefalse   | TF1   | First question  |
@@ -52,7 +52,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | Test questions   | truefalse   | TF4   | Fourth question |
       | Test questions   | truefalse   | TF5   | Fifth question  |
       | Test questions   | truefalse   | TF6   | Sixth question  |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 1    |
@@ -60,7 +60,7 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | TF4      | 3    |
       | TF5      | 4    |
       | TF6      | 4    |
-    And quiz "Quiz 1" contains the following sections:
+    And gnrquiz "Quiz 1" contains the following sections:
       | heading   | firstslot | shuffle |
       | Section 1 | 1         | 1       |
       | Section 2 | 3         | 0       |
@@ -70,35 +70,35 @@ Feature: Attemp a quiz where some questions require that the previous question h
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
 
     Then I should see "Section 1" in the "Quiz navigation" "block"
-    And I should see question "1" in section "Section 1" in the quiz navigation
-    And I should see question "2" in section "Section 1" in the quiz navigation
-    And I should see question "3" in section "Section 2" in the quiz navigation
-    And I should see question "4" in section "Section 2" in the quiz navigation
-    And I should see question "5" in section "Section 3" in the quiz navigation
-    And I should see question "6" in section "Section 3" in the quiz navigation
+    And I should see question "1" in section "Section 1" in the gnrquiz navigation
+    And I should see question "2" in section "Section 1" in the gnrquiz navigation
+    And I should see question "3" in section "Section 2" in the gnrquiz navigation
+    And I should see question "4" in section "Section 2" in the gnrquiz navigation
+    And I should see question "5" in section "Section 3" in the gnrquiz navigation
+    And I should see question "6" in section "Section 3" in the gnrquiz navigation
 
     And I follow "Finish attempt ..."
-    And I should see question "1" in section "Section 1" in the quiz navigation
-    And I should see question "2" in section "Section 1" in the quiz navigation
-    And I should see question "3" in section "Section 2" in the quiz navigation
-    And I should see question "4" in section "Section 2" in the quiz navigation
-    And I should see question "5" in section "Section 3" in the quiz navigation
-    And I should see question "6" in section "Section 3" in the quiz navigation
-    And I should see "Section 1" in the "quizsummaryofattempt" "table"
-    And I should see "Section 2" in the "quizsummaryofattempt" "table"
-    And I should see "Section 3" in the "quizsummaryofattempt" "table"
+    And I should see question "1" in section "Section 1" in the gnrquiz navigation
+    And I should see question "2" in section "Section 1" in the gnrquiz navigation
+    And I should see question "3" in section "Section 2" in the gnrquiz navigation
+    And I should see question "4" in section "Section 2" in the gnrquiz navigation
+    And I should see question "5" in section "Section 3" in the gnrquiz navigation
+    And I should see question "6" in section "Section 3" in the gnrquiz navigation
+    And I should see "Section 1" in the "gnrquizsummaryofattempt" "table"
+    And I should see "Section 2" in the "gnrquizsummaryofattempt" "table"
+    And I should see "Section 3" in the "gnrquizsummaryofattempt" "table"
 
     And I press "Submit all and finish"
     And I click on "Submit all and finish" "button" in the "Confirmation" "dialogue"
-    And I should see question "1" in section "Section 1" in the quiz navigation
-    And I should see question "2" in section "Section 1" in the quiz navigation
-    And I should see question "3" in section "Section 2" in the quiz navigation
-    And I should see question "4" in section "Section 2" in the quiz navigation
-    And I should see question "5" in section "Section 3" in the quiz navigation
-    And I should see question "6" in section "Section 3" in the quiz navigation
+    And I should see question "1" in section "Section 1" in the gnrquiz navigation
+    And I should see question "2" in section "Section 1" in the gnrquiz navigation
+    And I should see question "3" in section "Section 2" in the gnrquiz navigation
+    And I should see question "4" in section "Section 2" in the gnrquiz navigation
+    And I should see question "5" in section "Section 3" in the gnrquiz navigation
+    And I should see question "6" in section "Section 3" in the gnrquiz navigation
 
   @javascript
   Scenario: Next and previous navigation
@@ -106,14 +106,14 @@ Feature: Attemp a quiz where some questions require that the previous question h
       | questioncategory | qtype       | name  | questiontext                |
       | Test questions   | truefalse   | TF1   | Text of the first question  |
       | Test questions   | truefalse   | TF2   | Text of the second question |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page |
       | TF1      | 1    |
       | TF2      | 2    |
     When I log in as "student"
     And I follow "Course 1"
     And I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     Then I should see "Text of the first question"
     And I should not see "Text of the second question"
     And I press "Next page"

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_delaybetweenattempts plugin.
+ * Unit tests for the gnrquizaccess_delaybetweenattempts plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage delaybetweenattempts
  * @category   phpunit
  * @copyright  2008 The Open University
@@ -31,26 +31,26 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/delaybetweenattempts/rule.
 
 
 /**
- * Unit tests for the quizaccess_delaybetweenattempts plugin.
+ * Unit tests for the gnrquizaccess_delaybetweenattempts plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_delaybetweenattempts_testcase extends basic_testcase {
+class gnrquizaccess_delaybetweenattempts_testcase extends basic_testcase {
     public function test_just_first_delay() {
-        $quiz = new stdClass();
-        $quiz->attempts = 3;
-        $quiz->timelimit = 0;
-        $quiz->delay1 = 1000;
-        $quiz->delay2 = 0;
-        $quiz->timeclose = 0;
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 3;
+        $gnrquiz->timelimit = 0;
+        $gnrquiz->delay1 = 1000;
+        $gnrquiz->delay2 = 0;
+        $gnrquiz->timeclose = 0;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->timefinish = 10000;
 
-        $rule = new quizaccess_delaybetweenattempts($quizobj, 10000);
+        $rule = new gnrquizaccess_delaybetweenattempts($gnrquizobj, 10000);
         $this->assertEmpty($rule->description());
         $this->assertFalse($rule->prevent_access());
         $this->assertFalse($rule->is_finished(0, $attempt));
@@ -72,19 +72,19 @@ class quizaccess_delaybetweenattempts_testcase extends basic_testcase {
     }
 
     public function test_just_second_delay() {
-        $quiz = new stdClass();
-        $quiz->attempts = 5;
-        $quiz->timelimit = 0;
-        $quiz->delay1 = 0;
-        $quiz->delay2 = 1000;
-        $quiz->timeclose = 0;
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 5;
+        $gnrquiz->timelimit = 0;
+        $gnrquiz->delay1 = 0;
+        $gnrquiz->delay2 = 1000;
+        $gnrquiz->timeclose = 0;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->timefinish = 10000;
 
-        $rule = new quizaccess_delaybetweenattempts($quizobj, 10000);
+        $rule = new gnrquizaccess_delaybetweenattempts($gnrquizobj, 10000);
         $this->assertEmpty($rule->description());
         $this->assertFalse($rule->prevent_access());
         $this->assertFalse($rule->is_finished(0, $attempt));
@@ -111,19 +111,19 @@ class quizaccess_delaybetweenattempts_testcase extends basic_testcase {
     }
 
     public function test_just_both_delays() {
-        $quiz = new stdClass();
-        $quiz->attempts = 5;
-        $quiz->timelimit = 0;
-        $quiz->delay1 = 2000;
-        $quiz->delay2 = 1000;
-        $quiz->timeclose = 0;
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 5;
+        $gnrquiz->timelimit = 0;
+        $gnrquiz->delay1 = 2000;
+        $gnrquiz->delay2 = 1000;
+        $gnrquiz->timeclose = 0;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->timefinish = 10000;
 
-        $rule = new quizaccess_delaybetweenattempts($quizobj, 10000);
+        $rule = new gnrquizaccess_delaybetweenattempts($gnrquizobj, 10000);
         $this->assertEmpty($rule->description());
         $this->assertFalse($rule->prevent_access());
         $this->assertFalse($rule->is_finished(0, $attempt));
@@ -162,19 +162,19 @@ class quizaccess_delaybetweenattempts_testcase extends basic_testcase {
     }
 
     public function test_with_close_date() {
-        $quiz = new stdClass();
-        $quiz->attempts = 5;
-        $quiz->timelimit = 0;
-        $quiz->delay1 = 2000;
-        $quiz->delay2 = 1000;
-        $quiz->timeclose = 15000;
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 5;
+        $gnrquiz->timelimit = 0;
+        $gnrquiz->delay1 = 2000;
+        $gnrquiz->delay2 = 1000;
+        $gnrquiz->timeclose = 15000;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->timefinish = 13000;
 
-        $rule = new quizaccess_delaybetweenattempts($quizobj, 10000);
+        $rule = new gnrquizaccess_delaybetweenattempts($gnrquizobj, 10000);
         $this->assertEmpty($rule->description());
         $this->assertFalse($rule->prevent_access());
         $this->assertFalse($rule->is_finished(0, $attempt));
@@ -194,7 +194,7 @@ class quizaccess_delaybetweenattempts_testcase extends basic_testcase {
         $this->assertEquals($rule->prevent_new_attempt(2, $attempt),
             get_string('youcannotwait', 'gnrquizaccess_delaybetweenattempts'));
 
-        $rule = new quizaccess_delaybetweenattempts($quizobj, 15000);
+        $rule = new gnrquizaccess_delaybetweenattempts($gnrquizobj, 15000);
         $attempt->timefinish = 13000;
         $this->assertFalse($rule->prevent_new_attempt(1, $attempt));
         $attempt->timefinish = 13001;
@@ -206,7 +206,7 @@ class quizaccess_delaybetweenattempts_testcase extends basic_testcase {
         $this->assertEquals($rule->prevent_new_attempt(2, $attempt),
             get_string('youcannotwait', 'gnrquizaccess_delaybetweenattempts'));
 
-        $rule = new quizaccess_delaybetweenattempts($quizobj, 15001);
+        $rule = new gnrquizaccess_delaybetweenattempts($gnrquizobj, 15001);
         $attempt->timefinish = 13000;
         $this->assertFalse($rule->prevent_new_attempt(1, $attempt));
         $attempt->timefinish = 13001;
@@ -218,20 +218,20 @@ class quizaccess_delaybetweenattempts_testcase extends basic_testcase {
     }
 
     public function test_time_limit_and_overdue() {
-        $quiz = new stdClass();
-        $quiz->attempts = 5;
-        $quiz->timelimit = 100;
-        $quiz->delay1 = 2000;
-        $quiz->delay2 = 1000;
-        $quiz->timeclose = 0;
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 5;
+        $gnrquiz->timelimit = 100;
+        $gnrquiz->delay1 = 2000;
+        $gnrquiz->delay2 = 1000;
+        $gnrquiz->timeclose = 0;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
         $attempt = new stdClass();
         $attempt->timestart = 9900;
         $attempt->timefinish = 10100;
 
-        $rule = new quizaccess_delaybetweenattempts($quizobj, 10000);
+        $rule = new gnrquizaccess_delaybetweenattempts($gnrquizobj, 10000);
         $this->assertEmpty($rule->description());
         $this->assertFalse($rule->prevent_access());
         $this->assertFalse($rule->is_finished(0, $attempt));

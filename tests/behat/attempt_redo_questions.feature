@@ -1,8 +1,8 @@
-@mod @mod_quiz
-Feature: Allow students to redo questions in a practice quiz, without starting a whole new attempt
+@mod @mod_gnrquiz
+Feature: Allow students to redo questions in a practice gnrquiz, without starting a whole new attempt
   In order to practice particular skills I am struggling with
   As a student
-  I need to be able to redo each question in a quiz as often as necessary without starting a whole new attempt, if my teacher allows it.
+  I need to be able to redo each question in a gnrquiz as often as necessary without starting a whole new attempt, if my teacher allows it.
 
   Background:
     Given the following "users" exist:
@@ -25,8 +25,8 @@ Feature: Allow students to redo questions in a practice quiz, without starting a
       | Test questions   | truefalse   | TF2   | Second question |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber | preferredbehaviour | canredoquestions |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    | immediatefeedback  | 1                |
-    And quiz "Quiz 1" contains the following questions:
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    | immediatefeedback  | 1                |
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | maxmark |
       | TF1      | 1    | 2       |
       | TF2      | 1    | 1       |
@@ -36,7 +36,7 @@ Feature: Allow students to redo questions in a practice quiz, without starting a
   @javascript
   Scenario: After completing a question, there is a redo question button that restarts the question
     When I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I click on "False" "radio" in the "First question" "question"
     And I click on "Check" "button" in the "First question" "question"
     And I press "Redo question"
@@ -46,7 +46,7 @@ Feature: Allow students to redo questions in a practice quiz, without starting a
   @javascript
   Scenario: The redo question button is visible but disabled for teachers
     When I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I click on "False" "radio" in the "First question" "question"
     And I click on "Check" "button" in the "First question" "question"
     And I log out
@@ -60,7 +60,7 @@ Feature: Allow students to redo questions in a practice quiz, without starting a
   @javascript
   Scenario: The redo question buttons are no longer visible after the attempt is submitted.
     When I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I click on "False" "radio" in the "First question" "question"
     And I click on "Check" "button" in the "First question" "question"
     And I press "Finish attempt ..."
@@ -71,7 +71,7 @@ Feature: Allow students to redo questions in a practice quiz, without starting a
   @javascript @_switch_window
   Scenario: Teachers reviewing can see all the qestions attempted in a slot
     When I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I click on "False" "radio" in the "First question" "question"
     And I click on "Check" "button" in the "First question" "question"
     And I press "Redo question"
@@ -94,14 +94,14 @@ Feature: Allow students to redo questions in a practice quiz, without starting a
     And I should not see "Submit" in the ".history" "css_element"
     And I navigate to "Statistics" node in "Quiz administration > Results"
     And I follow "TF1"
-    And "False" row "Frequency" column of "quizresponseanalysis" table should contain "100.00%"
-    And "True" row "Frequency" column of "quizresponseanalysis" table should contain "0.00%"
-    And "[No response]" row "Frequency" column of "quizresponseanalysis" table should contain "100.00%"
+    And "False" row "Frequency" column of "gnrquizresponseanalysis" table should contain "100.00%"
+    And "True" row "Frequency" column of "gnrquizresponseanalysis" table should contain "0.00%"
+    And "[No response]" row "Frequency" column of "gnrquizresponseanalysis" table should contain "100.00%"
 
   @javascript
   Scenario: Redoing question 1 should save any changes to question 2 on the same page
     When I follow "Quiz 1"
-    And I press "Attempt quiz now"
+    And I press "Attempt gnrquiz now"
     And I click on "False" "radio" in the "First question" "question"
     And I click on "Check" "button" in the "First question" "question"
     And I click on "True" "radio" in the "Second question" "question"

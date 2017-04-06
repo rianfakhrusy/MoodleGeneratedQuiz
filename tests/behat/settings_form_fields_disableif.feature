@@ -1,6 +1,6 @@
-@mod @mod_quiz
+@mod @mod_gnrquiz
 Feature: Settings form fields disabled if not required
-  In to create quizzes as simply as possible
+  In to create gnrquizzes as simply as possible
   As a teacher
   I don't need to to use certain form fields.
 
@@ -26,7 +26,7 @@ Feature: Settings form fields disabled if not required
   Scenario: Depending on the number of attempts, different form fields are disabled.
     When I add a "Quiz" to section "1"
     And I expand all fieldsets
-    And I set the field "Name" to "Test quiz"
+    And I set the field "Name" to "Test gnrquiz"
     And I set the field "Attempts allowed" to "1"
     Then the "Grading method" "field" should be disabled
     And the "Each attempt builds on the last" "field" should be disabled

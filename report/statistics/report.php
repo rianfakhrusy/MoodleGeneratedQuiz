@@ -30,8 +30,8 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/statistics/statistics_table.ph
 require_once($CFG->dirroot . '/mod/gnrquiz/report/statistics/statistics_question_table.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/report/statistics/statisticslib.php');
 /**
- * The quiz statistics report provides summary information about each question in
- * a quiz, compared to the whole quiz. It also provides a drill-down to more
+ * The gnrquiz statistics report provides summary information about each question in
+ * a gnrquiz, compared to the whole gnrquiz. It also provides a drill-down to more
  * detailed information about each question.
  *
  * @copyright 2008 Jamie Pratt
@@ -39,7 +39,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/report/statistics/statisticslib.php')
  */
 class gnrquiz_statistics_report extends gnrquiz_default_report {
 
-    /** @var context_module context of this quiz.*/
+    /** @var context_module context of this gnrquiz.*/
     protected $context;
 
     /** @var gnrquiz_statistics_table instance of table class used for main questions stats table. */
@@ -51,16 +51,16 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     /**
      * Display the report.
      */
-    public function display($quiz, $cm, $course) {
+    public function display($gnrquiz, $cm, $course) {
         global $OUTPUT;
 
         raise_memory_limit(MEMORY_HUGE);
 
         $this->context = context_module::instance($cm->id);
 
-        if (!gnrquiz_has_questions($quiz->id)) {
-            $this->print_header_and_tabs($cm, $course, $quiz, 'statistics');
-            echo gnrquiz_no_questions_message($quiz, $cm, $this->context);
+        if (!gnrquiz_has_questions($gnrquiz->id)) {
+            $this->print_header_and_tabs($cm, $course, $gnrquiz, 'statistics');
+            echo gnrquiz_no_questions_message($gnrquiz, $cm, $this->context);
             return true;
         }
 
@@ -72,7 +72,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
         $qid = optional_param('qid', 0, PARAM_INT);
         $slot = optional_param('slot', 0, PARAM_INT);
         $variantno = optional_param('variant', null, PARAM_INT);
-        $whichattempts = optional_param('whichattempts', $quiz->grademethod, PARAM_INT);
+        $whichattempts = optional_param('whichattempts', $gnrquiz->grademethod, PARAM_INT);
         $whichtries = optional_param('whichtries', question_attempt::LAST_TRY, PARAM_ALPHA);
 
         $pageoptions = array();
@@ -85,7 +85,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
 
         $mform->set_data(array('whichattempts' => $whichattempts, 'whichtries' => $whichtries));
 
-        if ($whichattempts != $quiz->grademethod) {
+        if ($whichattempts != $gnrquiz->grademethod) {
             $reporturl->param('whichattempts', $whichattempts);
         }
 
@@ -105,7 +105,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
             $nostudentsingroup = true;
 
         } else {
-            // All users who can attempt quizzes and who are in the currently selected group.
+            // All users who can attempt gnrquizzes and who are in the currently selected group.
             $groupstudents = get_users_by_capability($this->context,
                     array('mod/gnrquiz:reviewmyattempts', 'mod/gnrquiz:attempt'),
                     '', '', '', '', $currentgroup, '', false);
@@ -114,7 +114,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
             }
         }
 
-        $qubaids = gnrquiz_statistics_qubaids_condition($quiz->id, $groupstudents, $whichattempts);
+        $qubaids = gnrquiz_statistics_qubaids_condition($gnrquiz->id, $groupstudents, $whichattempts);
 
         // If recalculate was requested, handle that.
         if ($recalculate && confirm_sesskey()) {
@@ -131,30 +131,30 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
         }
         $courseshortname = format_string($course->shortname, true,
                 array('context' => context_course::instance($course->id)));
-        $filename = gnrquiz_report_download_filename($report, $courseshortname, $quiz->name);
+        $filename = gnrquiz_report_download_filename($report, $courseshortname, $gnrquiz->name);
         $this->table->is_downloading($download, $filename,
                 get_string('gnrquizstructureanalysis', 'gnrquiz_statistics'));
-        $questions = $this->load_and_initialise_questions_for_calculations($quiz);
+        $questions = $this->load_and_initialise_questions_for_calculations($gnrquiz);
 
         // Print the page header stuff (if not downloading.
         if (!$this->table->is_downloading()) {
-            $this->print_header_and_tabs($cm, $course, $quiz, 'statistics');
+            $this->print_header_and_tabs($cm, $course, $gnrquiz, 'statistics');
         }
 
         if (!$nostudentsingroup) {
             // Get the data to be displayed.
             $progress = $this->get_progress_trace_instance();
-            list($quizstats, $questionstats) =
-                $this->get_all_stats_and_analysis($quiz, $whichattempts, $whichtries, $groupstudents, $questions, $progress);
+            list($gnrquizstats, $questionstats) =
+                $this->get_all_stats_and_analysis($gnrquiz, $whichattempts, $whichtries, $groupstudents, $questions, $progress);
         } else {
             // Or create empty stats containers.
-            $quizstats = new \gnrquiz_statistics\calculated($whichattempts);
+            $gnrquizstats = new \gnrquiz_statistics\calculated($whichattempts);
             $questionstats = new \core_question\statistics\questions\all_calculated_for_qubaid_condition();
         }
 
         // Set up the table, if there is data.
-        if ($quizstats->s()) {
-            $this->table->statistics_setup($quiz, $cm->id, $reporturl, $quizstats->s());
+        if ($gnrquizstats->s()) {
+            $this->table->statistics_setup($gnrquiz, $cm->id, $reporturl, $gnrquizstats->s());
         }
 
         // Print the rest of the page header stuff (if not downloading.
@@ -167,7 +167,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
                 }
             }
 
-            if (!$this->table->is_downloading() && $quizstats->s() == 0) {
+            if (!$this->table->is_downloading() && $gnrquizstats->s() == 0) {
                 echo $OUTPUT->notification(get_string('nogradedattempts', 'gnrquiz_statistics'));
             }
 
@@ -181,14 +181,14 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
 
         if ($everything) { // Implies is downloading.
             // Overall report, then the analysis of each question.
-            $quizinfo = $quizstats->get_formatted_gnrquiz_info_data($course, $cm, $quiz);
-            $this->download_gnrquiz_info_table($quizinfo);
+            $gnrquizinfo = $gnrquizstats->get_formatted_gnrquiz_info_data($course, $cm, $gnrquiz);
+            $this->download_gnrquiz_info_table($gnrquizinfo);
 
-            if ($quizstats->s()) {
+            if ($gnrquizstats->s()) {
                 $this->output_gnrquiz_structure_analysis_table($questionstats);
 
-                if ($this->table->is_downloading() == 'xhtml' && $quizstats->s() != 0) {
-                    $this->output_statistics_graph($quiz->id, $currentgroup, $whichattempts);
+                if ($this->table->is_downloading() == 'xhtml' && $gnrquizstats->s() != 0) {
+                    $this->output_statistics_graph($gnrquiz->id, $currentgroup, $whichattempts);
                 }
 
                 $this->output_all_question_response_analysis($qubaids, $questions, $questionstats, $reporturl, $whichtries);
@@ -202,7 +202,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
                 print_error('questiondoesnotexist', 'question');
             }
 
-            $this->output_individual_question_data($quiz, $questionstats->for_subq($qid, $variantno));
+            $this->output_individual_question_data($gnrquiz, $questionstats->for_subq($qid, $variantno));
             $this->output_individual_question_response_analysis($questionstats->for_subq($qid, $variantno)->question,
                                                                 $variantno,
                                                                 $questionstats->for_subq($qid, $variantno)->s,
@@ -211,7 +211,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
                                                                 $whichtries);
             // Back to overview link.
             echo $OUTPUT->box('<a href="' . $reporturl->out() . '">' .
-                              get_string('backtoquizreport', 'gnrquiz_statistics') . '</a>',
+                              get_string('backtognrquizreport', 'gnrquiz_statistics') . '</a>',
                               'boxaligncenter generalbox boxwidthnormal mdl-align');
         } else if ($slot) {
             // Report on an individual question indexed by position.
@@ -229,7 +229,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
                 $this->table->define_baseurl(new moodle_url($reporturl, array('slot' => $slot)));
                 $this->table->format_and_add_array_of_rows($questionstats->structure_analysis_for_one_slot($slot));
             } else {
-                $this->output_individual_question_data($quiz, $questionstats->for_slot($slot, $variantno));
+                $this->output_individual_question_data($gnrquiz, $questionstats->for_slot($slot, $variantno));
                 $this->output_individual_question_response_analysis($questions[$slot],
                                                                     $variantno,
                                                                     $questionstats->for_slot($slot, $variantno)->s,
@@ -240,7 +240,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
             if (!$this->table->is_downloading()) {
                 // Back to overview link.
                 echo $OUTPUT->box('<a href="' . $reporturl->out() . '">' .
-                        get_string('backtoquizreport', 'gnrquiz_statistics') . '</a>',
+                        get_string('backtognrquizreport', 'gnrquiz_statistics') . '</a>',
                         'backtomainstats boxaligncenter generalbox boxwidthnormal mdl-align');
             } else {
                 $this->table->finish_output();
@@ -248,9 +248,9 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
 
         } else if ($this->table->is_downloading()) {
             // Downloading overview report.
-            $quizinfo = $quizstats->get_formatted_gnrquiz_info_data($course, $cm, $quiz);
-            $this->download_gnrquiz_info_table($quizinfo);
-            if ($quizstats->s()) {
+            $gnrquizinfo = $gnrquizstats->get_formatted_gnrquiz_info_data($course, $cm, $gnrquiz);
+            $this->download_gnrquiz_info_table($gnrquizinfo);
+            if ($gnrquizstats->s()) {
                 $this->output_gnrquiz_structure_analysis_table($questionstats);
             }
             $this->table->finish_output();
@@ -258,14 +258,14 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
         } else {
             // On-screen display of overview report.
             echo $OUTPUT->heading(get_string('gnrquizinformation', 'gnrquiz_statistics'), 3);
-            echo $this->output_caching_info($quizstats->timemodified, $quiz->id, $groupstudents, $whichattempts, $reporturl);
+            echo $this->output_caching_info($gnrquizstats->timemodified, $gnrquiz->id, $groupstudents, $whichattempts, $reporturl);
             echo $this->everything_download_options($reporturl);
-            $quizinfo = $quizstats->get_formatted_gnrquiz_info_data($course, $cm, $quiz);
-            echo $this->output_gnrquiz_info_table($quizinfo);
-            if ($quizstats->s()) {
+            $gnrquizinfo = $gnrquizstats->get_formatted_gnrquiz_info_data($course, $cm, $gnrquiz);
+            echo $this->output_gnrquiz_info_table($gnrquizinfo);
+            if ($gnrquizstats->s()) {
                 echo $OUTPUT->heading(get_string('gnrquizstructureanalysis', 'gnrquiz_statistics'), 3);
                 $this->output_gnrquiz_structure_analysis_table($questionstats);
-                $this->output_statistics_graph($quiz->id, $currentgroup, $whichattempts);
+                $this->output_statistics_graph($gnrquiz->id, $currentgroup, $whichattempts);
             }
         }
 
@@ -276,13 +276,13 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
      * Display the statistical and introductory information about a question.
      * Only called when not downloading.
      *
-     * @param object                                         $quiz         the quiz settings.
+     * @param object                                         $gnrquiz         the gnrquiz settings.
      * @param \core_question\statistics\questions\calculated $questionstat the question to report on.
      */
-    protected function output_individual_question_data($quiz, $questionstat) {
+    protected function output_individual_question_data($gnrquiz, $questionstat) {
         global $OUTPUT;
 
-        // On-screen display. Show a summary of the question's place in the quiz,
+        // On-screen display. Show a summary of the question's place in the gnrquiz,
         // and the question statistics.
         $datumfromtable = $this->table->format_row($questionstat);
 
@@ -293,7 +293,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
         $questioninfotable->attributes['class'] = 'generaltable titlesleft';
 
         $questioninfotable->data = array();
-        $questioninfotable->data[] = array(get_string('modulename', 'gnrquiz'), $quiz->name);
+        $questioninfotable->data[] = array(get_string('modulename', 'gnrquiz'), $gnrquiz->name);
         $questioninfotable->data[] = array(get_string('questionname', 'gnrquiz_statistics'),
                 $questionstat->question->name.'&nbsp;'.$datumfromtable['actions']);
 
@@ -439,10 +439,10 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     }
 
     /**
-     * Output the table that lists all the questions in the quiz with their statistics.
+     * Output the table that lists all the questions in the gnrquiz with their statistics.
      *
      * @param \core_question\statistics\questions\all_calculated_for_qubaid_condition $questionstats the stats for all questions in
-     *                                                                                               the quiz including subqs and
+     *                                                                                               the gnrquiz including subqs and
      *                                                                                               variants.
      */
     protected function output_gnrquiz_structure_analysis_table($questionstats) {
@@ -456,45 +456,45 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     }
 
     /**
-     * Return HTML for table of overall quiz statistics.
+     * Return HTML for table of overall gnrquiz statistics.
      *
-     * @param array $quizinfo as returned by {@link get_formatted_gnrquiz_info_data()}.
+     * @param array $gnrquizinfo as returned by {@link get_formatted_gnrquiz_info_data()}.
      * @return string the HTML.
      */
-    protected function output_gnrquiz_info_table($quizinfo) {
+    protected function output_gnrquiz_info_table($gnrquizinfo) {
 
-        $quizinfotable = new html_table();
-        $quizinfotable->align = array('center', 'center');
-        $quizinfotable->width = '60%';
-        $quizinfotable->attributes['class'] = 'generaltable titlesleft';
-        $quizinfotable->data = array();
+        $gnrquizinfotable = new html_table();
+        $gnrquizinfotable->align = array('center', 'center');
+        $gnrquizinfotable->width = '60%';
+        $gnrquizinfotable->attributes['class'] = 'generaltable titlesleft';
+        $gnrquizinfotable->data = array();
 
-        foreach ($quizinfo as $heading => $value) {
-             $quizinfotable->data[] = array($heading, $value);
+        foreach ($gnrquizinfo as $heading => $value) {
+             $gnrquizinfotable->data[] = array($heading, $value);
         }
 
-        return html_writer::table($quizinfotable);
+        return html_writer::table($gnrquizinfotable);
     }
 
     /**
-     * Download the table of overall quiz statistics.
+     * Download the table of overall gnrquiz statistics.
      *
-     * @param array $quizinfo as returned by {@link get_formatted_gnrquiz_info_data()}.
+     * @param array $gnrquizinfo as returned by {@link get_formatted_gnrquiz_info_data()}.
      */
-    protected function download_gnrquiz_info_table($quizinfo) {
+    protected function download_gnrquiz_info_table($gnrquizinfo) {
         global $OUTPUT;
 
         // XHTML download is a special case.
         if ($this->table->is_downloading() == 'xhtml') {
             echo $OUTPUT->heading(get_string('gnrquizinformation', 'gnrquiz_statistics'), 3);
-            echo $this->output_gnrquiz_info_table($quizinfo);
+            echo $this->output_gnrquiz_info_table($gnrquizinfo);
             return;
         }
 
         // Reformat the data ready for output.
         $headers = array();
         $row = array();
-        foreach ($quizinfo as $heading => $value) {
+        foreach ($gnrquizinfo as $heading => $value) {
             $headers[] = $heading;
             $row[] = $value;
         }
@@ -510,14 +510,14 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     /**
      * Output the HTML needed to show the statistics graph.
      *
-     * @param $quizid
+     * @param $gnrquizid
      * @param $currentgroup
      * @param $whichattempts
      */
-    protected function output_statistics_graph($quizid, $currentgroup, $whichattempts) {
+    protected function output_statistics_graph($gnrquizid, $currentgroup, $whichattempts) {
         global $PAGE;
 
-        $output = $PAGE->get_renderer('mod_quiz');
+        $output = $PAGE->get_renderer('mod_gnrquiz');
         $imageurl = new moodle_url('/mod/gnrquiz/report/statistics/statistics_graph.php',
                                     compact('gnrquizid', 'currentgroup', 'whichattempts'));
         $graphname = get_string('statisticsreportgraph', 'gnrquiz_statistics');
@@ -525,52 +525,52 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     }
 
     /**
-     * Get the quiz and question statistics, either by loading the cached results,
+     * Get the gnrquiz and question statistics, either by loading the cached results,
      * or by recomputing them.
      *
-     * @param object $quiz               the quiz settings.
+     * @param object $gnrquiz               the gnrquiz settings.
      * @param string $whichattempts      which attempts to use, represented internally as one of the constants as used in
-     *                                   $quiz->grademethod ie.
-     *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+     *                                   $gnrquiz->grademethod ie.
+     *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
      *                                   we calculate stats based on which attempts would affect the grade for each student.
      * @param string $whichtries         which tries to analyse for response analysis. Will be one of
      *                                   question_attempt::FIRST_TRY, LAST_TRY or ALL_TRIES.
      * @param array  $groupstudents      students in this group.
      * @param array  $questions          full question data.
      * @param \core\progress\base|null   $progress
-     * @return array with 2 elements:    - $quizstats The statistics for overall attempt scores.
+     * @return array with 2 elements:    - $gnrquizstats The statistics for overall attempt scores.
      *                                   - $questionstats \core_question\statistics\questions\all_calculated_for_qubaid_condition
      */
-    public function get_all_stats_and_analysis($quiz, $whichattempts, $whichtries, $groupstudents, $questions, $progress = null) {
+    public function get_all_stats_and_analysis($gnrquiz, $whichattempts, $whichtries, $groupstudents, $questions, $progress = null) {
 
         if ($progress === null) {
             $progress = new \core\progress\none();
         }
 
-        $qubaids = gnrquiz_statistics_qubaids_condition($quiz->id, $groupstudents, $whichattempts);
+        $qubaids = gnrquiz_statistics_qubaids_condition($gnrquiz->id, $groupstudents, $whichattempts);
 
         $qcalc = new \core_question\statistics\questions\calculator($questions, $progress);
 
-        $quizcalc = new \gnrquiz_statistics\calculator($progress);
+        $gnrquizcalc = new \gnrquiz_statistics\calculator($progress);
 
         $progress->start_progress('', 3);
-        if ($quizcalc->get_last_calculated_time($qubaids) === false) {
+        if ($gnrquizcalc->get_last_calculated_time($qubaids) === false) {
 
             // Recalculate now.
             $questionstats = $qcalc->calculate($qubaids);
             $progress->progress(1);
 
-            $quizstats = $quizcalc->calculate($quiz->id, $whichattempts, $groupstudents, count($questions),
+            $gnrquizstats = $gnrquizcalc->calculate($gnrquiz->id, $whichattempts, $groupstudents, count($questions),
                                               $qcalc->get_sum_of_mark_variance());
             $progress->progress(2);
         } else {
-            $quizstats = $quizcalc->get_cached($qubaids);
+            $gnrquizstats = $gnrquizcalc->get_cached($qubaids);
             $progress->progress(1);
             $questionstats = $qcalc->get_cached($qubaids);
             $progress->progress(2);
         }
 
-        if ($quizstats->s()) {
+        if ($gnrquizstats->s()) {
             $subquestions = $questionstats->get_sub_questions();
             $this->analyse_responses_for_all_questions_and_subquestions($questions,
                                                                         $subquestions,
@@ -581,7 +581,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
         $progress->progress(3);
         $progress->end_progress();
 
-        return array($quizstats, $questionstats);
+        return array($gnrquizstats, $questionstats);
     }
 
     /**
@@ -602,7 +602,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     }
 
     /**
-     * Analyse responses for all questions and sub questions in this quiz.
+     * Analyse responses for all questions and sub questions in this gnrquiz.
      *
      * @param object[] $questions as returned by self::load_and_initialise_questions_for_calculations
      * @param object[] $subquestions full question objects.
@@ -661,7 +661,7 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     }
 
     /**
-     * Return a little form for the user to request to download the full report, including quiz stats and response analysis for
+     * Return a little form for the user to request to download the full report, including gnrquiz stats and response analysis for
      * all questions and sub-questions.
      *
      * @param moodle_url $reporturl the base URL of the report.
@@ -677,16 +677,16 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
      * Return HTML for a message that says when the stats were last calculated and a 'recalculate now' button.
      *
      * @param int    $lastcachetime  the time the stats were last cached.
-     * @param int    $quizid         the quiz id.
+     * @param int    $gnrquizid         the gnrquiz id.
      * @param array  $groupstudents  ids of students in the group or empty array if groups not used.
      * @param string $whichattempts which attempts to use, represented internally as one of the constants as used in
-     *                                   $quiz->grademethod ie.
-     *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
+     *                                   $gnrquiz->grademethod ie.
+     *                                   GNRQUIZ_GRADEAVERAGE, GNRQUIZ_GRADEHIGHEST, GNRQUIZ_ATTEMPTLAST or GNRQUIZ_ATTEMPTFIRST
      *                                   we calculate stats based on which attempts would affect the grade for each student.
      * @param moodle_url $reporturl url for this report
      * @return string HTML.
      */
-    protected function output_caching_info($lastcachetime, $quizid, $groupstudents, $whichattempts, $reporturl) {
+    protected function output_caching_info($lastcachetime, $gnrquizid, $groupstudents, $whichattempts, $reporturl) {
         global $DB, $OUTPUT;
 
         if (empty($lastcachetime)) {
@@ -694,12 +694,12 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
         }
 
         // Find the number of attempts since the cached statistics were computed.
-        list($fromqa, $whereqa, $qaparams) = gnrquiz_statistics_attempts_sql($quizid, $groupstudents, $whichattempts, true);
+        list($fromqa, $whereqa, $qaparams) = gnrquiz_statistics_attempts_sql($gnrquizid, $groupstudents, $whichattempts, true);
         $count = $DB->count_records_sql("
                 SELECT COUNT(1)
                 FROM $fromqa
                 WHERE $whereqa
-                AND quiza.timefinish > {$lastcachetime}", $qaparams);
+                AND gnrquiza.timefinish > {$lastcachetime}", $qaparams);
 
         if (!$count) {
             $count = 0;
@@ -737,14 +737,14 @@ class gnrquiz_statistics_report extends gnrquiz_default_report {
     }
 
     /**
-     * Load the questions in this quiz and add some properties to the objects needed in the reports.
+     * Load the questions in this gnrquiz and add some properties to the objects needed in the reports.
      *
-     * @param object $quiz the quiz.
-     * @return array of questions for this quiz.
+     * @param object $gnrquiz the gnrquiz.
+     * @return array of questions for this gnrquiz.
      */
-    public function load_and_initialise_questions_for_calculations($quiz) {
+    public function load_and_initialise_questions_for_calculations($gnrquiz) {
         // Load the questions.
-        $questions = gnrquiz_report_get_significant_questions($quiz);
+        $questions = gnrquiz_report_get_significant_questions($gnrquiz);
         $questionids = array();
         foreach ($questions as $question) {
             $questionids[] = $question->id;

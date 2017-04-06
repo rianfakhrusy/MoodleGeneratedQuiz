@@ -50,35 +50,35 @@ class gnrquiz_report_responses_from_steps_testcase extends mod_gnrquiz_attempt_w
     protected $files = array('questions', 'steps', 'responses');
 
     /**
-     * Create a quiz add questions to it, walk through quiz attempts and then check results.
+     * Create a gnrquiz add questions to it, walk through gnrquiz attempts and then check results.
      *
-     * @param array $quizsettings settings to override default settings for quiz created by generator. Taken from quizzes.csv.
+     * @param array $gnrquizsettings settings to override default settings for gnrquiz created by generator. Taken from gnrquizzes.csv.
      * @param PHPUnit_Extensions_Database_DataSet_ITable[] $csvdata of data read from csv file "questionsXX.csv",
      *                                                                                  "stepsXX.csv" and "responsesXX.csv".
      * @dataProvider get_data_for_walkthrough
      */
-    public function test_walkthrough_from_csv($quizsettings, $csvdata) {
+    public function test_walkthrough_from_csv($gnrquizsettings, $csvdata) {
 
         $this->resetAfterTest(true);
         question_bank::get_qtype('random')->clear_caches_before_testing();
 
-        $this->create_quiz($quizsettings, $csvdata['questions']);
+        $this->create_gnrquiz($gnrquizsettings, $csvdata['questions']);
 
-        $quizattemptids = $this->walkthrough_attempts($csvdata['steps']);
+        $gnrquizattemptids = $this->walkthrough_attempts($csvdata['steps']);
 
         for ($rowno = 0; $rowno < $csvdata['responses']->getRowCount(); $rowno++) {
             $responsesfromcsv = $csvdata['responses']->getRow($rowno);
             $responses = $this->explode_dot_separated_keys_to_make_subindexs($responsesfromcsv);
 
-            if (!isset($quizattemptids[$responses['gnrquizattempt']])) {
-                throw new coding_exception("There is no quizattempt {$responses['gnrquizattempt']}!");
+            if (!isset($gnrquizattemptids[$responses['gnrquizattempt']])) {
+                throw new coding_exception("There is no gnrquizattempt {$responses['gnrquizattempt']}!");
             }
-            $this->assert_response_test($quizattemptids[$responses['gnrquizattempt']], $responses);
+            $this->assert_response_test($gnrquizattemptids[$responses['gnrquizattempt']], $responses);
         }
     }
 
-    protected function assert_response_test($quizattemptid, $responses) {
-        $quizattempt = gnrquiz_attempt::create($quizattemptid);
+    protected function assert_response_test($gnrquizattemptid, $responses) {
+        $gnrquizattempt = gnrquiz_attempt::create($gnrquizattemptid);
 
         foreach ($responses['slot'] as $slot => $tests) {
             $slothastests = false;
@@ -90,12 +90,12 @@ class gnrquiz_report_responses_from_steps_testcase extends mod_gnrquiz_attempt_w
             if (!$slothastests) {
                 continue;
             }
-            $qa = $quizattempt->get_question_attempt($slot);
+            $qa = $gnrquizattempt->get_question_attempt($slot);
             $stepswithsubmit = $qa->get_steps_with_submitted_response_iterator();
             $step = $stepswithsubmit[$responses['submittedstepno']];
             if (null === $step) {
                 throw new coding_exception("There is no step no {$responses['submittedstepno']} ".
-                                           "for slot $slot in quizattempt {$responses['gnrquizattempt']}!");
+                                           "for slot $slot in gnrquizattempt {$responses['gnrquizattempt']}!");
             }
             foreach (array('responsesummary', 'fraction', 'state') as $column) {
                 if (isset($tests[$column]) && $tests[$column] != '') {
@@ -123,7 +123,7 @@ class gnrquiz_report_responses_from_steps_testcase extends mod_gnrquiz_attempt_w
                             $actual = substr(get_class($state), strlen('question_state_'));
                     }
                     $expected = $tests[$column];
-                    $failuremessage = "Error in  quizattempt {$responses['gnrquizattempt']} in $column, slot $slot, ".
+                    $failuremessage = "Error in  gnrquizattempt {$responses['gnrquizattempt']} in $column, slot $slot, ".
                     "submittedstepno {$responses['submittedstepno']}";
                     $this->assertEquals($expected, $actual, $failuremessage);
                 }

@@ -17,7 +17,7 @@
 /**
  * Tests for the gnrquiz_attempt class.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @category  test
  * @copyright 2014 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -42,7 +42,7 @@ class mod_gnrquiz_attempt_testable extends gnrquiz_attempt {
     /**
      * Set a fake page layout. Used when we test URL generation.
      * @param int $id assumed attempt id.
-     * @param string $layout layout to set. Like quiz attempt.layout. E.g. '1,2,0,3,4,0,'.
+     * @param string $layout layout to set. Like gnrquiz attempt.layout. E.g. '1,2,0,3,4,0,'.
      * @param array $infos slot numbers which contain 'descriptions', or other non-questions.
      * @return gnrquiz_attempt attempt object for use in unit tests.
      */
@@ -52,11 +52,11 @@ class mod_gnrquiz_attempt_testable extends gnrquiz_attempt {
         $attempt->layout = $layout;
 
         $course = new stdClass();
-        $quiz = new stdClass();
+        $gnrquiz = new stdClass();
         $cm = new stdClass();
         $cm->id = 0;
 
-        $attemptobj = new self($attempt, $quiz, $cm, $course, false);
+        $attemptobj = new self($attempt, $gnrquiz, $cm, $course, false);
 
         $attemptobj->slots = array();
         foreach (explode(',', $layout) as $slot) {
@@ -218,7 +218,7 @@ class mod_gnrquiz_attempt_testcase extends basic_testcase {
                 '/mod/gnrquiz/review.php?attempt=123&page=1#'),
                 $attempt->review_url(3, -1, false, 0));
 
-        // Review with more than 50 questions in the quiz.
+        // Review with more than 50 questions in the gnrquiz.
         $attempt = mod_gnrquiz_attempt_testable::setup_fake_attempt_layout(
                 124, '1,2,3,4,5,6,7,8,9,10,0,11,12,13,14,15,16,17,18,19,20,0,' .
                 '21,22,23,24,25,26,27,28,29,30,0,31,32,33,34,35,36,37,38,39,40,0,' .

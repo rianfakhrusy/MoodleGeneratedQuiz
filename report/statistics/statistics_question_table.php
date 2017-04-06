@@ -53,7 +53,7 @@ class gnrquiz_statistics_question_table extends flexible_table {
      * displayed.
      */
     public function __construct($qid) {
-        parent::__construct('mod-quiz-report-statistics-question-table' . $qid);
+        parent::__construct('mod-gnrquiz-report-statistics-question-table' . $qid);
     }
 
     /**
@@ -70,7 +70,7 @@ class gnrquiz_statistics_question_table extends flexible_table {
 
         $this->define_baseurl($reporturl->out());
         $this->collapsible(false);
-        $this->set_attribute('class', 'generaltable generalbox boxaligncenter quizresponseanalysis');
+        $this->set_attribute('class', 'generaltable generalbox boxaligncenter gnrquizresponseanalysis');
 
         // Define the table columns.
         $columns = array();

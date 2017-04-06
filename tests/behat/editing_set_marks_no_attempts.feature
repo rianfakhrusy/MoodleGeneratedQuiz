@@ -1,7 +1,7 @@
-@mod @mod_quiz
-Feature: In order to create a quiz that awards marks the way I want
+@mod @mod_gnrquiz
+Feature: In order to create a gnrquiz that awards marks the way I want
   As a teacher
-  I must be able to set the marks I want on the Edit quiz page.
+  I must be able to set the marks I want on the Edit gnrquiz page.
 
   Background:
     Given the following "users" exist:
@@ -15,14 +15,14 @@ Feature: In order to create a quiz that awards marks the way I want
       | teacher1 | C1     | editingteacher |
     And the following "activities" exist:
       | activity   | name   | course | idnumber | grade | decimalpoints | questiondecimalpoints |
-      | quiz       | Quiz 1 | C1     | quiz1    | 20    | 2             | -1                    |
+      | gnrquiz       | Quiz 1 | C1     | gnrquiz1    | 20    | 2             | -1                    |
     And I log in as "teacher1"
     And I follow "Course 1"
-    And I add a "True/False" question to the "Quiz 1" quiz with:
+    And I add a "True/False" question to the "Quiz 1" gnrquiz with:
       | Question name | First question |
       | Question text | Answer me      |
       | Default mark  | 2.0            |
-    And I add a "True/False" question to the "Quiz 1" quiz with:
+    And I add a "True/False" question to the "Quiz 1" gnrquiz with:
       | Question name | Second question |
       | Question text | Answer again    |
       | Default mark  | 3.0             |
@@ -52,7 +52,7 @@ Feature: In order to create a quiz that awards marks the way I want
     And I should see "Total of marks: 5.00"
 
   @javascript
-  Scenario: Verify the number of decimal places shown is what the quiz settings say it should be.
+  Scenario: Verify the number of decimal places shown is what the gnrquiz settings say it should be.
     # Then the field "maxgrade" matches value "20.00" -- with exact match on decimal places.
     Then "//input[@name = 'maxgrade' and @value = '20.00']" "xpath_element" should exist
     And I should see "2.00"
@@ -66,7 +66,7 @@ Feature: In order to create a quiz that awards marks the way I want
       | Decimal places in grades | 3 |
       | Decimal places in question grades | 5 |
     And I press "Save and display"
-    And I follow "Edit quiz"
+    And I follow "Edit gnrquiz"
     # Then the field "maxgrade" matches value "20.000" -- with exact match on decimal places.
     Then "//input[@name = 'maxgrade' and @value = '20.000']" "xpath_element" should exist
     And I should see "2.00000"

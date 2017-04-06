@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Renderer outputting the quiz editing UI.
+ * Renderer outputting the gnrquiz editing UI.
  *
- * @package mod_quiz
+ * @package mod_gnrquiz
  * @copyright 2013 The Open University.
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\output;
+namespace mod_gnrquiz\output;
 defined('MOODLE_INTERNAL') || die();
 
-use \mod_quiz\structure;
+use \mod_gnrquiz\structure;
 use \html_writer;
 
 /**
- * Renderer outputting the quiz editing UI.
+ * Renderer outputting the gnrquiz editing UI.
  *
  * @copyright 2013 The Open University.
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -40,28 +40,28 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Render the edit page
      *
-     * @param \quiz $quizobj object containing all the quiz settings information.
-     * @param structure $structure object containing the structure of the quiz.
+     * @param \gnrquiz $gnrquizobj object containing all the gnrquiz settings information.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param \question_edit_contexts $contexts the relevant question bank contexts.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @param array $pagevars the variables from {@link question_edit_setup()}.
      * @return string HTML to output.
      */
-    public function edit_page(\quiz $quizobj, structure $structure,
+    public function edit_page(\gnrquiz $gnrquizobj, structure $structure,
             \question_edit_contexts $contexts, \moodle_url $pageurl, array $pagevars) {
         $output = '';
 
         // Page title.
-        $output .= $this->heading_with_help(get_string('editingquizx', 'gnrquiz',
-                format_string($quizobj->get_gnrquiz_name())), 'editingquiz', 'gnrquiz', '',
-                get_string('basicideasofquiz', 'gnrquiz'), 2);
+        $output .= $this->heading_with_help(get_string('editinggnrquizx', 'gnrquiz',
+                format_string($gnrquizobj->get_gnrquiz_name())), 'editinggnrquiz', 'gnrquiz', '',
+                get_string('basicideasofgnrquiz', 'gnrquiz'), 2);
 
         // Information at the top.
         $output .= $this->gnrquiz_state_warnings($structure);
         $output .= $this->gnrquiz_information($structure);
         $output .= $this->maximum_grade_input($structure, $pageurl);
         $output .= $this->repaginate_button($structure, $pageurl);
-        $output .= $this->total_marks($quizobj->get_quiz());
+        $output .= $this->total_marks($gnrquizobj->get_gnrquiz());
 
         // Show the questions organised into sections and pages.
         $output .= $this->start_section_list($structure);
@@ -90,30 +90,30 @@ class edit_renderer extends \plugin_renderer_base {
             $popups = '';
 
             $popups .= $this->question_bank_loading();
-            $this->page->requires->yui_module('moodle-mod_quiz-quizquestionbank',
-                    'M.mod_quiz.quizquestionbank.init',
+            $this->page->requires->yui_module('moodle-mod_gnrquiz-gnrquizquestionbank',
+                    'M.mod_gnrquiz.gnrquizquestionbank.init',
                     array('class' => 'questionbank', 'cmid' => $structure->get_cmid()));
 
             $popups .= $this->random_question_form($pageurl, $contexts, $pagevars);
-            $this->page->requires->yui_module('moodle-mod_quiz-randomquestion',
-                    'M.mod_quiz.randomquestion.init');
+            $this->page->requires->yui_module('moodle-mod_gnrquiz-randomquestion',
+                    'M.mod_gnrquiz.randomquestion.init');
 
             $output .= html_writer::div($popups, 'mod_gnrquiz_edit_forms');
 
             // Include the question chooser.
             $output .= $this->question_chooser();
-            $this->page->requires->yui_module('moodle-mod_quiz-questionchooser', 'M.mod_quiz.init_questionchooser');
+            $this->page->requires->yui_module('moodle-mod_gnrquiz-questionchooser', 'M.mod_gnrquiz.init_questionchooser');
         }
 
         return $output;
     }
 
     /**
-     * Render any warnings that might be required about the state of the quiz,
+     * Render any warnings that might be required about the state of the gnrquiz,
      * e.g. if it has been attempted, or if the shuffle questions option is
      * turned on.
      *
-     * @param structure $structure the quiz structure.
+     * @param structure $structure the gnrquiz structure.
      * @return string HTML to output.
      */
     public function gnrquiz_state_warnings(structure $structure) {
@@ -133,7 +133,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Render the status bar.
      *
-     * @param structure $structure the quiz structure.
+     * @param structure $structure the gnrquiz structure.
      * @return string HTML to output.
      */
     public function gnrquiz_information(structure $structure) {
@@ -149,9 +149,9 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Render the form for setting a quiz' overall grade
+     * Render the form for setting a gnrquiz' overall grade
      *
-     * @param structure $structure the quiz structure.
+     * @param structure $structure the gnrquiz structure.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
      */
@@ -178,7 +178,7 @@ class edit_renderer extends \plugin_renderer_base {
 
     /**
      * Return the repaginate button
-     * @param structure $structure the structure of the quiz being edited.
+     * @param structure $structure the structure of the gnrquiz being edited.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
      */
@@ -202,7 +202,7 @@ class edit_renderer extends \plugin_renderer_base {
         if (!$structure->can_be_repaginated()) {
             $buttonoptions['disabled'] = 'disabled';
         } else {
-            $this->page->requires->yui_module('moodle-mod_quiz-repaginate', 'M.mod_quiz.repaginate.init');
+            $this->page->requires->yui_module('moodle-mod_gnrquiz-repaginate', 'M.mod_gnrquiz.repaginate.init');
         }
 
         return html_writer::tag('div',
@@ -211,7 +211,7 @@ class edit_renderer extends \plugin_renderer_base {
 
     /**
      * Return the repaginate form
-     * @param structure $structure the structure of the quiz being edited.
+     * @param structure $structure the structure of the gnrquiz being edited.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
      */
@@ -240,13 +240,13 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Render the total marks available for the quiz.
+     * Render the total marks available for the gnrquiz.
      *
-     * @param \stdClass $quiz the quiz settings from the database.
+     * @param \stdClass $gnrquiz the gnrquiz settings from the database.
      * @return string HTML to output.
      */
-    public function total_marks($quiz) {
-        $totalmark = html_writer::span(gnrquiz_format_grade($quiz, $quiz->sumgrades), 'mod_gnrquiz_summarks');
+    public function total_marks($gnrquiz) {
+        $totalmark = html_writer::span(gnrquiz_format_grade($gnrquiz, $gnrquiz->sumgrades), 'mod_gnrquiz_summarks');
         return html_writer::tag('span',
                 get_string('totalmarksx', 'gnrquiz', $totalmark),
                 array('class' => 'totalpoints'));
@@ -254,7 +254,7 @@ class edit_renderer extends \plugin_renderer_base {
 
     /**
      * Generate the starting container html for the start of a list of sections
-     * @param structure $structure the structure of the quiz being edited.
+     * @param structure $structure the structure of the gnrquiz being edited.
      * @return string HTML to output.
      */
     protected function start_section_list(structure $structure) {
@@ -276,7 +276,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Display the start of a section, before the questions.
      *
-     * @param structure $structure the structure of the quiz being edited.
+     * @param structure $structure the structure of the gnrquiz being edited.
      * @param \stdClass $section The gnrquiz_section entry from DB
      * @return string HTML to output.
      */
@@ -323,7 +323,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Display a checkbox for shuffling question within a section.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param \stdClass $section data from the gnrquiz_section table.
      * @return string HTML to output.
      */
@@ -370,7 +370,7 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Render an icon to remove a section from the quiz.
+     * Render an icon to remove a section from the gnrquiz.
      *
      * @param object $section the section to be removed.
      * @return string HTML to output.
@@ -385,11 +385,11 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Renders HTML to display the questions in a section of the quiz.
+     * Renders HTML to display the questions in a section of the gnrquiz.
      *
      * This function calls {@link core_course_renderer::gnrquiz_section_question()}
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param \stdClass $section information about the section.
      * @param \question_edit_contexts $contexts the relevant question bank contexts.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
@@ -409,7 +409,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Displays one question with the surrounding controls.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot which slot we are outputting.
      * @param \question_edit_contexts $contexts the relevant question bank contexts.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
@@ -423,7 +423,7 @@ class edit_renderer extends \plugin_renderer_base {
 
         // Page split/join icon.
         $joinhtml = '';
-        if ($structure->can_be_edited() && !$structure->is_last_slot_in_quiz($slot) &&
+        if ($structure->can_be_edited() && !$structure->is_last_slot_in_gnrquiz($slot) &&
                                             !$structure->is_last_slot_in_section($slot)) {
             $joinhtml = $this->page_split_join_button($structure, $slot);
         }
@@ -442,7 +442,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Displays one question with the surrounding controls.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot the first slot on the page we are outputting.
      * @param \question_edit_contexts $contexts the relevant question bank contexts.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
@@ -475,7 +475,7 @@ class edit_renderer extends \plugin_renderer_base {
 
     /**
      * Returns the add menu that is output once per page.
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $page the page number that this menu will add to.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @param \question_edit_contexts $contexts the relevant question bank contexts.
@@ -491,14 +491,14 @@ class edit_renderer extends \plugin_renderer_base {
         }
         $menu = new \action_menu();
         $menu->set_alignment(\action_menu::TR, \action_menu::TR);
-        $menu->set_constraint('.mod-quiz-edit-content');
+        $menu->set_constraint('.mod-gnrquiz-edit-content');
         $trigger = html_writer::tag('span', get_string('add', 'gnrquiz'), array('class' => 'add-menu'));
         $menu->set_menu_trigger($trigger);
         // The menu appears within an absolutely positioned element causing width problems.
         // Make sure no-wrap is set so that we don't get a squashed menu.
         $menu->set_nowrap_on_items(true);
 
-        // Disable the link if quiz has attempts.
+        // Disable the link if gnrquiz has attempts.
         if (!$structure->can_be_edited()) {
             return $this->render($menu);
         }
@@ -519,7 +519,7 @@ class edit_renderer extends \plugin_renderer_base {
 
     /**
      * Returns the list of actions to go in the add menu.
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $page the page number that this menu will add to.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
@@ -548,7 +548,7 @@ class edit_renderer extends \plugin_renderer_base {
                 $str->addasection, array('class' => 'cm-edit-action addasection', 'data-action' => 'addasection')
         );
 
-        // Add a new question to the quiz.
+        // Add a new question to the gnrquiz.
         $returnurl = new \moodle_url($pageurl, array('addonpage' => $page));
         $params = array('returnurl' => $returnurl->out_as_local_url(false),
                 'cmid' => $structure->get_cmid(), 'category' => $questioncategoryid,
@@ -589,9 +589,9 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Render the form that contains the data for adding a new question to the quiz.
+     * Render the form that contains the data for adding a new question to the gnrquiz.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $page the page number that this menu will add to.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
@@ -619,7 +619,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Display a question.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot the first slot on the page we are outputting.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
@@ -654,7 +654,7 @@ class edit_renderer extends \plugin_renderer_base {
 
         // Action icons.
         $questionicons = '';
-        $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot));
+        $questionicons .= $this->question_preview_icon($structure->get_gnrquiz(), $structure->get_question_in_slot($slot));
         if ($structure->can_be_edited()) {
             $questionicons .= $this->question_remove_icon($structure, $slot, $pageurl);
         }
@@ -674,7 +674,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Render the move icon.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot the first slot on the page we are outputting.
      * @return string The markup for the move action.
      */
@@ -700,14 +700,14 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Render the preview icon.
      *
-     * @param \stdClass $quiz the quiz settings from the database.
+     * @param \stdClass $gnrquiz the gnrquiz settings from the database.
      * @param \stdClass $question data from the question and gnrquiz_slots tables.
      * @param bool $label if true, show the preview question label after the icon
      * @param int $variant which question variant to preview (optional).
      * @return string HTML to output.
      */
-    public function question_preview_icon($quiz, $question, $label = null, $variant = null) {
-        $url = gnrquiz_question_preview_url($quiz, $question, $variant);
+    public function question_preview_icon($gnrquiz, $question, $label = null, $variant = null) {
+        $url = gnrquiz_question_preview_url($gnrquiz, $question, $variant);
 
         // Do we want a label?
         $strpreviewlabel = '';
@@ -727,9 +727,9 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Render an icon to remove a question from the quiz.
+     * Render an icon to remove a question from the gnrquiz.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot the first slot on the page we are outputting.
      * @param \moodle_url $pageurl the canonical URL of the edit page.
      * @return string HTML to output.
@@ -745,15 +745,15 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Display an icon to split or join two pages of the quiz.
+     * Display an icon to split or join two pages of the gnrquiz.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot the first slot on the page we are outputting.
      * @return string HTML to output.
      */
     public function page_split_join_button($structure, $slot) {
         $insertpagebreak = !$structure->is_last_slot_on_page($slot);
-        $url = new \moodle_url('repaginate.php', array('gnrquizid' => $structure->get_quizid(),
+        $url = new \moodle_url('repaginate.php', array('gnrquizid' => $structure->get_gnrquizid(),
                 'slot' => $slot, 'repag' => $insertpagebreak ? 2 : 1, 'sesskey' => sesskey()));
 
         if ($insertpagebreak) {
@@ -766,7 +766,7 @@ class edit_renderer extends \plugin_renderer_base {
             $action = 'removepagebreak';
         }
 
-        // Disable the link if quiz has attempts.
+        // Disable the link if gnrquiz has attempts.
         $disabled = null;
         if (!$structure->can_be_edited()) {
             $disabled = 'disabled';
@@ -780,7 +780,7 @@ class edit_renderer extends \plugin_renderer_base {
      * Display the icon for whether this question can only be seen if the previous
      * one has been answered.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot the first slot on the page we are outputting.
      * @return string HTML to output.
      */
@@ -801,7 +801,7 @@ class edit_renderer extends \plugin_renderer_base {
             $action = 'adddependency';
         }
 
-        // Disable the link if quiz has attempts.
+        // Disable the link if gnrquiz has attempts.
         $disabled = null;
         if (!$structure->can_be_edited()) {
             $disabled = 'disabled';
@@ -816,12 +816,12 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Renders html to display a name with the link to the question on a quiz edit page
+     * Renders html to display a name with the link to the question on a gnrquiz edit page
      *
      * If the user does not have permission to edi the question, it is rendered
      * without a link
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot which slot we are outputting.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
@@ -859,7 +859,7 @@ class edit_renderer extends \plugin_renderer_base {
      * Renders html to display a random question the link to edit the configuration
      * and also to see that category in the question bank.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot which slot we are outputting.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
@@ -899,7 +899,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Display the 'marked out of' information for a question.
      * Along with the regrade action.
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param int $slot which slot we are outputting.
      * @return string HTML to output.
      */
@@ -980,7 +980,7 @@ class edit_renderer extends \plugin_renderer_base {
      * Initialise the JavaScript for the general editing. (JavaScript for popups
      * is handled with the specific code for those.)
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param \question_edit_contexts $contexts the relevant question bank contexts.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
      * @param \moodle_url $pageurl the canonical URL of this page.
@@ -997,11 +997,11 @@ class edit_renderer extends \plugin_renderer_base {
         $config->pagehtml = $this->new_page_template($structure, $contexts, $pagevars, $pageurl);
         $config->addpageiconhtml = $this->add_page_icon_template($structure);
 
-        $this->page->requires->yui_module('moodle-mod_quiz-toolboxes',
-                'M.mod_quiz.init_resource_toolbox',
+        $this->page->requires->yui_module('moodle-mod_gnrquiz-toolboxes',
+                'M.mod_gnrquiz.init_resource_toolbox',
                 array(array(
                         'courseid' => $structure->get_courseid(),
-                        'gnrquizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_gnrquizid(),
                         'ajaxurl' => $config->resourceurl,
                         'config' => $config,
                 ))
@@ -1009,28 +1009,28 @@ class edit_renderer extends \plugin_renderer_base {
         unset($config->pagehtml);
         unset($config->addpageiconhtml);
 
-        $this->page->requires->yui_module('moodle-mod_quiz-toolboxes',
-                'M.mod_quiz.init_section_toolbox',
+        $this->page->requires->yui_module('moodle-mod_gnrquiz-toolboxes',
+                'M.mod_gnrquiz.init_section_toolbox',
                 array(array(
                         'courseid' => $structure,
-                        'gnrquizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_gnrquizid(),
                         'ajaxurl' => $config->sectionurl,
                         'config' => $config,
                 ))
         );
 
-        $this->page->requires->yui_module('moodle-mod_quiz-dragdrop', 'M.mod_quiz.init_section_dragdrop',
+        $this->page->requires->yui_module('moodle-mod_gnrquiz-dragdrop', 'M.mod_gnrquiz.init_section_dragdrop',
                 array(array(
                         'courseid' => $structure,
-                        'gnrquizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_gnrquizid(),
                         'ajaxurl' => $config->sectionurl,
                         'config' => $config,
                 )), null, true);
 
-        $this->page->requires->yui_module('moodle-mod_quiz-dragdrop', 'M.mod_quiz.init_resource_dragdrop',
+        $this->page->requires->yui_module('moodle-mod_gnrquiz-dragdrop', 'M.mod_gnrquiz.init_resource_dragdrop',
                 array(array(
                         'courseid' => $structure,
-                        'gnrquizid' => $structure->get_quizid(),
+                        'gnrquizid' => $structure->get_gnrquizid(),
                         'ajaxurl' => $config->resourceurl,
                         'config' => $config,
                 )), null, true);
@@ -1083,7 +1083,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * HTML for a page, with ids stripped, so it can be used as a javascript template.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @param \question_edit_contexts $contexts the relevant question bank contexts.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
      * @param \moodle_url $pageurl the canonical URL of this page.
@@ -1119,7 +1119,7 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * HTML for a page, with ids stripped, so it can be used as a javascript template.
      *
-     * @param structure $structure object containing the structure of the quiz.
+     * @param structure $structure object containing the structure of the gnrquiz.
      * @return string HTML for a new icon
      */
     protected function add_page_icon_template(structure $structure) {
@@ -1135,11 +1135,11 @@ class edit_renderer extends \plugin_renderer_base {
     /**
      * Return the contents of the question bank, to be displayed in the question-bank pop-up.
      *
-     * @param \mod_quiz\question\bank\custom_view $questionbank the question bank view object.
+     * @param \mod_gnrquiz\question\bank\custom_view $questionbank the question bank view object.
      * @param array $pagevars the variables from {@link \question_edit_setup()}.
      * @return string HTML to output / send back in response to an AJAX request.
      */
-    public function question_bank_contents(\mod_quiz\question\bank\custom_view $questionbank, array $pagevars) {
+    public function question_bank_contents(\mod_gnrquiz\question\bank\custom_view $questionbank, array $pagevars) {
 
         $qbank = $questionbank->render('editq', $pagevars['qpage'], $pagevars['qperpage'],
                 $pagevars['cat'], $pagevars['recurse'], $pagevars['showhidden'], $pagevars['qbshowtext']);

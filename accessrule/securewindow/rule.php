@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_securewindow plugin.
+ * Implementaton of the gnrquizaccess_securewindow plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage securewindow
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,13 +30,13 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
 
 
 /**
- * A rule for ensuring that the quiz is opened in a popup, with some JavaScript
+ * A rule for ensuring that the gnrquiz is opened in a popup, with some JavaScript
  * to prevent copying and pasting, etc.
  *
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_securewindow extends gnrquiz_access_rule_base {
+class gnrquizaccess_securewindow extends gnrquiz_access_rule_base {
     /** @var array options that should be used for opening the secure popup. */
     protected static $popupoptions = array(
         'left' => 0,
@@ -52,17 +52,17 @@ class quizaccess_securewindow extends gnrquiz_access_rule_base {
         'menubar' => false,
     );
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
 
-        if ($quizobj->get_quiz()->browsersecurity !== 'securewindow') {
+        if ($gnrquizobj->get_gnrquiz()->browsersecurity !== 'securewindow') {
             return null;
         }
 
-        return new self($quizobj, $timenow);
+        return new self($gnrquizobj, $timenow);
     }
 
     public function attempt_must_be_in_popup() {
-        return !$this->quizobj->is_preview_user();
+        return !$this->gnrquizobj->is_preview_user();
     }
 
     public function get_popup_options() {
@@ -71,21 +71,21 @@ class quizaccess_securewindow extends gnrquiz_access_rule_base {
 
     public function setup_attempt_page($page) {
         $page->set_popup_notification_allowed(false); // Prevent message notifications.
-        $page->set_title($this->quizobj->get_course()->shortname . ': ' . $page->title);
+        $page->set_title($this->gnrquizobj->get_course()->shortname . ': ' . $page->title);
         $page->set_cacheable(false);
         $page->set_pagelayout('secure');
 
-        if ($this->quizobj->is_preview_user()) {
+        if ($this->gnrquizobj->is_preview_user()) {
             return;
         }
 
         $page->add_body_class('gnrquiz-secure-window');
-        $page->requires->js_init_call('M.mod_quiz.secure_window.init',
+        $page->requires->js_init_call('M.mod_gnrquiz.secure_window.init',
                 null, false, gnrquiz_get_js_module());
     }
 
     /**
-     * @return array key => lang string any choices to add to the quiz Browser
+     * @return array key => lang string any choices to add to the gnrquiz Browser
      *      security settings menu.
      */
     public static function get_browser_security_choices() {

@@ -17,7 +17,7 @@
 /**
  * Quiz attempt walk through using data from csv file.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   phpunit
  * @copyright  2013 The Open University
  * @author     Jamie Pratt <me@jamiep.org>
@@ -32,7 +32,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 /**
  * Quiz attempt walk through using data from csv file.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @category   phpunit
  * @copyright  2013 The Open University
  * @author     Jamie Pratt <me@jamiep.org>
@@ -43,9 +43,9 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
     protected $files = array('questions', 'steps', 'results');
 
     /**
-     * @var stdClass the quiz record we create.
+     * @var stdClass the gnrquiz record we create.
      */
-    protected $quiz;
+    protected $gnrquiz;
 
     /**
      * @var array with slot no => question name => questionid. Question ids of questions created in the same category as random q.
@@ -56,20 +56,20 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
      * The only test in this class. This is run multiple times depending on how many sets of files there are in fixtures/
      * directory.
      *
-     * @param array $quizsettings of settings read from csv file quizzes.csv
+     * @param array $gnrquizsettings of settings read from csv file gnrquizzes.csv
      * @param PHPUnit_Extensions_Database_DataSet_ITable[] $csvdata of data read from csv file "questionsXX.csv",
      *                                                                                  "stepsXX.csv" and "resultsXX.csv".
      * @dataProvider get_data_for_walkthrough
      */
-    public function test_walkthrough_from_csv($quizsettings, $csvdata) {
+    public function test_walkthrough_from_csv($gnrquizsettings, $csvdata) {
 
         // CSV data files for these tests were generated using :
-        // https://github.com/jamiepratt/moodle-quiz-tools/tree/master/responsegenerator
+        // https://github.com/jamiepratt/moodle-gnrquiz-tools/tree/master/responsegenerator
 
-        $this->create_gnrquiz_simulate_attempts_and_check_results($quizsettings, $csvdata);
+        $this->create_gnrquiz_simulate_attempts_and_check_results($gnrquizsettings, $csvdata);
     }
 
-    public function create_quiz($quizsettings, $qs) {
+    public function create_gnrquiz($gnrquizsettings, $qs) {
         global $SITE, $DB;
         $this->setAdminUser();
 
@@ -115,39 +115,39 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
 
         ksort($slots);
 
-        // Make a quiz.
-        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        // Make a gnrquiz.
+        $gnrquizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_gnrquiz');
 
         // Settings from param override defaults.
-        $aggregratedsettings = $quizsettings + array('course' => $SITE->id,
+        $aggregratedsettings = $gnrquizsettings + array('course' => $SITE->id,
                                                      'questionsperpage' => 0,
                                                      'grade' => 100.0,
                                                      'sumgrades' => $sumofgrades);
 
-        $this->quiz = $quizgenerator->create_instance($aggregratedsettings);
+        $this->gnrquiz = $gnrquizgenerator->create_instance($aggregratedsettings);
 
         $this->randqids = array();
         foreach ($slots as $slotno => $slotquestion) {
             if ($slotquestion['type'] !== 'random') {
-                gnrquiz_add_gnrquiz_question($slotquestion['id'], $this->quiz, 0, $slotquestion['mark']);
+                gnrquiz_add_gnrquiz_question($slotquestion['id'], $this->gnrquiz, 0, $slotquestion['mark']);
             } else {
-                gnrquiz_add_random_questions($this->quiz, 0, $slotquestion['catid'], 1, 0);
+                gnrquiz_add_random_questions($this->gnrquiz, 0, $slotquestion['catid'], 1, 0);
                 $this->randqids[$slotno] = $qidsbycat[$slotquestion['catid']];
             }
         }
     }
 
     /**
-     * Create quiz, simulate attempts and check results (if resultsXX.csv exists).
+     * Create gnrquiz, simulate attempts and check results (if resultsXX.csv exists).
      *
-     * @param array $quizsettings Quiz overrides for this quiz.
+     * @param array $gnrquizsettings Quiz overrides for this gnrquiz.
      * @param PHPUnit_Extensions_Database_DataSet_ITable[] $csvdata Data loaded from csv files for this test.
      */
-    protected function create_gnrquiz_simulate_attempts_and_check_results($quizsettings, $csvdata) {
+    protected function create_gnrquiz_simulate_attempts_and_check_results($gnrquizsettings, $csvdata) {
         $this->resetAfterTest(true);
         question_bank::get_qtype('random')->clear_caches_before_testing();
 
-        $this->create_quiz($quizsettings, $csvdata['questions']);
+        $this->create_gnrquiz($gnrquizsettings, $csvdata['questions']);
 
         $attemptids = $this->walkthrough_attempts($csvdata['steps']);
 
@@ -212,17 +212,17 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
      *                  test_walkthrough_from_csv.
      */
     public function get_data_for_walkthrough() {
-        $quizzes = $this->load_csv_data_file('gnrquizzes');
+        $gnrquizzes = $this->load_csv_data_file('gnrquizzes');
         $datasets = array();
-        for ($rowno = 0; $rowno < $quizzes->getRowCount(); $rowno++) {
-            $quizsettings = $quizzes->getRow($rowno);
+        for ($rowno = 0; $rowno < $gnrquizzes->getRowCount(); $rowno++) {
+            $gnrquizsettings = $gnrquizzes->getRow($rowno);
             $dataset = array();
             foreach ($this->files as $file) {
-                if (file_exists($this->get_full_path_of_csv_file($file, $quizsettings['testnumber']))) {
-                    $dataset[$file] = $this->load_csv_data_file($file, $quizsettings['testnumber']);
+                if (file_exists($this->get_full_path_of_csv_file($file, $gnrquizsettings['testnumber']))) {
+                    $dataset[$file] = $this->load_csv_data_file($file, $gnrquizsettings['testnumber']);
                 }
             }
-            $datasets[] = array($quizsettings, $dataset);
+            $datasets[] = array($gnrquizsettings, $dataset);
         }
         return $datasets;
     }
@@ -237,7 +237,7 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
         for ($rowno = 0; $rowno < $steps->getRowCount(); $rowno++) {
 
             $step = $this->explode_dot_separated_keys_to_make_subindexs($steps->getRow($rowno));
-            // Find existing user or make a new user to do the quiz.
+            // Find existing user or make a new user to do the gnrquiz.
             $username = array('firstname' => $step['firstname'],
                               'lastname'  => $step['lastname']);
 
@@ -247,14 +247,14 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
 
             if (!isset($attemptids[$step['gnrquizattempt']])) {
                 // Start the attempt.
-                $quizobj = quiz::create($this->quiz->id, $user->id);
-                $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
-                $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+                $gnrquizobj = gnrquiz::create($this->gnrquiz->id, $user->id);
+                $quba = question_engine::make_questions_usage_by_activity('mod_gnrquiz', $gnrquizobj->get_context());
+                $quba->set_preferred_behaviour($gnrquizobj->get_gnrquiz()->preferredbehaviour);
 
-                $prevattempts = gnrquiz_get_user_attempts($this->quiz->id, $user->id, 'all', true);
+                $prevattempts = gnrquiz_get_user_attempts($this->gnrquiz->id, $user->id, 'all', true);
                 $attemptnumber = count($prevattempts) + 1;
                 $timenow = time();
-                $attempt = gnrquiz_create_attempt($quizobj, $attemptnumber, false, $timenow, false, $user->id);
+                $attempt = gnrquiz_create_attempt($gnrquizobj, $attemptnumber, false, $timenow, false, $user->id);
                 // Select variant and / or random sub question.
                 if (!isset($step['variants'])) {
                     $step['variants'] = array();
@@ -268,8 +268,8 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
                     $step['randqs'] = array();
                 }
 
-                gnrquiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $timenow, $step['randqs'], $step['variants']);
-                gnrquiz_attempt_save_started($quizobj, $quba, $attempt);
+                gnrquiz_start_new_attempt($gnrquizobj, $quba, $attempt, $attemptnumber, $timenow, $step['randqs'], $step['variants']);
+                gnrquiz_attempt_save_started($gnrquizobj, $quba, $attempt);
                 $attemptid = $attemptids[$step['gnrquizattempt']] = $attempt->id;
             } else {
                 $attemptid = $attemptids[$step['gnrquizattempt']];
@@ -295,7 +295,7 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
     protected function check_attempts_results($results, $attemptids) {
         for ($rowno = 0; $rowno < $results->getRowCount(); $rowno++) {
             $result = $this->explode_dot_separated_keys_to_make_subindexs($results->getRow($rowno));
-            // Re-load quiz attempt data.
+            // Re-load gnrquiz attempt data.
             $attemptobj = gnrquiz_attempt::create($attemptids[$result['gnrquizattempt']]);
             $this->check_attempt_results($result, $attemptobj);
         }
@@ -341,8 +341,8 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
                     $this->assertEquals($value, $attemptobj->get_sum_marks(), "Sum of marks of attempt {$result['gnrquizattempt']}.");
                     break;
                 case 'gnrquizgrade' :
-                    // Check quiz grades.
-                    $grades = gnrquiz_get_user_grades($attemptobj->get_quiz(), $attemptobj->get_userid());
+                    // Check gnrquiz grades.
+                    $grades = gnrquiz_get_user_grades($attemptobj->get_gnrquiz(), $attemptobj->get_userid());
                     $grade = array_shift($grades);
                     $this->assertEquals($value, $grade->rawgrade, "Quiz grade for attempt {$result['gnrquizattempt']}.");
                     break;
@@ -350,7 +350,7 @@ class mod_gnrquiz_attempt_walkthrough_from_csv_testcase extends advanced_testcas
                     // Check grade book.
                     $gradebookgrades = grade_get_grades($attemptobj->get_courseid(),
                                                         'mod', 'gnrquiz',
-                                                        $attemptobj->get_quizid(),
+                                                        $attemptobj->get_gnrquizid(),
                                                         $attemptobj->get_userid());
                     $gradebookitem = array_shift($gradebookgrades->items);
                     $gradebookgrade = array_shift($gradebookitem->grades);

@@ -1,13 +1,13 @@
 {
-    "moodle-mod_quiz-toolboxes": {
+    "moodle-mod_gnrquiz-toolboxes": {
         "requires": [
             "base",
             "node",
             "event",
             "event-key",
             "io",
-            "moodle-mod_quiz-quizbase",
-            "moodle-mod_quiz-util-slot",
+            "moodle-mod_gnrquiz-gnrquizbase",
+            "moodle-mod_gnrquiz-util-slot",
             "moodle-core-notification-ajaxexception"
         ]
     }

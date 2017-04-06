@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_timelimit plugin.
+ * Implementaton of the gnrquizaccess_timelimit plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage timelimit
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -36,24 +36,24 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/accessrulebase.php');
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_timelimit extends gnrquiz_access_rule_base {
+class gnrquizaccess_timelimit extends gnrquiz_access_rule_base {
 
-    public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
+    public static function make(gnrquiz $gnrquizobj, $timenow, $canignoretimelimits) {
 
-        if (empty($quizobj->get_quiz()->timelimit) || $canignoretimelimits) {
+        if (empty($gnrquizobj->get_gnrquiz()->timelimit) || $canignoretimelimits) {
             return null;
         }
 
-        return new self($quizobj, $timenow);
+        return new self($gnrquizobj, $timenow);
     }
 
     public function description() {
         return get_string('gnrquiztimelimit', 'gnrquizaccess_timelimit',
-                format_time($this->quiz->timelimit));
+                format_time($this->gnrquiz->timelimit));
     }
 
     public function end_time($attempt) {
-        return $attempt->timestart + $this->quiz->timelimit;
+        return $attempt->timestart + $this->gnrquiz->timelimit;
     }
 
     public function time_left_display($attempt, $timenow) {
@@ -70,11 +70,11 @@ class quizaccess_timelimit extends gnrquiz_access_rule_base {
         return $attemptid === null;
     }
 
-    public function add_preflight_check_form_fields(mod_gnrquiz_preflight_check_form $quizform,
+    public function add_preflight_check_form_fields(mod_gnrquiz_preflight_check_form $gnrquizform,
             MoodleQuickForm $mform, $attemptid) {
         $mform->addElement('header', 'honestycheckheader',
                 get_string('confirmstartheader', 'gnrquizaccess_timelimit'));
         $mform->addElement('static', 'honestycheckmessage', '',
-                get_string('confirmstart', 'gnrquizaccess_timelimit', format_time($this->quiz->timelimit)));
+                get_string('confirmstart', 'gnrquizaccess_timelimit', format_time($this->gnrquiz->timelimit)));
     }
 }

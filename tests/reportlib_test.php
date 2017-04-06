@@ -17,7 +17,7 @@
 /**
  * Unit tests for (some of) mod/gnrquiz/report/reportlib.php
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @category  phpunit
  * @copyright 2008 Jamie Pratt me@jamiep.org
  * @license   http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -62,29 +62,29 @@ class mod_gnrquiz_reportlib_testcase extends advanced_testcase {
     }
 
     public function test_gnrquiz_report_scale_summarks_as_percentage() {
-        $quiz = new stdClass();
-        $quiz->sumgrades = 10;
-        $quiz->decimalpoints = 2;
+        $gnrquiz = new stdClass();
+        $gnrquiz->sumgrades = 10;
+        $gnrquiz->decimalpoints = 2;
 
         $this->assertEquals('12.34567%',
-            gnrquiz_report_scale_summarks_as_percentage(1.234567, $quiz, false));
+            gnrquiz_report_scale_summarks_as_percentage(1.234567, $gnrquiz, false));
         $this->assertEquals('12.35%',
-            gnrquiz_report_scale_summarks_as_percentage(1.234567, $quiz, true));
+            gnrquiz_report_scale_summarks_as_percentage(1.234567, $gnrquiz, true));
         $this->assertEquals('-',
-            gnrquiz_report_scale_summarks_as_percentage('-', $quiz, true));
+            gnrquiz_report_scale_summarks_as_percentage('-', $gnrquiz, true));
     }
 
     public function test_gnrquiz_report_qm_filter_select_only_one_attempt_allowed() {
-        $quiz = new stdClass();
-        $quiz->attempts = 1;
-        $this->assertSame('', gnrquiz_report_qm_filter_select($quiz));
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 1;
+        $this->assertSame('', gnrquiz_report_qm_filter_select($gnrquiz));
     }
 
     public function test_gnrquiz_report_qm_filter_select_average() {
-        $quiz = new stdClass();
-        $quiz->attempts = 10;
-        $quiz->grademethod = QUIZ_GRADEAVERAGE;
-        $this->assertSame('', gnrquiz_report_qm_filter_select($quiz));
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 10;
+        $gnrquiz->grademethod = GNRQUIZ_GRADEAVERAGE;
+        $this->assertSame('', gnrquiz_report_qm_filter_select($gnrquiz));
     }
 
     public function test_gnrquiz_report_qm_filter_select_first_last_best() {
@@ -93,13 +93,13 @@ class mod_gnrquiz_reportlib_testcase extends advanced_testcase {
 
         $fakeattempt = new stdClass();
         $fakeattempt->userid = 123;
-        $fakeattempt->quiz = 456;
+        $fakeattempt->gnrquiz = 456;
         $fakeattempt->layout = '1,2,0,3,4,0,5';
         $fakeattempt->state = gnrquiz_attempt::FINISHED;
 
         // We intentionally insert these in a funny order, to test the SQL better.
         // The test data is:
-        // id | quizid | user | attempt | sumgrades | state
+        // id | gnrquizid | user | attempt | sumgrades | state
         // ---------------------------------------------------
         // 4  | 456    | 123  | 1       | 30        | finished
         // 2  | 456    | 123  | 2       | 50        | finished
@@ -137,30 +137,30 @@ class mod_gnrquiz_reportlib_testcase extends advanced_testcase {
         $fakeattempt->uniqueid = 65;
         $DB->insert_record('gnrquiz_attempts', $fakeattempt);
 
-        $quiz = new stdClass();
-        $quiz->attempts = 10;
+        $gnrquiz = new stdClass();
+        $gnrquiz->attempts = 10;
 
-        $quiz->grademethod = QUIZ_ATTEMPTFIRST;
+        $gnrquiz->grademethod = GNRQUIZ_ATTEMPTFIRST;
         $firstattempt = $DB->get_records_sql("
-                SELECT * FROM {gnrquiz_attempts} quiza WHERE userid = ? AND quiz = ? AND "
-                        . gnrquiz_report_qm_filter_select($quiz), array(123, 456));
+                SELECT * FROM {gnrquiz_attempts} gnrquiza WHERE userid = ? AND gnrquiz = ? AND "
+                        . gnrquiz_report_qm_filter_select($gnrquiz), array(123, 456));
         $this->assertEquals(1, count($firstattempt));
         $firstattempt = reset($firstattempt);
         $this->assertEquals(1, $firstattempt->attempt);
 
-        $quiz->grademethod = QUIZ_ATTEMPTLAST;
+        $gnrquiz->grademethod = GNRQUIZ_ATTEMPTLAST;
         $lastattempt = $DB->get_records_sql("
-                SELECT * FROM {gnrquiz_attempts} quiza WHERE userid = ? AND quiz = ? AND "
-                . gnrquiz_report_qm_filter_select($quiz), array(123, 456));
+                SELECT * FROM {gnrquiz_attempts} gnrquiza WHERE userid = ? AND gnrquiz = ? AND "
+                . gnrquiz_report_qm_filter_select($gnrquiz), array(123, 456));
         $this->assertEquals(1, count($lastattempt));
         $lastattempt = reset($lastattempt);
         $this->assertEquals(3, $lastattempt->attempt);
 
-        $quiz->attempts = 0;
-        $quiz->grademethod = QUIZ_GRADEHIGHEST;
+        $gnrquiz->attempts = 0;
+        $gnrquiz->grademethod = GNRQUIZ_GRADEHIGHEST;
         $bestattempt = $DB->get_records_sql("
-                SELECT * FROM {gnrquiz_attempts} qa_alias WHERE userid = ? AND quiz = ? AND "
-                . gnrquiz_report_qm_filter_select($quiz, 'qa_alias'), array(123, 456));
+                SELECT * FROM {gnrquiz_attempts} qa_alias WHERE userid = ? AND gnrquiz = ? AND "
+                . gnrquiz_report_qm_filter_select($gnrquiz, 'qa_alias'), array(123, 456));
         $this->assertEquals(1, count($bestattempt));
         $bestattempt = reset($bestattempt);
         $this->assertEquals(2, $bestattempt->attempt);

@@ -15,19 +15,19 @@
 
 
 /**
- * Auto-save functionality for during quiz attempts.
+ * Auto-save functionality for during gnrquiz attempts.
  *
- * @module moodle-mod_quiz-autosave
+ * @module moodle-mod_gnrquiz-autosave
  */
 
 /**
- * Auto-save functionality for during quiz attempts.
+ * Auto-save functionality for during gnrquiz attempts.
  *
- * @class M.mod_quiz.autosave
+ * @class M.mod_gnrquiz.autosave
  */
 
-M.mod_quiz = M.mod_quiz || {};
-M.mod_quiz.autosave = {
+M.mod_gnrquiz = M.mod_gnrquiz || {};
+M.mod_gnrquiz.autosave = {
     /**
      * The amount of time (in milliseconds) to wait between TinyMCE detections.
      *
@@ -88,7 +88,7 @@ M.mod_quiz.autosave = {
      * @static
      */
     SELECTORS: {
-        QUIZ_FORM:             '#responseform',
+        GNRQUIZ_FORM:             '#responseform',
         VALUE_CHANGE_ELEMENTS: 'input, textarea, [contenteditable="true"]',
         CHANGE_ELEMENTS:       'input, select',
         HIDDEN_INPUTS:         'input[type=hidden]',
@@ -190,9 +190,9 @@ M.mod_quiz.autosave = {
      * a save happening.
      */
     init: function(delay) {
-        this.form = Y.one(this.SELECTORS.QUIZ_FORM);
+        this.form = Y.one(this.SELECTORS.GNRQUIZ_FORM);
         if (!this.form) {
-            Y.log('No response form found. Why did you try to set up autosave?', 'debug', 'moodle-mod_quiz-autosave');
+            Y.log('No response form found. Why did you try to set up autosave?', 'debug', 'moodle-mod_gnrquiz-autosave');
             return;
         }
 
@@ -254,12 +254,12 @@ M.mod_quiz.autosave = {
             if (repeatcount > 0) {
                 Y.later(this.TINYMCE_DETECTION_DELAY, this, this.init_tinymce, [repeatcount - 1]);
             } else {
-                Y.log('Gave up looking for TinyMCE.', 'debug', 'moodle-mod_quiz-autosave');
+                Y.log('Gave up looking for TinyMCE.', 'debug', 'moodle-mod_gnrquiz-autosave');
             }
             return;
         }
 
-        Y.log('Found TinyMCE.', 'debug', 'moodle-mod_quiz-autosave');
+        Y.log('Found TinyMCE.', 'debug', 'moodle-mod_gnrquiz-autosave');
         this.editor_change_handler = Y.bind(this.editor_changed, this);
         window.tinyMCE.onAddEditor.add(Y.bind(this.init_tinymce_editor, this));
     },
@@ -272,7 +272,7 @@ M.mod_quiz.autosave = {
      * @param {Object} editor The TinyMCE editor object
      */
     init_tinymce_editor: function(e, editor) {
-        Y.log('Found TinyMCE editor ' + editor.id + '.', 'debug', 'moodle-mod_quiz-autosave');
+        Y.log('Found TinyMCE editor ' + editor.id + '.', 'debug', 'moodle-mod_gnrquiz-autosave');
         editor.onChange.add(this.editor_change_handler);
         editor.onRedo.add(this.editor_change_handler);
         editor.onUndo.add(this.editor_change_handler);
@@ -287,12 +287,12 @@ M.mod_quiz.autosave = {
 
         // Fallback to the ID when the name is not present (in the case of content editable).
         name = name || '#' + e.target.getAttribute('id');
-        Y.log('Detected a value change in element ' + name + '.', 'debug', 'moodle-mod_quiz-autosave');
+        Y.log('Detected a value change in element ' + name + '.', 'debug', 'moodle-mod_gnrquiz-autosave');
         this.start_save_timer_if_necessary();
     },
 
     editor_changed: function(editor) {
-        Y.log('Detected a value change in editor ' + editor.id + '.', 'debug', 'moodle-mod_quiz-autosave');
+        Y.log('Detected a value change in editor ' + editor.id + '.', 'debug', 'moodle-mod_gnrquiz-autosave');
         this.start_save_timer_if_necessary();
     },
 
@@ -324,12 +324,12 @@ M.mod_quiz.autosave = {
         this.dirty = false;
 
         if (this.is_time_nearly_over()) {
-            Y.log('No more saving, time is nearly over.', 'debug', 'moodle-mod_quiz-autosave');
+            Y.log('No more saving, time is nearly over.', 'debug', 'moodle-mod_gnrquiz-autosave');
             this.stop_autosaving();
             return;
         }
 
-        Y.log('Doing a save.', 'debug', 'moodle-mod_quiz-autosave');
+        Y.log('Doing a save.', 'debug', 'moodle-mod_gnrquiz-autosave');
         if (typeof window.tinyMCE !== 'undefined') {
             window.tinyMCE.triggerSave();
         }
@@ -352,11 +352,11 @@ M.mod_quiz.autosave = {
             return;
         }
 
-        Y.log('Save completed.', 'debug', 'moodle-mod_quiz-autosave');
+        Y.log('Save completed.', 'debug', 'moodle-mod_gnrquiz-autosave');
         this.save_transaction = null;
 
         if (this.dirty) {
-            Y.log('Dirty after save.', 'debug', 'moodle-mod_quiz-autosave');
+            Y.log('Dirty after save.', 'debug', 'moodle-mod_gnrquiz-autosave');
             this.start_save_timer();
         }
 
@@ -371,7 +371,7 @@ M.mod_quiz.autosave = {
     },
 
     save_failed: function() {
-        Y.log('Save failed.', 'debug', 'moodle-mod_quiz-autosave');
+        Y.log('Save failed.', 'debug', 'moodle-mod_gnrquiz-autosave');
         this.save_transaction = null;
 
         // We want to retry soon.
@@ -385,8 +385,8 @@ M.mod_quiz.autosave = {
     },
 
     is_time_nearly_over: function() {
-        return M.mod_quiz.timer && M.mod_quiz.timer.endtime &&
-                (new Date().getTime() + 2*this.delay) > M.mod_quiz.timer.endtime;
+        return M.mod_gnrquiz.timer && M.mod_gnrquiz.timer.endtime &&
+                (new Date().getTime() + 2*this.delay) > M.mod_gnrquiz.timer.endtime;
     },
 
     stop_autosaving: function() {

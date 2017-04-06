@@ -18,7 +18,7 @@
  * The file defines a base class that can be used to build a report like the
  * overview or responses report, that has one row per attempt.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 2010 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ require_once($CFG->libdir.'/tablelib.php');
 
 
 /**
- * Base class for quiz reports that are basically a table with one row for each attempt.
+ * Base class for gnrquiz reports that are basically a table with one row for each attempt.
  *
  * @copyright 2010 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -51,7 +51,7 @@ abstract class gnrquiz_attempts_report extends gnrquiz_default_report {
     /** @var string the mode this report is. */
     protected $mode;
 
-    /** @var object the quiz context. */
+    /** @var object the gnrquiz context. */
     protected $context;
 
     /** @var mod_gnrquiz_attempts_report_form The settings form to use. */
@@ -69,11 +69,11 @@ abstract class gnrquiz_attempts_report extends gnrquiz_default_report {
      *
      * @param string $mode
      * @param string $formclass
-     * @param object $quiz
+     * @param object $gnrquiz
      * @param object $cm
      * @param object $course
      */
-    protected function init($mode, $formclass, $quiz, $cm, $course) {
+    protected function init($mode, $formclass, $gnrquiz, $cm, $course) {
         $this->mode = $mode;
 
         $this->context = context_module::instance($cm->id);
@@ -81,10 +81,10 @@ abstract class gnrquiz_attempts_report extends gnrquiz_default_report {
         list($currentgroup, $students, $groupstudents, $allowed) =
                 $this->load_relevant_students($cm, $course);
 
-        $this->qmsubselect = gnrquiz_report_qm_filter_select($quiz);
+        $this->qmsubselect = gnrquiz_report_qm_filter_select($gnrquiz);
 
         $this->form = new $formclass($this->get_base_url(),
-                array('gnrquiz' => $quiz, 'currentgroup' => $currentgroup, 'context' => $this->context));
+                array('gnrquiz' => $gnrquiz, 'currentgroup' => $currentgroup, 'context' => $this->context));
 
         return array($currentgroup, $students, $groupstudents, $allowed);
     }
@@ -230,20 +230,20 @@ abstract class gnrquiz_attempts_report extends gnrquiz_default_report {
     /**
      * Add all the grade and feedback columns, if applicable, to the $columns
      * and $headers arrays.
-     * @param object $quiz the quiz settings.
-     * @param bool $usercanseegrades whether the user is allowed to see grades for this quiz.
+     * @param object $gnrquiz the gnrquiz settings.
+     * @param bool $usercanseegrades whether the user is allowed to see grades for this gnrquiz.
      * @param array $columns the list of columns. Added to.
      * @param array $headers the columns headings. Added to.
      * @param bool $includefeedback whether to include the feedbacktext columns
      */
-    protected function add_grade_columns($quiz, $usercanseegrades, &$columns, &$headers, $includefeedback = true) {
+    protected function add_grade_columns($gnrquiz, $usercanseegrades, &$columns, &$headers, $includefeedback = true) {
         if ($usercanseegrades) {
             $columns[] = 'sumgrades';
             $headers[] = get_string('grade', 'gnrquiz') . '/' .
-                    gnrquiz_format_grade($quiz, $quiz->grade);
+                    gnrquiz_format_grade($gnrquiz, $gnrquiz->grade);
         }
 
-        if ($includefeedback && gnrquiz_has_feedback($quiz)) {
+        if ($includefeedback && gnrquiz_has_feedback($gnrquiz)) {
             $columns[] = 'feedbacktext';
             $headers[] = get_string('feedback', 'gnrquiz');
         }
@@ -278,19 +278,19 @@ abstract class gnrquiz_attempts_report extends gnrquiz_default_report {
 
     /**
      * Process any submitted actions.
-     * @param object $quiz the quiz settings.
-     * @param object $cm the cm object for the quiz.
+     * @param object $gnrquiz the gnrquiz settings.
+     * @param object $cm the cm object for the gnrquiz.
      * @param int $currentgroup the currently selected group.
      * @param array $groupstudents the students in the current group.
      * @param array $allowed the users whose attempt this user is allowed to modify.
      * @param moodle_url $redirecturl where to redircet to after a successful action.
      */
-    protected function process_actions($quiz, $cm, $currentgroup, $groupstudents, $allowed, $redirecturl) {
+    protected function process_actions($gnrquiz, $cm, $currentgroup, $groupstudents, $allowed, $redirecturl) {
         if (empty($currentgroup) || $groupstudents) {
             if (optional_param('delete', 0, PARAM_BOOL) && confirm_sesskey()) {
                 if ($attemptids = optional_param_array('attemptid', array(), PARAM_INT)) {
                     require_capability('mod/gnrquiz:deleteattempts', $this->context);
-                    $this->delete_selected_attempts($quiz, $cm, $attemptids, $allowed);
+                    $this->delete_selected_attempts($gnrquiz, $cm, $attemptids, $allowed);
                     redirect($redirecturl);
                 }
             }
@@ -298,22 +298,22 @@ abstract class gnrquiz_attempts_report extends gnrquiz_default_report {
     }
 
     /**
-     * Delete the quiz attempts
-     * @param object $quiz the quiz settings. Attempts that don't belong to
-     * this quiz are not deleted.
+     * Delete the gnrquiz attempts
+     * @param object $gnrquiz the gnrquiz settings. Attempts that don't belong to
+     * this gnrquiz are not deleted.
      * @param object $cm the course_module object.
      * @param array $attemptids the list of attempt ids to delete.
      * @param array $allowed This list of userids that are visible in the report.
      *      Users can only delete attempts that they are allowed to see in the report.
      *      Empty means all users.
      */
-    protected function delete_selected_attempts($quiz, $cm, $attemptids, $allowed) {
+    protected function delete_selected_attempts($gnrquiz, $cm, $attemptids, $allowed) {
         global $DB;
 
         foreach ($attemptids as $attemptid) {
             $attempt = $DB->get_record('gnrquiz_attempts', array('id' => $attemptid));
-            if (!$attempt || $attempt->quiz != $quiz->id || $attempt->preview != 0) {
-                // Ensure the attempt exists, and belongs to this quiz. If not skip.
+            if (!$attempt || $attempt->gnrquiz != $gnrquiz->id || $attempt->preview != 0) {
+                // Ensure the attempt exists, and belongs to this gnrquiz. If not skip.
                 continue;
             }
             if ($allowed && !in_array($attempt->userid, $allowed)) {
@@ -322,8 +322,8 @@ abstract class gnrquiz_attempts_report extends gnrquiz_default_report {
             }
 
             // Set the course module id before calling gnrquiz_delete_attempt().
-            $quiz->cmid = $cm->id;
-            gnrquiz_delete_attempt($attempt, $quiz);
+            $gnrquiz->cmid = $cm->id;
+            gnrquiz_delete_attempt($attempt, $gnrquiz);
         }
     }
 }

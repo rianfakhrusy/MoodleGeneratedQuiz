@@ -1,8 +1,8 @@
-@mod @mod_quiz
-Feature: Set a quiz to be marked complete when the student uses all attempts allowed
+@mod @mod_gnrquiz
+Feature: Set a gnrquiz to be marked complete when the student uses all attempts allowed
   In order to ensure a student has learned the material before being marked complete
   As a teacher
-  I need to set a quiz to complete when the student receives a passing grade, or completed_fail if they use all attempts without passing
+  I need to set a gnrquiz to complete when the student receives a passing grade, or completed_fail if they use all attempts without passing
 
   Background:
     Given the following "users" exist:
@@ -26,31 +26,31 @@ Feature: Set a quiz to be marked complete when the student uses all attempts all
       | Test questions   | truefalse | First question | Answer the first question |
     And the following "activities" exist:
       | activity   | name           | course | idnumber | attempts | gradepass | completion | completionattemptsexhausted |
-      | quiz       | Test quiz name | C1     | quiz1    | 2        | 5.00      | 2          | 1                           |
-    And quiz "Test quiz name" contains the following questions:
+      | gnrquiz       | Test gnrquiz name | C1     | gnrquiz1    | 2        | 5.00      | 2          | 1                           |
+    And gnrquiz "Test gnrquiz name" contains the following questions:
       | question       | page |
       | First question | 1    |
 
   Scenario: student1 uses up both attempts without passing
     When I log in as "student1"
     And I follow "Course 1"
-    And the "Test quiz name" "quiz" activity with "auto" completion should be marked as not complete
-    And I follow "Test quiz name"
-    And I press "Attempt quiz now"
+    And the "Test gnrquiz name" "gnrquiz" activity with "auto" completion should be marked as not complete
+    And I follow "Test gnrquiz name"
+    And I press "Attempt gnrquiz now"
     And I set the field "False" to "1"
     And I press "Finish attempt ..."
     And I press "Submit all and finish"
     And I follow "C1"
-    And the "Test quiz name" "quiz" activity with "auto" completion should be marked as not complete
-    And I follow "Test quiz name"
-    And I press "Re-attempt quiz"
+    And the "Test gnrquiz name" "gnrquiz" activity with "auto" completion should be marked as not complete
+    And I follow "Test gnrquiz name"
+    And I press "Re-attempt gnrquiz"
     And I set the field "False" to "1"
     And I press "Finish attempt ..."
     And I press "Submit all and finish"
     And I follow "C1"
-    Then "//img[contains(@alt, 'Completed: Test quiz name')]" "xpath_element" should exist in the "li.modtype_quiz" "css_element"
+    Then "//img[contains(@alt, 'Completed: Test gnrquiz name')]" "xpath_element" should exist in the "li.modtype_gnrquiz" "css_element"
     And I log out
     And I log in as "teacher1"
     And I follow "Course 1"
     And I navigate to "Activity completion" node in "Course administration > Reports"
-    And "//img[contains(@title,'Test quiz name') and @alt='Completed']" "xpath_element" should exist in the "Student 1" "table_row"
+    And "//img[contains(@title,'Test gnrquiz name') and @alt='Completed']" "xpath_element" should exist in the "Student 1" "table_row"

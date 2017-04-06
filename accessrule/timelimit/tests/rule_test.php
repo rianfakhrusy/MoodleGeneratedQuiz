@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the quizaccess_timelimit plugin.
+ * Unit tests for the gnrquizaccess_timelimit plugin.
  *
- * @package    quizaccess
+ * @package    gnrquizaccess
  * @subpackage timelimit
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,19 +31,19 @@ require_once($CFG->dirroot . '/mod/gnrquiz/accessrule/timelimit/rule.php');
 
 
 /**
- * Unit tests for the quizaccess_timelimit plugin.
+ * Unit tests for the gnrquizaccess_timelimit plugin.
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_timelimit_testcase extends basic_testcase {
+class gnrquizaccess_timelimit_testcase extends basic_testcase {
     public function test_time_limit_access_rule() {
-        $quiz = new stdClass();
-        $quiz->timelimit = 3600;
+        $gnrquiz = new stdClass();
+        $gnrquiz->timelimit = 3600;
         $cm = new stdClass();
         $cm->id = 0;
-        $quizobj = new quiz($quiz, $cm, null);
-        $rule = new quizaccess_timelimit($quizobj, 10000);
+        $gnrquizobj = new gnrquiz($gnrquiz, $cm, null);
+        $rule = new gnrquizaccess_timelimit($gnrquizobj, 10000);
         $attempt = new stdClass();
 
         $this->assertEquals($rule->description(),

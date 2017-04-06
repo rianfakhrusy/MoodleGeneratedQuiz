@@ -15,12 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This page prints a review of a particular quiz attempt
+ * This page prints a review of a particular gnrquiz attempt
  *
  * It is used either by the student whose attempts this is, after the attempt,
  * or by a teacher reviewing another's attempt during or afterwards.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -68,12 +68,12 @@ if ($attemptobj->is_own_attempt()) {
         redirect($attemptobj->attempt_url(null, $page));
 
     } else if (!$options->attempt) {
-        $accessmanager->back_to_view_page($PAGE->get_renderer('mod_quiz'),
+        $accessmanager->back_to_view_page($PAGE->get_renderer('mod_gnrquiz'),
                 $attemptobj->cannot_review_message());
     }
 
 } else if (!$attemptobj->is_review_allowed()) {
-    throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'noreviewattempt');
+    throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'noreviewattempt');
 }
 
 // Load the questions and states needed by this page.
@@ -98,7 +98,7 @@ if ($attemptobj->is_own_preview()) {
 
 } else {
     $strreviewtitle = get_string('reviewofattempt', 'gnrquiz', $attemptobj->get_attempt_number());
-    if (empty($attemptobj->get_quiz()->showblocks) && !$attemptobj->is_preview_user()) {
+    if (empty($attemptobj->get_gnrquiz()->showblocks) && !$attemptobj->is_preview_user()) {
         $PAGE->blocks->show_only_fake_blocks();
     }
 }
@@ -112,13 +112,13 @@ $PAGE->set_heading($attemptobj->get_course()->fullname);
 
 // Work out some time-related things.
 $attempt = $attemptobj->get_attempt();
-$quiz = $attemptobj->get_quiz();
+$gnrquiz = $attemptobj->get_gnrquiz();
 $overtime = 0;
 
 if ($attempt->state == gnrquiz_attempt::FINISHED) {
     if ($timetaken = ($attempt->timefinish - $attempt->timestart)) {
-        if ($quiz->timelimit && $timetaken > ($quiz->timelimit + 60)) {
-            $overtime = $timetaken - $quiz->timelimit;
+        if ($gnrquiz->timelimit && $timetaken > ($gnrquiz->timelimit + 60)) {
+            $overtime = $timetaken - $gnrquiz->timelimit;
             $overtime = format_time($overtime);
         }
         $timetaken = format_time($timetaken);
@@ -131,7 +131,7 @@ if ($attempt->state == gnrquiz_attempt::FINISHED) {
 
 // Prepare summary informat about the whole attempt.
 $summarydata = array();
-if (!$attemptobj->get_quiz()->showuserpicture && $attemptobj->get_userid() != $USER->id) {
+if (!$attemptobj->get_gnrquiz()->showuserpicture && $attemptobj->get_userid() != $USER->id) {
     // If showuserpicture is true, the picture is shown elsewhere, so don't repeat it.
     $student = $DB->get_record('user', array('id' => $attemptobj->get_userid()));
     $userpicture = new user_picture($student);
@@ -185,8 +185,8 @@ if (!empty($overtime)) {
 }
 
 // Show marks (if the user is allowed to see marks at the moment).
-$grade = gnrquiz_rescale_grade($attempt->sumgrades, $quiz, false);
-if ($options->marks >= question_display_options::MARK_AND_MAX && gnrquiz_has_grades($quiz)) {
+$grade = gnrquiz_rescale_grade($attempt->sumgrades, $gnrquiz, false);
+if ($options->marks >= question_display_options::MARK_AND_MAX && gnrquiz_has_grades($gnrquiz)) {
 
     if ($attempt->state != gnrquiz_attempt::FINISHED) {
         // Cannot display grade.
@@ -194,15 +194,15 @@ if ($options->marks >= question_display_options::MARK_AND_MAX && gnrquiz_has_gra
     } else if (is_null($grade)) {
         $summarydata['grade'] = array(
             'title'   => get_string('grade', 'gnrquiz'),
-            'content' => gnrquiz_format_grade($quiz, $grade),
+            'content' => gnrquiz_format_grade($gnrquiz, $grade),
         );
 
     } else {
         // Show raw marks only if they are different from the grade (like on the view page).
-        if ($quiz->grade != $quiz->sumgrades) {
+        if ($gnrquiz->grade != $gnrquiz->sumgrades) {
             $a = new stdClass();
-            $a->grade = gnrquiz_format_grade($quiz, $attempt->sumgrades);
-            $a->maxgrade = gnrquiz_format_grade($quiz, $quiz->sumgrades);
+            $a->grade = gnrquiz_format_grade($gnrquiz, $attempt->sumgrades);
+            $a->maxgrade = gnrquiz_format_grade($gnrquiz, $gnrquiz->sumgrades);
             $summarydata['marks'] = array(
                 'title'   => get_string('marks', 'gnrquiz'),
                 'content' => get_string('outofshort', 'gnrquiz', $a),
@@ -211,11 +211,11 @@ if ($options->marks >= question_display_options::MARK_AND_MAX && gnrquiz_has_gra
 
         // Now the scaled grade.
         $a = new stdClass();
-        $a->grade = html_writer::tag('b', gnrquiz_format_grade($quiz, $grade));
-        $a->maxgrade = gnrquiz_format_grade($quiz, $quiz->grade);
-        if ($quiz->grade != 100) {
+        $a->grade = html_writer::tag('b', gnrquiz_format_grade($gnrquiz, $grade));
+        $a->maxgrade = gnrquiz_format_grade($gnrquiz, $gnrquiz->grade);
+        if ($gnrquiz->grade != 100) {
             $a->percent = html_writer::tag('b', format_float(
-                    $attempt->sumgrades * 100 / $quiz->sumgrades, 0));
+                    $attempt->sumgrades * 100 / $gnrquiz->sumgrades, 0));
             $formattedgrade = get_string('outofpercent', 'gnrquiz', $a);
         } else {
             $formattedgrade = get_string('outof', 'gnrquiz', $a);
@@ -249,7 +249,7 @@ if ($showall) {
     $lastpage = $attemptobj->is_last_page($page);
 }
 
-$output = $PAGE->get_renderer('mod_quiz');
+$output = $PAGE->get_renderer('mod_gnrquiz');
 
 // Arrange for the navigation to be displayed.
 $navbc = $attemptobj->get_navigation_panel($output, 'gnrquiz_review_nav_panel', $page, $showall);

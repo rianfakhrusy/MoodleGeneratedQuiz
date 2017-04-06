@@ -15,27 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_quiz attempt preview started event.
+ * The mod_gnrquiz attempt preview started event.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz\event;
+namespace mod_gnrquiz\event;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_quiz attempt preview started event class.
+ * The mod_gnrquiz attempt preview started event class.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - int quizid: the id of the quiz.
+ *      - int gnrquizid: the id of the gnrquiz.
  * }
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @since      Moodle 2.7
  * @copyright  2014 Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -57,7 +57,7 @@ class attempt_preview_started extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventattemptpreviewstarted', 'mod_quiz');
+        return get_string('eventattemptpreviewstarted', 'mod_gnrquiz');
     }
 
     /**
@@ -67,7 +67,7 @@ class attempt_preview_started extends \core\event\base {
      */
     public function get_description() {
         return "The user with id '$this->relateduserid' has had their attempt with id '$this->objectid' previewed by " .
-            "the user with id '$this->userid' for the quiz with course module id '$this->contextinstanceid'.";
+            "the user with id '$this->userid' for the gnrquiz with course module id '$this->contextinstanceid'.";
     }
 
     /**

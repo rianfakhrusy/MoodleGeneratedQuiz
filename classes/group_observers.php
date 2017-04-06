@@ -17,12 +17,12 @@
 /**
  * Group observers.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2013 Frédéric Massart
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_quiz;
+namespace mod_gnrquiz;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
@@ -30,7 +30,7 @@ require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 /**
  * Group observers class.
  *
- * @package    mod_quiz
+ * @package    mod_gnrquiz
  * @copyright  2013 Frédéric Massart
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

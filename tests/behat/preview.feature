@@ -1,6 +1,6 @@
-@mod @mod_quiz
-Feature: Preview a quiz as a teacher
-  In order to verify my quizzes are ready for my students
+@mod @mod_gnrquiz
+Feature: Preview a gnrquiz as a teacher
+  In order to verify my gnrquizzes are ready for my students
   As a teacher
   I need to be able to preview them
 
@@ -19,12 +19,12 @@ Feature: Preview a quiz as a teacher
       | Course       | C1        | Test questions |
     And the following "activities" exist:
       | activity   | name   | intro              | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 description | C1     | quiz1    |
+      | gnrquiz       | Quiz 1 | Quiz 1 description | C1     | gnrquiz1    |
     And the following "questions" exist:
       | questioncategory | qtype       | name  | questiontext    |
       | Test questions   | truefalse   | TF1   | First question  |
       | Test questions   | truefalse   | TF2   | Second question |
-    And quiz "Quiz 1" contains the following questions:
+    And gnrquiz "Quiz 1" contains the following questions:
       | question | page | maxmark |
       | TF1      | 1    |         |
       | TF2      | 1    | 3.0     |
@@ -32,9 +32,9 @@ Feature: Preview a quiz as a teacher
     And I follow "Course 1"
 
   @javascript
-  Scenario: Preview a quiz
+  Scenario: Preview a gnrquiz
     When I follow "Quiz 1"
-    And I press "Preview quiz now"
+    And I press "Preview gnrquiz now"
     And I click on "True" "radio" in the "First question" "question"
     And I click on "False" "radio" in the "Second question" "question"
     And I press "Finish attempt ..."

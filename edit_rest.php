@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Rest endpoint for ajax editing of quiz structure.
+ * Rest endpoint for ajax editing of gnrquiz structure.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 1999 Martin Dougiamas  http://dougiamas.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
 // Initialise ALL the incoming parameters here, up front.
-$quizid     = required_param('gnrquizid', PARAM_INT);
+$gnrquizid     = required_param('gnrquizid', PARAM_INT);
 $class      = required_param('class', PARAM_ALPHA);
 $field      = optional_param('field', '', PARAM_ALPHA);
 $instanceid = optional_param('instanceId', 0, PARAM_INT);
@@ -48,16 +48,16 @@ $newheading = optional_param('newheading', '', PARAM_TEXT);
 $shuffle    = optional_param('newshuffle', 0, PARAM_INT);
 $page       = optional_param('page', '', PARAM_INT);
 $PAGE->set_url('/mod/gnrquiz/edit-rest.php',
-        array('gnrquizid' => $quizid, 'class' => $class));
+        array('gnrquizid' => $gnrquizid, 'class' => $class));
 
 require_sesskey();
-$quiz = $DB->get_record('gnrquiz', array('id' => $quizid), '*', MUST_EXIST);
-$cm = get_coursemodule_from_instance('gnrquiz', $quiz->id, $quiz->course);
-$course = $DB->get_record('course', array('id' => $quiz->course), '*', MUST_EXIST);
+$gnrquiz = $DB->get_record('gnrquiz', array('id' => $gnrquizid), '*', MUST_EXIST);
+$cm = get_coursemodule_from_instance('gnrquiz', $gnrquiz->id, $gnrquiz->course);
+$course = $DB->get_record('course', array('id' => $gnrquiz->course), '*', MUST_EXIST);
 require_login($course, false, $cm);
 
-$quizobj = new quiz($quiz, $cm, $course);
-$structure = $quizobj->get_structure();
+$gnrquizobj = new gnrquiz($gnrquiz, $cm, $course);
+$structure = $gnrquizobj->get_structure();
 $modcontext = context_module::instance($cm->id);
 
 echo $OUTPUT->header(); // Send headers.
@@ -107,7 +107,7 @@ switch($requestmethod) {
                             }
                         }
                         $structure->move_slot($id, $previousid, $page);
-                        gnrquiz_delete_previews($quiz);
+                        gnrquiz_delete_previews($gnrquiz);
                         echo json_encode(array('visible' => true));
                         break;
 
@@ -115,7 +115,7 @@ switch($requestmethod) {
                         require_capability('mod/gnrquiz:manage', $modcontext);
                         $slot = $DB->get_record('gnrquiz_slots', array('id' => $id), '*', MUST_EXIST);
                         echo json_encode(array('instancemaxmark' =>
-                                gnrquiz_format_question_grade($quiz, $slot->maxmark)));
+                                gnrquiz_format_question_grade($gnrquiz, $slot->maxmark)));
                         break;
 
                     case 'updatemaxmark':
@@ -123,14 +123,14 @@ switch($requestmethod) {
                         $slot = $structure->get_slot_by_id($id);
                         if ($structure->update_slot_maxmark($slot, $maxmark)) {
                             // Grade has really changed.
-                            gnrquiz_delete_previews($quiz);
-                            gnrquiz_update_sumgrades($quiz);
-                            gnrquiz_update_all_attempt_sumgrades($quiz);
-                            gnrquiz_update_all_final_grades($quiz);
-                            gnrquiz_update_grades($quiz, 0, true);
+                            gnrquiz_delete_previews($gnrquiz);
+                            gnrquiz_update_sumgrades($gnrquiz);
+                            gnrquiz_update_all_attempt_sumgrades($gnrquiz);
+                            gnrquiz_update_all_final_grades($gnrquiz);
+                            gnrquiz_update_grades($gnrquiz, 0, true);
                         }
-                        echo json_encode(array('instancemaxmark' => gnrquiz_format_question_grade($quiz, $maxmark),
-                                'newsummarks' => gnrquiz_format_grade($quiz, $quiz->sumgrades)));
+                        echo json_encode(array('instancemaxmark' => gnrquiz_format_question_grade($gnrquiz, $maxmark),
+                                'newsummarks' => gnrquiz_format_grade($gnrquiz, $gnrquiz->sumgrades)));
                         break;
 
                     case 'updatepagebreak':
@@ -166,13 +166,13 @@ switch($requestmethod) {
 
             case 'resource':
                 require_capability('mod/gnrquiz:manage', $modcontext);
-                if (!$slot = $DB->get_record('gnrquiz_slots', array('gnrquizid' => $quiz->id, 'id' => $id))) {
+                if (!$slot = $DB->get_record('gnrquiz_slots', array('gnrquizid' => $gnrquiz->id, 'id' => $id))) {
                     throw new moodle_exception('AJAX commands.php: Bad slot ID '.$id);
                 }
                 $structure->remove_slot($slot->slot);
-                gnrquiz_delete_previews($quiz);
-                gnrquiz_update_sumgrades($quiz);
-                echo json_encode(array('newsummarks' => gnrquiz_format_grade($quiz, $quiz->sumgrades),
+                gnrquiz_delete_previews($gnrquiz);
+                gnrquiz_update_sumgrades($gnrquiz);
+                echo json_encode(array('newsummarks' => gnrquiz_format_grade($gnrquiz, $gnrquiz->sumgrades),
                             'deleted' => true, 'newnumquestions' => $structure->get_question_count()));
                 break;
         }

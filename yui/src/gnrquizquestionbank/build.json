@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_gnrquiz-gnrquizquestionbank",
+    "builds": {
+        "moodle-mod_gnrquiz-gnrquizquestionbank": {
+            "jsfiles": [
+                "gnrquizquestionbank.js"
+            ]
+        }
+    }
+}

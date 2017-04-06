@@ -18,7 +18,7 @@
  * This page prints a review of a particular question attempt.
  * This page is expected to only be used in a popup window.
  *
- * @package   mod_quiz
+ * @package   mod_gnrquiz
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -54,7 +54,7 @@ $PAGE->set_title(get_string('reviewofquestion', 'gnrquiz', array(
         'question' => format_string($attemptobj->get_question_name($slot)),
         'gnrquiz' => format_string($attemptobj->get_gnrquiz_name()), 'user' => fullname($student))));
 $PAGE->set_heading($attemptobj->get_course()->fullname);
-$output = $PAGE->get_renderer('mod_quiz');
+$output = $PAGE->get_renderer('mod_gnrquiz');
 
 // Check permissions - warning there is similar code in review.php and
 // gnrquiz_attempt::check_file_access. If you change on, change them all.
@@ -69,7 +69,7 @@ if ($attemptobj->is_own_attempt()) {
     }
 
 } else if (!$attemptobj->is_review_allowed()) {
-    throw new moodle_gnrquiz_exception($attemptobj->get_quizobj(), 'noreviewattempt');
+    throw new moodle_gnrquiz_exception($attemptobj->get_gnrquizobj(), 'noreviewattempt');
 }
 
 // Prepare summary informat about this question attempt.
@@ -97,7 +97,7 @@ $summarydata['questionname'] = array(
     'content' => $attemptobj->get_question_name($slot),
 );
 
-// Other attempts at the quiz.
+// Other attempts at the gnrquiz.
 if ($attemptobj->has_capability('mod/gnrquiz:viewreports')) {
     $attemptlist = $attemptobj->links_to_other_attempts($baseurl);
     if ($attemptlist) {
