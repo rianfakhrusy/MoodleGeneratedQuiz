@@ -803,11 +803,11 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $output .= $this->access_messages($viewobj->preventmessages);
 
         //attempt quiz now button, if the question is already in the quiz
-        //if ($viewobj->buttontext) {
+        if ($viewobj->buttontext) {
             $output .= $this->start_attempt_button($viewobj->buttontext,
                     $viewobj->startattempturl, $viewobj->preflightcheckform,
                     $viewobj->popuprequired, $viewobj->popupoptions);
-        // }
+        }
 
         if ($viewobj->showbacktocourse) {
             $output .= $this->single_button($viewobj->backtocourseurl,

@@ -191,42 +191,46 @@ $viewobj->preventmessages = array();
 if (!$viewobj->gnrquizhasquestions) {
     $viewobj->buttontext = '';
 
-} else {
-    if ($unfinished) {
-        if ($canattempt) {
-            $viewobj->buttontext = get_string('continueattemptgnrquiz', 'gnrquiz');
-        } else if ($canpreview) {
-            $viewobj->buttontext = get_string('continuepreview', 'gnrquiz');
-        }
-
-    } else {
-        if ($canattempt) {
-            $viewobj->preventmessages = $viewobj->accessmanager->prevent_new_attempt(
-                    $viewobj->numattempts, $viewobj->lastfinishedattempt);
-            if ($viewobj->preventmessages) {
-                $viewobj->buttontext = '';
-            } else if ($viewobj->numattempts == 0) {
-                $viewobj->buttontext = get_string('attemptgnrquiznow', 'gnrquiz');
-            } else {
-                $viewobj->buttontext = get_string('reattemptgnrquiz', 'gnrquiz');
-            }
-
-        } else if ($canpreview) {
-            $viewobj->buttontext = get_string('previewgnrquiznow', 'gnrquiz');
-        }
+    gnrquiz_add_gnrquiz_question(10,$gnrquiz);
+    #gnrquiz_add_random_questions($gnrquiz, 0, 4, 1, false);
+    gnrquiz_delete_previews($gnrquiz);
+    gnrquiz_update_sumgrades($gnrquiz);
+} #else is removed, there should be a defined questions all the time
+if ($unfinished) {
+    if ($canattempt) {
+        $viewobj->buttontext = get_string('continueattemptgnrquiz', 'gnrquiz');
+    } else if ($canpreview) {
+        $viewobj->buttontext = get_string('continuepreview', 'gnrquiz');
     }
 
-    // If, so far, we think a button should be printed, so check if they will be
-    // allowed to access it.
-    if ($viewobj->buttontext) {
-        if (!$viewobj->moreattempts) {
+} else {
+    if ($canattempt) {
+        $viewobj->preventmessages = $viewobj->accessmanager->prevent_new_attempt(
+                $viewobj->numattempts, $viewobj->lastfinishedattempt);
+        if ($viewobj->preventmessages) {
             $viewobj->buttontext = '';
-        } else if ($canattempt
-                && $viewobj->preventmessages = $viewobj->accessmanager->prevent_access()) {
-            $viewobj->buttontext = '';
+        } else if ($viewobj->numattempts == 0) {
+            $viewobj->buttontext = get_string('attemptgnrquiznow', 'gnrquiz');
+        } else {
+            $viewobj->buttontext = get_string('reattemptgnrquiz', 'gnrquiz');
         }
+
+    } else if ($canpreview) {
+        $viewobj->buttontext = get_string('previewgnrquiznow', 'gnrquiz');
     }
 }
+
+// If, so far, we think a button should be printed, so check if they will be
+// allowed to access it.
+if ($viewobj->buttontext) {
+    if (!$viewobj->moreattempts) {
+        $viewobj->buttontext = '';
+    } else if ($canattempt
+            && $viewobj->preventmessages = $viewobj->accessmanager->prevent_access()) {
+        $viewobj->buttontext = '';
+    }
+}
+
 
 $viewobj->showbacktocourse = ($viewobj->buttontext === '' &&
         course_get_format($course)->has_view_page());
@@ -241,10 +245,6 @@ if (isguestuser()) {
     // If they are not enrolled in this course in a good enough role, tell them to enrol.
     echo $output->view_page_notenrolled($course, $gnrquiz, $cm, $context, $viewobj->infomessages);
 } else {
-    gnrquiz_add_gnrquiz_question(10,$gnrquiz);
-    #gnrquiz_add_random_questions($gnrquiz, 0, 4, 1, false);
-    gnrquiz_delete_previews($gnrquiz);
-    gnrquiz_update_sumgrades($gnrquiz);
 
     echo $output->view_page($course, $gnrquiz, $cm, $context, $viewobj);
 }
