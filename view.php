@@ -63,11 +63,31 @@ $canreviewmine = has_capability('mod/gnrquiz:reviewmyattempts', $context);
 $canpreview = has_capability('mod/gnrquiz:preview', $context);
 
 // Create an object to manage all the other (non-roles) access rules.
+$query = "SELECT q.id, q.defaultmark, q.qtype, qtf.difficulty, qc.name, qtf.distinguishingdegree, qtf.time  FROM {question} q, {question_categories} qc, {question_truefalsequizgens} qtf WHERE q.category = qc.id AND q.id = qtf.question
+                ORDER BY q.id ASC";
+
+$allquestions = $DB->get_records_sql($query, array());
+var_dump($allquestions);
+
+/*
+##genetic algorithm process
+$p = new Population($allquestions);
+for ($x=1; $x<=512; $x++){
+    $best = reset($p->population);
+    
+    #printf("Generation %d: %s<br>", $x, $best->fitness);
+    #var_dump($best->gene);
+
+    $p->evolve();
+}
+var_dump($best->gene);*/
+
 $timenow = time();
 $gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
 $accessmanager = new gnrquiz_access_manager($gnrquizobj, $timenow,
         has_capability('mod/gnrquiz:ignoretimelimits', $context, null, false));
 $gnrquiz = $gnrquizobj->get_gnrquiz();
+var_dump($gnrquiz);
 
 // Trigger course_module_viewed event and completion.
 gnrquiz_view($gnrquiz, $course, $cm, $context);
@@ -188,6 +208,8 @@ if ($gnrquiz->attempts != 1) {
 // Determine wheter a start attempt button should be displayed.
 $viewobj->gnrquizhasquestions = $gnrquizobj->has_questions();
 $viewobj->preventmessages = array();
+
+#var_dump($gnrquizobj);
 if (!$viewobj->gnrquizhasquestions) {
     $viewobj->buttontext = '';
 

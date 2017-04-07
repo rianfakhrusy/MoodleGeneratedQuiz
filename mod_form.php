@@ -86,6 +86,31 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         $mform->addRule('nquestion', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
         $mform->setType('nquestion', PARAM_INT);
 
+        //total score
+        $mform->addElement('text', 'sumscore', 'Total score',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('sumscore', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
+        $mform->addRule('sumscore', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('sumscore', PARAM_INT);
+        //average difficulty
+        $mform->addElement('text', 'avgdiff', 'Average Difficulty',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('avgdiff', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
+        $mform->addRule('avgdiff', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('avgdiff', PARAM_FLOAT);
+        //average distinguishing degree
+        $mform->addElement('text', 'avgdist', 'Average Distinguishing Degree',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('avgdist', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
+        $mform->addRule('avgdist', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('avgdist', PARAM_FLOAT);
+        //total time
+        $mform->addElement('text', 'sumtime', 'Total time',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('sumtime', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
+        $mform->addRule('sumtime', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('sumtime', PARAM_INT);
+
         // -------------------------------------------------------------------------------
         $mform->addElement('header', 'timing', get_string('timing', 'gnrquiz'));
 
