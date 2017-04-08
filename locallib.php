@@ -41,7 +41,6 @@ require_once($CFG->libdir . '/eventslib.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/questionlib.php');
 
-
 /**
  * @var int We show the countdown timer if there is less than this amount of time left before the
  * the gnrquiz close date. (1 hour)

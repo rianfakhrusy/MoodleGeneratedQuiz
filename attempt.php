@@ -96,7 +96,7 @@ if ($autosaveperiod) {
 
 // Log this page view.
 $attemptobj->fire_attempt_viewed_event();
-
+#var_dump($attemptobj);
 // Get the list of questions needed by this page.
 $slots = $attemptobj->get_slots($page);
 

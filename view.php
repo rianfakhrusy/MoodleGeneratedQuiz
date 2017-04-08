@@ -29,6 +29,9 @@ require_once($CFG->libdir.'/gradelib.php');
 require_once($CFG->dirroot.'/mod/gnrquiz/locallib.php');
 require_once($CFG->libdir . '/completionlib.php');
 require_once($CFG->dirroot . '/course/format/lib.php');
+require_once($CFG->dirroot.'/mod/gnrquiz/classes/structure.php');
+require_once($CFG->dirroot.'/mod/gnrquiz/classes/population.php');
+require_once($CFG->dirroot.'/mod/gnrquiz/classes/chromosome.php');
 
 $id = optional_param('id', 0, PARAM_INT); // Course Module ID, or ...
 $q = optional_param('q',  0, PARAM_INT);  // Quiz ID.
@@ -63,31 +66,20 @@ $canreviewmine = has_capability('mod/gnrquiz:reviewmyattempts', $context);
 $canpreview = has_capability('mod/gnrquiz:preview', $context);
 
 // Create an object to manage all the other (non-roles) access rules.
-$query = "SELECT q.id, q.defaultmark, q.qtype, qtf.difficulty, qc.name, qtf.distinguishingdegree, qtf.time  FROM {question} q, {question_categories} qc, {question_truefalsequizgens} qtf WHERE q.category = qc.id AND q.id = qtf.question
-                ORDER BY q.id ASC";
-
-$allquestions = $DB->get_records_sql($query, array());
-var_dump($allquestions);
-
-/*
-##genetic algorithm process
-$p = new Population($allquestions);
-for ($x=1; $x<=512; $x++){
-    $best = reset($p->population);
-    
-    #printf("Generation %d: %s<br>", $x, $best->fitness);
-    #var_dump($best->gene);
-
-    $p->evolve();
-}
-var_dump($best->gene);*/
-
 $timenow = time();
 $gnrquizobj = gnrquiz::create($cm->instance, $USER->id);
 $accessmanager = new gnrquiz_access_manager($gnrquizobj, $timenow,
         has_capability('mod/gnrquiz:ignoretimelimits', $context, null, false));
+
 $gnrquiz = $gnrquizobj->get_gnrquiz();
-var_dump($gnrquiz);
+structure::$constraints = $gnrquizobj->get_gnrquiz(); //get constraints
+//get all questions
+$query = "SELECT q.id, q.defaultmark, q.qtype, qtf.difficulty, qc.name, qtf.distinguishingdegree, qtf.time  FROM {question} q, {question_categories} qc, {question_truefalsequizgens} qtf WHERE q.category = qc.id AND q.id = qtf.question
+                ORDER BY q.id ASC";
+structure::$allquestions = $DB->get_records_sql($query, array());
+#var_dump(structure::$allquestions);
+#var_dump(structure::$constraints);
+
 
 // Trigger course_module_viewed event and completion.
 gnrquiz_view($gnrquiz, $course, $cm, $context);
@@ -212,9 +204,23 @@ $viewobj->preventmessages = array();
 #var_dump($gnrquizobj);
 if (!$viewobj->gnrquizhasquestions) {
     $viewobj->buttontext = '';
+    
+    #genetic algorithm process
+    $p = new population();
+    for ($x=1; $x<=512; $x++){
+        $best = reset($p->population);
+        
+        #printf("Generation %d: %s<br>", $x, $best->fitness);
 
-    gnrquiz_add_gnrquiz_question(10,$gnrquiz);
+        $p->evolve();
+    }
+    #var_dump($best->gene);
+
+    foreach ($best->gene as &$value) {
+        gnrquiz_add_gnrquiz_question($value,$gnrquiz);
+    }
     #gnrquiz_add_random_questions($gnrquiz, 0, 4, 1, false);
+    #gnrquiz_add_gnrquiz_question(10,$gnrquiz);
     gnrquiz_delete_previews($gnrquiz);
     gnrquiz_update_sumgrades($gnrquiz);
 } #else is removed, there should be a defined questions all the time
@@ -252,7 +258,7 @@ if ($viewobj->buttontext) {
         $viewobj->buttontext = '';
     }
 }
-
+#var_dump($gnrquizobj);
 
 $viewobj->showbacktocourse = ($viewobj->buttontext === '' &&
         course_get_format($course)->has_view_page());

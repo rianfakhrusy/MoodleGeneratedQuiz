@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-namespace mod_gnrquiz;
+#namespace mod_gnrquiz;
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -50,10 +50,10 @@ class chromosome {
      * result in a new chromosome instance being created.
 
      */
-    public function __construct($gene,$allquestions)
+    public function __construct($gene)
     {
         $this->gene = $gene;
-        $this->fitness = $this->calculateFitness($gene,$allquestions);
+        $this->fitness = $this->calculateFitness($gene);
     }
 
     /*
@@ -98,16 +98,17 @@ class chromosome {
     public function mutate()
     {
         #get array of all question in question bank id
-        $quizIds = array_map(function($o) { return $o->getId(); }, Quiz::$question); 
+        $quizIds = array_map(function($o) { return $o->id; }, structure::$allquestions); 
 
         $gene = $this->gene;
         $unusedGene = array_diff($quizIds, $gene); #get all question id that has not been in the quiz
         #remember that a quiz can not contain 2 of the same question
-
-        #replace a random gene with a random new question that is represented by a gene
-        shuffle($unusedGene);
-        $gene{rand(0, count($gene)-1)} = $unusedGene[0];
-
+        #var_dump($unusedGene);
+        if ($unusedGene!=null){
+            #replace a random gene with a random new question that is represented by a gene
+            shuffle($unusedGene);
+            $gene{rand(0, count($gene)-1)} = $unusedGene[0];
+        }
         return new self($gene);
     }
 
@@ -115,7 +116,7 @@ class chromosome {
      * Helper method used to return the fitness for the chromosome based
      * on its gene.
      */
-    public function calculateFitness($gene,$allquestions)
+    public function calculateFitness($gene)
     {
         #temporary variables for storing new quiz attributes
         $tempScore = 0;
@@ -128,10 +129,10 @@ class chromosome {
         #compute the value of all new quiz attributes
         foreach($gene as $key => $value)
         {
-            $tempScore += $allquestions[$value-1]->getScore(); #sum of new quiz score value
-            $tempDiff += $allquestions[$value-1]->getDifficulty();
-            $tempDist += $allquestions[$value-1]->getDistinguishingDegree();
-            $tempTime += $allquestions[$value-1]->getSolutionTime(); #sum of new quiz time value
+            $tempScore += structure::$allquestions[$value]->defaultmark; #sum of new quiz score value
+            $tempDiff += structure::$allquestions[$value]->difficulty;
+            $tempDist += structure::$allquestions[$value]->distinguishingdegree;
+            $tempTime += structure::$allquestions[$value]->time; #sum of new quiz time value
             /*
             #count the value of all question types in a quiz
             $s = $allquestions[$value-1]->getType();
@@ -155,10 +156,10 @@ class chromosome {
         #computing normalized relative error (NRE) of the exam
         #NRE is the difference between expected value and real value
         $NRE = 0;
-        $NRE += abs($allquestions->$sumScore - $tempScore)/ $allquestions->$sumScore;
-        $NRE += abs($allquestions->$avgDiff - $tempDiff)/ $allquestions->$avgDiff;
-        $NRE += abs($allquestions->$avgDist - $tempDist)/ $allquestions->$avgDist;
-        $NRE += abs($allquestions->$sumTime - $tempTime)/ $allquestions->$sumTime;
+        $NRE += abs(structure::$constraints->sumscore - $tempScore)/ structure::$constraints->sumscore;
+        $NRE += abs(structure::$constraints->avgdiff - $tempDiff)/ structure::$constraints->avgdiff;
+        $NRE += abs(structure::$constraints->avgdist - $tempDiff)/ structure::$constraints->avgdist;
+        $NRE += abs(structure::$constraints->sumtime - $tempTime)/ structure::$constraints->sumtime;
         /*
         foreach($allquestions->$types as $key => $value)
         {
@@ -186,18 +187,18 @@ class chromosome {
      * A convenience method for generating a random chromosome with a random
      * gene.
      */
-    public static function genRandom($allquestions)
+    public static function genRandom()
     {
         #get array of all question id
-        $quizIds = array_map(function($o) { return $o->getId(); }, $allquestions); 
+        $quizIds = array_map(function($o) { return $o->id; }, structure::$allquestions); 
 
         #randomize the id by shuffling the array and take whatever several questions at the beginning of the array is as a quiz
         #this step is done like this so that no duplicate questions are in the quiz
         shuffle($quizIds);
-        $newgene = array_slice($quizIds, 0, $allquestions->nquestion);
+        $newgene = array_slice($quizIds, 0, structure::$constraints->nquestion);
 
         #var_dump($newgene);
-        $chromosome = new self($newgene,$allquestions);
+        $chromosome = new self($newgene);
         return $chromosome;
     }
 

@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_gnrquiz;
+#namespace mod_gnrquiz;
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -38,6 +38,12 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class structure {
+
+    // Static variable for memory efficiency.
+    public static $allquestions; //store all questions that have relevant attribute with genetic algorithm 
+    public static $constraints; //store generated quiz info
+
+
     /** @var \gnrquiz the gnrquiz this is the structure of. */
     protected $gnrquizobj = null;
 

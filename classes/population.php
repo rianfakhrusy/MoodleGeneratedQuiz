@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-namespace mod_gnrquiz;
+#namespace mod_gnrquiz;
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -55,14 +55,14 @@ class population {
     public $maxSize;
     public $currentSize;
 
-    public function __construct($allquestions, $size = 1024, $crossover = .8, $elitism=0.1, $mutation=0.03)
+    public function __construct($size = 512, $crossover = .8, $elitism=0.1, $mutation=0.03)
     {
         $this->crossover = $crossover;
         $this->elitism = $elitism;
         $this->mutation = $mutation;
         $this->maxSize = $this->currentSize = $size;
         while ($size--)
-            $this->population[] = chromosome::genRandom($allquestions);
+            $this->population[] = chromosome::genRandom();
 
         $this->sortPopulation();
     }
