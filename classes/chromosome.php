@@ -129,53 +129,79 @@ class chromosome {
         #compute the value of all new quiz attributes
         foreach($gene as $key => $value)
         {
-            $tempScore += structure::$allquestions[$value]->defaultmark; #sum of new quiz score value
-            $tempDiff += structure::$allquestions[$value]->difficulty;
-            $tempDist += structure::$allquestions[$value]->distinguishingdegree;
-            $tempTime += structure::$allquestions[$value]->time; #sum of new quiz time value
-            /*
-            #count the value of all question types in a quiz
-            $s = $allquestions[$value-1]->getType();
-            if (array_key_exists($s, $tempTypes)){
-                $tempTypes[$s] += 1;
-            } else {
-                $tempTypes[$s] = 1;
+            if (structure::$constraints->usescore)
+                $tempScore += structure::$allquestions[$value]->defaultmark; #sum of new quiz score value
+            if (structure::$constraints->usediff)
+                $tempDiff += structure::$allquestions[$value]->difficulty;
+            if (structure::$constraints->usedist)
+                $tempDist += structure::$allquestions[$value]->distinguishingdegree;
+            if (structure::$constraints->usetime)
+                $tempTime += structure::$allquestions[$value]->time; #sum of new quiz time value
+            if (structure::$constraints->usetype){
+                #count the value of all question types in a quiz
+                $s = structure::$allquestions[$value]->qtype;
+                if (array_key_exists($s, $tempTypes)){
+                    $tempTypes[$s] += 1;
+                } else {
+                    $tempTypes[$s] = 1;
+                }
             }
 
-            #count the value of all chapter covered in a quiz
-            $ss = $allquestions[$value-1]->getChapterCovered();
-            if (array_key_exists($ss, $tempChapters)){
-                $tempChapters[$ss] += 1;
-            } else {
-                $tempChapters[$ss] = 1;
-            }*/
+            if (structure::$constraints->usechapter){
+                #count the value of all chapter covered in a quiz
+                $ss = structure::$allquestions[$value]->catid;
+                if (array_key_exists($ss, $tempChapters)){
+                    $tempChapters[$ss] += 1;
+                } else {
+                    $tempChapters[$ss] = 1;
+                }
+            }
         }
-        $tempDiff /= count($gene); #average quiz difficulty value
-        $tempDist /= count($gene); #average quiz distinguishing degree value
+        if (structure::$constraints->usediff)
+            $tempDiff /= count($gene); #average quiz difficulty value
+        if (structure::$constraints->usedist)
+            $tempDist /= count($gene); #average quiz distinguishing degree value
 
         #computing normalized relative error (NRE) of the exam
         #NRE is the difference between expected value and real value
         $NRE = 0;
-        $NRE += abs(structure::$constraints->sumscore - $tempScore)/ structure::$constraints->sumscore;
-        $NRE += abs(structure::$constraints->avgdiff - $tempDiff)/ structure::$constraints->avgdiff;
-        $NRE += abs(structure::$constraints->avgdist - $tempDiff)/ structure::$constraints->avgdist;
-        $NRE += abs(structure::$constraints->sumtime - $tempTime)/ structure::$constraints->sumtime;
-        /*
-        foreach($allquestions->$types as $key => $value)
-        {
-            if (!array_key_exists($key, $tempTypes)){
-                $tempTypes[$key] = 0;
+        if (structure::$constraints->usescore)
+            $NRE += abs(structure::$constraints->sumscore - $tempScore)/ structure::$constraints->sumscore;
+
+        if (structure::$constraints->usediff)
+            $NRE += abs(structure::$constraints->avgdiff - $tempDiff)/ structure::$constraints->avgdiff;
+
+        if (structure::$constraints->usedist)
+            $NRE += abs(structure::$constraints->avgdist - $tempDist)/ structure::$constraints->avgdist;
+        if (structure::$constraints->usetime)
+            $NRE += abs(structure::$constraints->timelimit - $tempTime)/ structure::$constraints->timelimit;
+
+        if (structure::$constraints->usetype){
+            $alltypes = unserialize(structure::$constraints->types);
+            foreach( $alltypes as $key => $value)
+            {
+                #var_dump($NRE);
+                if (!array_key_exists($key, $tempTypes)){
+                    $tempTypes[$key] = 0;
+                }
+
+                if ($value!=0)
+                    $NRE += abs($value - $tempTypes[$key])/ $value;
             }
-            $NRE += abs($value - $tempTypes[$key])/ $value;
         }
 
-        foreach($allquestions->$chapters as $key => $value)
-        {
-            if (!array_key_exists($key, $tempChapters)){
-                $tempChapters[$key] = 0;
+        if (structure::$constraints->usechapter){
+            $allchapters = unserialize(structure::$constraints->chapters);
+            foreach( $allchapters as $key => $value)
+            {
+                if (!array_key_exists($key, $tempChapters)){
+                    $tempChapters[$key] = 0;
+                }
+
+                if ($value!=0)
+                    $NRE += abs($value - $tempChapters[$key])/ $value;
             }
-            $NRE += abs($value - $tempChapters[$key])/ $value;
-        }*/
+        }
         #print($NRE);
         #print("<br>");
 

@@ -30,6 +30,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/eventslib.php');
 require_once($CFG->dirroot . '/calendar/lib.php');
+require_once($CFG->dirroot.'/mod/gnrquiz/classes/structure.php');
+require_once($CFG->dirroot.'/mod/gnrquiz/classes/population.php');
+require_once($CFG->dirroot.'/mod/gnrquiz/classes/chromosome.php');
 
 
 /**#@+
@@ -75,6 +78,35 @@ define('GNRQUIZ_NAVMETHOD_SEQ',  'sequential');
  *          false or a string error message on failure.
  */
 function gnrquiz_add_instance($gnrquiz) {
+    $alltypes['choicegnrquiz'] = $gnrquiz->multichoice;
+    $alltypes['essaygnrquiz'] = $gnrquiz->essay;
+    $alltypes['matchgnrquiz'] = $gnrquiz->match;
+    $alltypes['truefalsegnrquiz'] = $gnrquiz->truefalse;
+    $alltypes['shortgnrquiz'] = $gnrquiz->shortanswer;
+/*
+    $alltypes = array($gnrquiz->multichoice, 
+        $gnrquiz->essay,
+        $gnrquiz->match,
+        $gnrquiz->truefalse,
+        $gnrquiz->shortanswer
+    );*/
+    $gnrquiz->types = serialize($alltypes);
+
+    #var_dump($gnrquiz);
+
+    $questids = unserialize($gnrquiz->allids);
+    $allchapters = array();
+    foreach ($questids as $value) {
+        $allchapters[$value] = $gnrquiz->{'category_' . $value};
+    }
+    $gnrquiz->chapters = serialize($allchapters);
+
+    #var_dump($questids);
+    #var_dump($allchapters);
+    
+    //var_dump($gnrquiz);
+
+
     global $DB;
     $cmid = $gnrquiz->coursemodule;
 
@@ -88,6 +120,10 @@ function gnrquiz_add_instance($gnrquiz) {
     // Try to store it in the database.
     $gnrquiz->id = $DB->insert_record('gnrquiz', $gnrquiz);
 
+    $gnrquiz = generate_questions_using_genetic_algorihm($gnrquiz);
+
+    $DB->update_record('gnrquiz', $gnrquiz);
+
     // Create the first section for this gnrquiz.
     $DB->insert_record('gnrquiz_sections', array('gnrquizid' => $gnrquiz->id,
             'firstslot' => 1, 'heading' => '', 'shufflequestions' => 0));
@@ -96,6 +132,106 @@ function gnrquiz_add_instance($gnrquiz) {
     gnrquiz_after_add_or_update($gnrquiz);
 
     return $gnrquiz->id;
+}
+
+
+function generate_questions_using_genetic_algorihm($gnrquiz){
+    global $DB;
+    structure::$constraints = $gnrquiz; //get constraints
+
+    $query = "(SELECT q.id, q.defaultmark, q.qtype, qtf.difficulty, qc.id AS catid, qtf.distinguishingdegree, qtf.time 
+    FROM {question} q, {question_categories} qc, {question_truefalsegnrquiz} qtf 
+    WHERE q.category = qc.id AND q.id = qtf.question 
+    ORDER BY q.id ASC) 
+    UNION 
+    (SELECT q.id, q.defaultmark, q.qtype, qmc.difficulty, qc.id AS catid, qmc.distinguishingdegree, qmc.time 
+    FROM {question} q, {question_categories} qc, {qtype_choicegnrquiz_options} qmc
+    WHERE q.category = qc.id AND q.id = qmc.questionid 
+    ORDER BY q.id ASC)
+    UNION 
+    (SELECT q.id, q.defaultmark, q.qtype, qm.difficulty, qc.id AS catid, qm.distinguishingdegree, qm.time 
+    FROM {question} q, {question_categories} qc, {qtype_matchgnrquiz_options} qm
+    WHERE q.category = qc.id AND q.id = qm.questionid 
+    ORDER BY q.id ASC)
+    UNION 
+    (SELECT q.id, q.defaultmark, q.qtype, qe.difficulty, qc.id AS catid, qe.distinguishingdegree, qe.time 
+    FROM {question} q, {question_categories} qc, {qtype_essaygnrquiz_options} qe
+    WHERE q.category = qc.id AND q.id = qe.questionid 
+    ORDER BY q.id ASC)
+    UNION 
+    (SELECT q.id, q.defaultmark, q.qtype, qs.difficulty, qc.id AS catid, qs.distinguishingdegree, qs.time 
+    FROM {question} q, {question_categories} qc, {qtype_shortgnrquiz_options} qs
+    WHERE q.category = qc.id AND q.id = qs.questionid 
+    ORDER BY q.id ASC)";
+
+    structure::$allquestions = $DB->get_records_sql($query, array());
+
+    #genetic algorithm process
+    $p = new population();
+    for ($x=1; $x<=512; $x++){
+        $best = reset($p->population);
+        
+        #printf("Generation %d: %s<br>", $x, $best->fitness);
+
+        $p->evolve();
+    }
+    #var_dump($best->gene);
+
+    foreach ($best->gene as &$value) {
+        gnrquiz_add_gnrquiz_question($value,$gnrquiz);
+    }
+    #gnrquiz_add_random_questions($gnrquiz, 0, 4, 1, false);
+    #gnrquiz_add_gnrquiz_question(10,$gnrquiz);
+    gnrquiz_delete_previews($gnrquiz);
+    gnrquiz_update_sumgrades($gnrquiz);
+
+    #temporary variables for storing new quiz attributes
+    $tempScore = 0;
+    $tempTypes = [];
+    $tempDiff = 0;
+    $tempChapters = [];
+    $tempDist = 0;
+    $tempTime = 0;
+
+    #compute the value of all new quiz attributes
+    foreach($best->gene as $key => $value)
+    {
+        $tempScore += structure::$allquestions[$value]->defaultmark; #sum of new quiz score value
+        $tempDiff += structure::$allquestions[$value]->difficulty;
+        $tempDist += structure::$allquestions[$value]->distinguishingdegree;
+        $tempTime += structure::$allquestions[$value]->time; #sum of new quiz time value
+        
+        #count the value of all question types in a quiz
+        $s = structure::$allquestions[$value]->qtype;
+        if (array_key_exists($s, $tempTypes)){
+            $tempTypes[$s] += 1;
+        } else {
+            $tempTypes[$s] = 1;
+        }
+
+        #count the value of all chapter covered in a quiz
+        $ss = structure::$allquestions[$value]->catid;
+        if (array_key_exists($ss, $tempChapters)){
+            $tempChapters[$ss] += 1;
+        } else {
+            $tempChapters[$ss] = 1;
+        }
+    }
+    $tempDiff /= count($best->gene); #average quiz difficulty value
+    $tempDist /= count($best->gene); #average quiz distinguishing degree value
+
+
+    $gnrquiz->realsumscore = $tempScore;
+    $gnrquiz->realtypes = serialize($tempTypes);
+    $gnrquiz->realavgdiff = $tempDiff;
+    $gnrquiz->realchapters = serialize($tempChapters);
+    $gnrquiz->realavgdist = $tempDist;
+    $gnrquiz->realtimelimit = $tempTime;
+    structure::$constraints = $gnrquiz; //save statistics
+
+    #var_dump($gnrquiz);
+
+    return $gnrquiz;
 }
 
 /**
@@ -107,6 +243,33 @@ function gnrquiz_add_instance($gnrquiz) {
  * @return mixed true on success, false or a string error message on failure.
  */
 function gnrquiz_update_instance($gnrquiz, $mform) {
+    $alltypes['choicegnrquiz'] = $gnrquiz->multichoice;
+    $alltypes['essaygnrquiz'] = $gnrquiz->essay;
+    $alltypes['matchgnrquiz'] = $gnrquiz->match;
+    $alltypes['truefalsegnrquiz'] = $gnrquiz->truefalse;
+    $alltypes['shortgnrquiz'] = $gnrquiz->shortanswer;
+    /*
+    $alltypes = array($gnrquiz->multichoice, 
+        $gnrquiz->essay,
+        $gnrquiz->match,
+        $gnrquiz->truefalse,
+        $gnrquiz->shortanswer
+    );*/
+    $gnrquiz->types = serialize($alltypes);
+
+    #var_dump($gnrquiz);
+
+    $questids = unserialize($gnrquiz->allids);
+    $allchapters = array();
+    foreach ($questids as $value) {
+        $allchapters[$value] = $gnrquiz->{'category_' . $value};
+    }
+    $gnrquiz->chapters = serialize($allchapters);
+
+    #var_dump($questids);
+    #var_dump($allchapters);
+    #var_dump($gnrquiz);
+
     global $CFG, $DB;
     require_once($CFG->dirroot . '/mod/gnrquiz/locallib.php');
 
@@ -126,6 +289,10 @@ function gnrquiz_update_instance($gnrquiz, $mform) {
 
     // Update the database.
     $gnrquiz->id = $gnrquiz->instance;
+
+    $gnrquiz = generate_questions_using_genetic_algorihm($gnrquiz);
+    #var_dump($gnrquiz);
+
     $DB->update_record('gnrquiz', $gnrquiz);
 
     // Do the processing required after an add or an update.

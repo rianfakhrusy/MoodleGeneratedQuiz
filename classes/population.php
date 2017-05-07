@@ -40,7 +40,7 @@ defined('MOODLE_INTERNAL') || die();
  * @author Rian Fakhrusy
  */
 
-ini_set('max_execution_time', 300); //5 minutes php run timeout
+ini_set('max_execution_time', 600); //5 minutes php run timeout
 
 class population {
     

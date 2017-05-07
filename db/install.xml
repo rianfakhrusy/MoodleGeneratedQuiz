@@ -46,11 +46,27 @@
         <FIELD NAME="showblocks" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Whether blocks should be shown on the attempt.php and review.php pages."/>
         <FIELD NAME="completionattemptsexhausted" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="completionpass" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+
         <FIELD NAME="nquestion" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sumscore" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="types" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Number of question for each type."/>
         <FIELD NAME="avgdiff" TYPE="number" LENGTH="6" NOTNULL="true" DEFAULT="0.0" SEQUENCE="false" DECIMALS="4"/>
+        <FIELD NAME="chapters" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Number of question for each chapter."/>
         <FIELD NAME="avgdist" TYPE="number" LENGTH="6" NOTNULL="true" DEFAULT="0.0" SEQUENCE="false" DECIMALS="4"/>
-        <FIELD NAME="sumtime" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+
+        <FIELD NAME="usescore" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usetype" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usediff" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usechapter" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usedist" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usetime" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+
+        <FIELD NAME="realsumscore" TYPE="int" LENGTH="3" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="realtypes" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Number of question for each type."/>
+        <FIELD NAME="realavgdiff" TYPE="number" LENGTH="6" NOTNULL="false" DEFAULT="0.0" SEQUENCE="false" DECIMALS="4"/>
+        <FIELD NAME="realchapters" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Number of question for each chapter."/>
+        <FIELD NAME="realavgdist" TYPE="number" LENGTH="6" NOTNULL="false" DEFAULT="0.0" SEQUENCE="false" DECIMALS="4"/>
+        <FIELD NAME="realtimelimit" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="The real time limit for gnrquiz attempts, in seconds."/>
 
       </FIELDS>
       <KEYS>

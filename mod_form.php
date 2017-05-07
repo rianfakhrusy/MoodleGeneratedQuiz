@@ -79,39 +79,138 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
         // Introduction.
         $this->standard_intro_elements(get_string('introduction', 'gnrquiz'));
 
-        //number of question
+        // Checkbox for selecting constraints.
+        $mform->addElement('header', 'constraintcheckbox', get_string('selectconstraint', 'gnrquiz'));
+        $mform->setExpanded('constraintcheckbox');
+        $mform->addElement('advcheckbox', 'usescore', get_string('totalscore', 'gnrquiz'), null, array('group' => 1));
+        $mform->addElement('advcheckbox', 'usetype', get_string('numquestioneachtype', 'gnrquiz'), null, array('group' => 1));
+        $mform->addElement('advcheckbox', 'usediff', get_string('averagedifficulty', 'gnrquiz'), null, array('group' => 1));
+        $mform->addElement('advcheckbox', 'usechapter', get_string('numquestioneachchapter', 'gnrquiz'), null, array('group' => 1));
+        $mform->addElement('advcheckbox', 'usedist', get_string('averagedistinguishingdegree', 'gnrquiz'), null, array('group' => 1));
+        $mform->addElement('advcheckbox', 'usetime', get_string('timelimit', 'gnrquiz'), null, array('group' => 1));
+
+        // Header for constraints.
+        $mform->addElement('header', 'constraints', 'Constraints');
+
+        // Number of question.
         $mform->addElement('text', 'nquestion', get_string('numberofquestion', 'gnrquiz'),
             array('size' => '3', 'maxlength' => '3'));
         $mform->addRule('nquestion', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
         $mform->addRule('nquestion', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setDefault('nquestion', 0);
         $mform->setType('nquestion', PARAM_INT);
 
-        //total score
-        $mform->addElement('text', 'sumscore', 'Total score',
+        // Total score.
+        $mform->addElement('text', 'sumscore', get_string('totalscore', 'gnrquiz'),
             array('size' => '3', 'maxlength' => '3'));
-        $mform->addRule('sumscore', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
         $mform->addRule('sumscore', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
         $mform->setType('sumscore', PARAM_INT);
+        $mform->setDefault('sumscore', 0);
+        // Disable my control unless a checkbox is checked.
+        $mform->disabledIf('sumscore', 'usescore');
+
         //average difficulty
-        $mform->addElement('text', 'avgdiff', 'Average Difficulty',
-            array('size' => '3', 'maxlength' => '3'));
-        $mform->addRule('avgdiff', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
+        $mform->addElement('text', 'avgdiff', get_string('averagedifficulty', 'gnrquiz'),
+            array('size' => '6', 'maxlength' => '6'));
         $mform->addRule('avgdiff', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
         $mform->setType('avgdiff', PARAM_FLOAT);
-        //average distinguishing degree
-        $mform->addElement('text', 'avgdist', 'Average Distinguishing Degree',
-            array('size' => '3', 'maxlength' => '3'));
-        $mform->addRule('avgdist', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
+        $mform->setDefault('avgdiff', 0);
+        // Disable my control unless a checkbox is checked.
+        $mform->disabledIf('avgdiff', 'usediff');
+
+        // Average distinguishing degree.
+        $mform->addElement('text', 'avgdist', get_string('averagedistinguishingdegree', 'gnrquiz'),
+            array('size' => '6', 'maxlength' => '6'));
         $mform->addRule('avgdist', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
         $mform->setType('avgdist', PARAM_FLOAT);
-        //total time
-        $mform->addElement('text', 'sumtime', 'Total time',
-            array('size' => '3', 'maxlength' => '3'));
-        $mform->addRule('sumtime', get_string('formelementempty', 'gnrquiz'), 'required', null, 'client');
-        $mform->addRule('sumtime', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
-        $mform->setType('sumtime', PARAM_INT);
+        $mform->setDefault('avgdist', 0);
+        // Disable my control unless a checkbox is checked.
+        $mform->disabledIf('avgdist', 'usedist');
+
+        // Time limit.
+        $mform->addElement('duration', 'timelimit', get_string('timelimit', 'gnrquiz'),
+                array('optional' => false));
+        $mform->addHelpButton('timelimit', 'timelimit', 'gnrquiz');
+        $mform->setAdvanced('timelimit', $gnrquizconfig->timelimit_adv);
+        $mform->setDefault('timelimit', $gnrquizconfig->timelimit);
+        // Disable my control unless a checkbox is checked.
+        $mform->disabledIf('timelimit', 'usetime');
 
         // -------------------------------------------------------------------------------
+        
+        //type constraint block
+        $mform->addElement('header', 'qtypeconstraints', get_string('numquestioneachtype', 'gnrquiz'));
+        $mform->setExpanded('qtypeconstraints');
+        //multiple choice
+        $mform->addElement('text', 'multichoice', 'Multiple Choice',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('multichoice', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('multichoice', PARAM_INT);
+        $mform->setDefault('multichoice', 0);
+        $mform->disabledIf('multichoice', 'usetype');
+        //essay
+        $mform->addElement('text', 'essay', 'Essay',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('essay', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setDefault('essay', 0);
+        $mform->setType('essay', PARAM_INT);
+        $mform->disabledIf('essay', 'usetype');
+        //match
+        $mform->addElement('text', 'match', 'Matching',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('match', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('match', PARAM_INT);
+        $mform->setDefault('match', 0);
+        $mform->disabledIf('match', 'usetype');
+        //true false
+        $mform->addElement('text', 'truefalse', 'True Flase',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('truefalse', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('truefalse', PARAM_INT);
+        $mform->setDefault('truefalse', 0);
+        $mform->disabledIf('truefalse', 'usetype');        
+        //short answer
+        $mform->addElement('text', 'shortanswer', 'Short Answer',
+            array('size' => '3', 'maxlength' => '3'));
+        $mform->addRule('shortanswer', get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+        $mform->setType('shortanswer', PARAM_INT);
+        $mform->setDefault('shortanswer', 0);
+        $mform->disabledIf('shortanswer', 'usetype');  
+
+        $mform->addElement('hidden', 'types', '');
+        $mform->setType('types', PARAM_TEXT);
+
+        //chapter constraint block
+        $mform->addElement('header', 'chapterconstraints', get_string('numquestioneachchapter', 'gnrquiz'));
+        $mform->setExpanded('chapterconstraints');
+        $questids = array();
+        $qesteditctx  = new question_edit_contexts($this->context);
+        $this->contexts     = $qesteditctx->having_one_edit_tab_cap('editq');
+        $questioncats = question_category_options($this->contexts);
+        foreach ($questioncats as $questioncatcourse) {
+            foreach ($questioncatcourse as $key => $questioncat) {
+                // Key format is [question cat id, question cat context id], we need to explode it.
+                $questidcontext = explode(',', $key);
+                $questid = array_shift($questidcontext);
+
+                $mform->addElement('text', 'category_' . $questid, $questioncat,
+            array('size' => '3', 'maxlength' => '3'));
+                $mform->addRule('category_' . $questid, get_string('formelementnumeric', 'gnrquiz'), 'numeric', null, 'client');
+                $mform->setType('category_' . $questid, PARAM_INT);
+                $mform->setDefault('category_' . $questid, 0);
+                $mform->disabledIf('category_' . $questid, 'usechapter'); 
+
+                $questids[] = $questid;
+            }
+        }
+
+        $mform->addElement('hidden', 'chapters', '');
+        $mform->setType('chapters', PARAM_TEXT);
+
+        $mform->addElement('hidden', 'allids', serialize($questids));
+        $mform->setType('allids', PARAM_TEXT);
+
+
         $mform->addElement('header', 'timing', get_string('timing', 'gnrquiz'));
 
         // Open and close dates.
@@ -121,13 +220,6 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
 
         $mform->addElement('date_time_selector', 'timeclose', get_string('gnrquizclose', 'gnrquiz'),
                 self::$datefieldoptions);
-
-        // Time limit.
-        $mform->addElement('duration', 'timelimit', get_string('timelimit', 'gnrquiz'),
-                array('optional' => true));
-        $mform->addHelpButton('timelimit', 'timelimit', 'gnrquiz');
-        $mform->setAdvanced('timelimit', $gnrquizconfig->timelimit_adv);
-        $mform->setDefault('timelimit', $gnrquizconfig->timelimit);
 
         // What to do with overdue attempts.
         $mform->addElement('select', 'overduehandling', get_string('overduehandling', 'gnrquiz'),
@@ -484,6 +576,40 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
             $toform['grade'] = $toform['grade'] + 0;
         }
 
+        #self::$usetime = $toform['usetime'];
+
+        #var_dump($toform);
+
+        if (isset($toform['types'])){
+            $alltypes = unserialize($toform['types']);
+            $toform['multichoice'] = $alltypes['choicegnrquiz'];
+            $toform['essay'] = $alltypes['essaygnrquiz'];
+            $toform['match'] = $alltypes['matchgnrquiz'];
+            $toform['truefalse'] = $alltypes['truefalsegnrquiz'];
+            $toform['shortanswer'] = $alltypes['shortgnrquiz'];
+        }
+
+        if (isset($toform['chapters'])){
+            $allchapters = unserialize($toform['chapters']);
+            $questids = array();
+            $qesteditctx  = new question_edit_contexts($this->context);
+            $this->contexts     = $qesteditctx->having_one_edit_tab_cap('editq');
+            $questioncats = question_category_options($this->contexts);
+            foreach ($questioncats as $questioncatcourse) {
+                foreach ($questioncatcourse as $key => $questioncat) {
+                    // Key format is [question cat id, question cat context id], we need to explode it.
+                    $questidcontext = explode(',', $key);
+                    $questid = array_shift($questidcontext);
+
+                    $questids[] = $questid;
+                }
+            }
+            $i = 0;
+            foreach ($questids as $value) {
+                $toform['category_' . $value] = $allchapters[$value];
+            }
+        }
+
         if (count($this->_feedbacks)) {
             $key = 0;
             foreach ($this->_feedbacks as $feedback) {
@@ -550,6 +676,29 @@ class mod_gnrquiz_mod_form extends moodleform_mod {
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+
+        // Check if number of question are consistent.
+        $sumqtypes = $data['multichoice'] + $data['truefalse'] + $data['match'] + $data['essay'] + $data['shortanswer'];
+
+        $questids = unserialize($data['allids']);
+
+        $sumqchapters = 0;
+        foreach ($questids as $value) {
+            $sumqchapters = $sumqchapters + $data['category_' . $value];
+        }
+        /*
+        if (($sumqtypes == 0) || ($sumqtypes != $sumqchapters)) {
+            $errors['nquestion'] = get_string('numberofquestionnotconsistent', 'gnrquiz');
+        }
+
+        // Check if number of question is more than zero
+        if ($sumqtypes <= 0) {
+            $errors['nquestion'] = get_string('numberofquestionmustmorethanzero', 'gnrquiz');
+        }*/
+
+        if ($data['nquestion'] <= 0){
+            $errors['nquestion'] = get_string('numberofquestionmustmorethanzero', 'gnrquiz');
+        }
 
         // Check open and close times are consistent.
         if ($data['timeopen'] != 0 && $data['timeclose'] != 0 &&

@@ -72,14 +72,39 @@ $accessmanager = new gnrquiz_access_manager($gnrquizobj, $timenow,
         has_capability('mod/gnrquiz:ignoretimelimits', $context, null, false));
 
 $gnrquiz = $gnrquizobj->get_gnrquiz();
+/*
 structure::$constraints = $gnrquizobj->get_gnrquiz(); //get constraints
 //get all questions
-$query = "SELECT q.id, q.defaultmark, q.qtype, qtf.difficulty, qc.name, qtf.distinguishingdegree, qtf.time  FROM {question} q, {question_categories} qc, {question_truefalsequizgens} qtf WHERE q.category = qc.id AND q.id = qtf.question
-                ORDER BY q.id ASC";
+
+$query = "(SELECT q.id, q.defaultmark, q.qtype, qtf.difficulty, qc.name, qtf.distinguishingdegree, qtf.time 
+FROM {question} q, {question_categories} qc, {question_truefalsegnrquiz} qtf 
+WHERE q.category = qc.id AND q.id = qtf.question 
+ORDER BY q.id ASC) 
+UNION 
+(SELECT q.id, q.defaultmark, q.qtype, qmc.difficulty, qc.name, qmc.distinguishingdegree, qmc.time 
+FROM {question} q, {question_categories} qc, {qtype_choicegnrquiz_options} qmc
+WHERE q.category = qc.id AND q.id = qmc.questionid 
+ORDER BY q.id ASC)
+UNION 
+(SELECT q.id, q.defaultmark, q.qtype, qm.difficulty, qc.name, qm.distinguishingdegree, qm.time 
+FROM {question} q, {question_categories} qc, {qtype_matchgnrquiz_options} qm
+WHERE q.category = qc.id AND q.id = qm.questionid 
+ORDER BY q.id ASC)
+UNION 
+(SELECT q.id, q.defaultmark, q.qtype, qe.difficulty, qc.name, qe.distinguishingdegree, qe.time 
+FROM {question} q, {question_categories} qc, {qtype_essaygnrquiz_options} qe
+WHERE q.category = qc.id AND q.id = qe.questionid 
+ORDER BY q.id ASC)
+UNION 
+(SELECT q.id, q.defaultmark, q.qtype, qs.difficulty, qc.name, qs.distinguishingdegree, qs.time 
+FROM {question} q, {question_categories} qc, {qtype_shortgnrquiz_options} qs
+WHERE q.category = qc.id AND q.id = qs.questionid 
+ORDER BY q.id ASC)";
+
 structure::$allquestions = $DB->get_records_sql($query, array());
 #var_dump(structure::$allquestions);
 #var_dump(structure::$constraints);
-
+*/
 
 // Trigger course_module_viewed event and completion.
 gnrquiz_view($gnrquiz, $course, $cm, $context);
@@ -201,7 +226,8 @@ if ($gnrquiz->attempts != 1) {
 $viewobj->gnrquizhasquestions = $gnrquizobj->has_questions();
 $viewobj->preventmessages = array();
 
-#var_dump($gnrquizobj);
+#var_dump($gnrquiz);
+/*
 if (!$viewobj->gnrquizhasquestions) {
     $viewobj->buttontext = '';
     
@@ -223,7 +249,68 @@ if (!$viewobj->gnrquizhasquestions) {
     #gnrquiz_add_gnrquiz_question(10,$gnrquiz);
     gnrquiz_delete_previews($gnrquiz);
     gnrquiz_update_sumgrades($gnrquiz);
+
+    #temporary variables for storing new quiz attributes
+    $tempScore = 0;
+    $tempTypes = [];
+    $tempDiff = 0;
+    $tempChapters = [];
+    $tempDist = 0;
+    $tempTime = 0;
+
+    #compute the value of all new quiz attributes
+    foreach($best->gene as $key => $value)
+    {
+        $tempScore += structure::$allquestions[$value]->defaultmark; #sum of new quiz score value
+        $tempDiff += structure::$allquestions[$value]->difficulty;
+        $tempDist += structure::$allquestions[$value]->distinguishingdegree;
+        $tempTime += structure::$allquestions[$value]->time; #sum of new quiz time value
+        
+        #count the value of all question types in a quiz
+        $s = structure::$allquestions[$value]->qtype;
+        if (array_key_exists($s, $tempTypes)){
+            $tempTypes[$s] += 1;
+        } else {
+            $tempTypes[$s] = 1;
+        }
+
+        #count the value of all chapter covered in a quiz
+        $ss = structure::$allquestions[$value]->name;
+        if (array_key_exists($ss, $tempChapters)){
+            $tempChapters[$ss] += 1;
+        } else {
+            $tempChapters[$ss] = 1;
+        }
+    }
+    $tempDiff /= count($best->gene); #average quiz difficulty value
+    $tempDist /= count($best->gene); #average quiz distinguishing degree value
+
+
+    $gnrquiz->realsumscore = $tempScore;
+    $gnrquiz->realtypes = $tempTypes;
+    $gnrquiz->realavgdiff = $tempDiff;
+    $gnrquiz->realchapters = $tempChapters;
+    $gnrquiz->realavgdist = $tempDist;
+    $gnrquiz->realtimelimit = $tempTime;
+
+    
+    var_dump($tempScore);
+    var_dump($tempTypes);
+    var_dump($tempDiff);
+    var_dump($tempChapters);
+    var_dump($tempDist);
+    var_dump($tempTime);
 } #else is removed, there should be a defined questions all the time
+
+var_dump($gnrquiz);*/
+
+/*
+$genequery = "SELECT g.questionid FROM {gnrquiz_slots} g WHERE g.gnrquizid = 2";
+
+$bestgene = $DB->get_records_sql($genequery, array());
+
+var_dump($bestgene);*/
+
 if ($unfinished) {
     if ($canattempt) {
         $viewobj->buttontext = get_string('continueattemptgnrquiz', 'gnrquiz');

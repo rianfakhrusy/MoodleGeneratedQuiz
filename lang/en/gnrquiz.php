@@ -563,6 +563,8 @@ $string['numberabbr'] = '#';
 
 
 $string['numberofquestion'] = 'Number of question';
+$string['numberofquestionmustmorethanzero'] = 'Number of question must be more than zero';
+$string['numberofquestionnotconsistent'] = 'Number of question is not consistent';
 
 
 $string['numerical'] = 'Numerical';
@@ -955,5 +957,10 @@ $string['yourfinalgradeis'] = 'Your final grade for this gnrquiz is {$a}.';
 
 // Deprecated since Moodle 2.9.
 
-$string['timelimitmin'] = 'Time limit (minutes)';
-$string['timelimitsec'] = 'Time limit (seconds)';
+$string['constraint'] = 'Constraints';
+$string['selectconstraint'] = 'Select constraints';
+$string['totalscore'] = 'Total score';
+$string['averagedifficulty'] = 'Average difficulty';
+$string['averagedistinguishingdegree'] = 'Average distinguishing degree';
+$string['numquestioneachtype'] = 'Number of question for each type';
+$string['numquestioneachchapter'] = 'Number of question for each chapter';

@@ -1,4 +1,4 @@
-<?php
+f<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -758,6 +758,100 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    public function view_statistics_table($gnrquiz, $categoryname){
+        //Score, difficulty, distinguishing degree and time attributes
+        $table = new html_table();
+
+        $table->head = array(
+            'Input/output',
+            get_string('totalscore', 'gnrquiz'),
+            get_string('averagedifficulty', 'gnrquiz'),
+            get_string('averagedistinguishingdegree', 'gnrquiz'),
+            get_string('timelimit', 'gnrquiz')
+        );
+        $table->data[] = array(
+            'Input',
+            ($gnrquiz->sumscore!=0)?$gnrquiz->sumscore:'N/A', 
+            ($gnrquiz->avgdiff!=0)?$gnrquiz->avgdiff:'N/A',
+            ($gnrquiz->avgdist!=0)?$gnrquiz->avgdist:'N/A',
+            ($gnrquiz->timelimit!=0)?($gnrquiz->timelimit . 's'):'N/A'
+        );
+
+        $table->data[] = array(
+            'Output',
+            $gnrquiz->realsumscore, 
+            $gnrquiz->realavgdiff,
+            $gnrquiz->realavgdist,
+            $gnrquiz->realtimelimit . 's'
+        );
+
+        $output = '';
+        $output .= $this->heading('Attributes', 3);
+        $output .= html_writer::table($table);
+
+        $qtypenames = array(
+            "choicegnrquiz" => "Multiple choice",
+            "essaygnrquiz" => "Essay",
+            "matchgnrquiz" => "Matching",
+            "truefalsegnrquiz" => "True false",
+            "shortgnrquiz" => "Short answer"
+        );
+
+        $intypestable = new html_table();
+        $intypes = unserialize($gnrquiz->types);
+        if (!$gnrquiz->usetype)
+            $intypes = array_map(function($val) { return 'N/A'; }, $intypes);
+
+        $outtypes = unserialize($gnrquiz->realtypes);
+
+        $intypes = array_merge_recursive($intypes, $outtypes);
+        
+        $intypestable->head = array('Question type','Input','Output');
+        $cnt = 0;
+        foreach($intypes as $key => $value){
+            $intypestable->data[$cnt][] = $qtypenames[$key];
+            if (($value[0]==null)||((!$gnrquiz->usetype)&&($value[0]=='N'))){
+                $intypestable->data[$cnt][] = $value;
+                $intypestable->data[$cnt++][] = 0;
+            } else {
+                $intypestable->data[$cnt][] = $value[0];
+                $intypestable->data[$cnt++][] = $value[1];
+            }
+        }
+        $output .= $this->heading('Number of questions for each types', 5);
+        $output .= html_writer::table($intypestable);
+
+
+        $outtable = new html_table();
+
+        //Chapter attribute
+        $inchapterstable = new html_table();
+        $inchapters = unserialize($gnrquiz->chapters);
+        if (!$gnrquiz->usechapter)
+            $inchapters = array_map(function($val) { return 'N/A'; }, $inchapters);
+
+        $outchapters = unserialize($gnrquiz->realchapters);
+
+        #$inchapters = array_merge_recursive($inchapters, $outchapters);
+        
+        $inchapterstable->head = array('Chapter', 'Input', 'Output');
+        $cnt = 0;
+        foreach($inchapters as $key => $value){
+            $inchapterstable->data[$cnt][] = $categoryname[$key];
+            if (!array_key_exists($key, $outchapters)){
+                $inchapterstable->data[$cnt][] = $value;
+                $inchapterstable->data[$cnt++][] = 0;
+            } else {
+                $inchapterstable->data[$cnt][] = $value;
+                $inchapterstable->data[$cnt++][] = $outchapters[$key];
+            }
+        }
+        $output .= $this->heading('Number of questions for each chapters', 5);
+        $output .= html_writer::table($inchapterstable);
+
+        return $output;
+    }
+
     /*
      * View Page
      */
@@ -780,7 +874,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
         $output .= $this->view_information($gnrquiz, $cm, $context, $viewobj->infomessages);
         $output .= $this->view_table($gnrquiz, $context, $viewobj);
         $output .= $this->view_result_info($gnrquiz, $context, $cm, $viewobj);
-        $output .= $this->box($this->view_page_buttons($viewobj), 'gnrquizattempt');
+        $output .= $this->box($this->view_page_buttons($gnrquiz, $cm, $viewobj), 'gnrquizattempt');
         return $output;
     }
 
@@ -791,7 +885,7 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
      * the view page.
      * @return string HTML to output.
      */
-    public function view_page_buttons(mod_gnrquiz_view_object $viewobj) {
+    public function view_page_buttons($gnrquiz, $cm, mod_gnrquiz_view_object $viewobj) {
         global $CFG;
         $output = '';
         /*
@@ -815,7 +909,25 @@ class mod_gnrquiz_renderer extends plugin_renderer_base {
                     array('class' => 'continuebutton'));
         }
 
+        $output .= $this->statistics_button($gnrquiz->id, $cm->id);
+
         return $output;
+    }
+
+    public function statistics_button($gnrquizid, $cmid){
+        $url = new moodle_url('/mod/gnrquiz/statistics.php', array('id' => $cmid, 'gnrquizid' => $gnrquizid));
+        $buttontext = "Statistics";
+
+        $button = new single_button($url, $buttontext,'get',array('id' => $cmid, 'gnrquizid' => $gnrquizid));
+        return $this->render($button);
+    }
+
+    public function return_button($cmid){
+        $url = new moodle_url('/mod/gnrquiz/view.php', array('id' => $cmid));
+        $buttontext = "Return";
+
+        $button = new single_button($url, $buttontext,'get',array('id' => $cmid));
+        return $this->render($button);
     }
 
     /**
